@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import {
@@ -12,12 +12,19 @@ import {
   deleteEnquiry,
   getGiftRequests,
   updateGiftStatus,
+  deleteGiftRequest,
   getPortfolio,
   addPortfolioItem,
+  updatePortfolioItem,
+  deletePortfolioItem,
+  getGiftCatalogue,
+  addGiftItem,
+  updateGiftItem,
+  deleteGiftItem,
   getBrandConfig,
   updateBrandConfig,
 } from "@/lib/store";
-import { EventEnquiry, GiftRequest, PortfolioItem } from "@/lib/types";
+import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem } from "@/lib/types";
 import {
   Lock,
   LogOut,
@@ -43,6 +50,11 @@ import {
   ChevronRight,
   X,
   Plus,
+  Pencil,
+  Upload,
+  Check,
+  Eye,
+  ShoppingBag,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -55,6 +67,7 @@ export default function AdminPage() {
   const [enquiries, setEnquiries] = useState<EventEnquiry[]>([]);
   const [gifts, setGifts] = useState<GiftRequest[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [giftCatalogue, setGiftCatalogue] = useState<GiftItem[]>([]);
   const [config, setConfig] = useState(getBrandConfig());
 
   // Filter & Search
@@ -62,8 +75,12 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedEnquiry, setSelectedEnquiry] = useState<EventEnquiry | null>(null);
 
-  // New Portfolio Modal
+  // Gifts Sub-Tab
+  const [giftsSubTab, setGiftsSubTab] = useState<"catalogue" | "orders">("catalogue");
+
+  // Portfolio Modals State
   const [isAddPortfolioOpen, setIsAddPortfolioOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<PortfolioItem | null>(null);
   const [newProject, setNewProject] = useState({
     title: "",
     subtitle: "",
@@ -75,8 +92,27 @@ export default function AdminPage() {
     featured: false,
   });
 
+  // Gift Item Modals State
+  const [isAddGiftOpen, setIsAddGiftOpen] = useState(false);
+  const [editingGift, setEditingGift] = useState<GiftItem | null>(null);
+  const [newGift, setNewGift] = useState({
+    name: "",
+    category: "Wrapping of EruIyawo" as GiftItem["category"],
+    price: 35000,
+    description: "",
+    image: "",
+    inStock: true,
+    popular: false,
+  });
+
   // Settings form
   const [settingsSaved, setSettingsSaved] = useState(false);
+
+  // File input refs
+  const portfolioAddFileRef = useRef<HTMLInputElement>(null);
+  const portfolioEditFileRef = useRef<HTMLInputElement>(null);
+  const giftAddFileRef = useRef<HTMLInputElement>(null);
+  const giftEditFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const authed = checkAdminAuth();
@@ -92,12 +128,14 @@ export default function AdminPage() {
     window.addEventListener("events21_enquiries_updated", handleUpdate);
     window.addEventListener("events21_gifts_updated", handleUpdate);
     window.addEventListener("events21_portfolio_updated", handleUpdate);
+    window.addEventListener("events21_gift_catalogue_updated", handleUpdate);
     window.addEventListener("events21_settings_updated", handleUpdate);
 
     return () => {
       window.removeEventListener("events21_enquiries_updated", handleUpdate);
       window.removeEventListener("events21_gifts_updated", handleUpdate);
       window.removeEventListener("events21_portfolio_updated", handleUpdate);
+      window.removeEventListener("events21_gift_catalogue_updated", handleUpdate);
       window.removeEventListener("events21_settings_updated", handleUpdate);
     };
   }, []);
@@ -106,6 +144,7 @@ export default function AdminPage() {
     setEnquiries(getEnquiries());
     setGifts(getGiftRequests());
     setPortfolio(getPortfolio());
+    setGiftCatalogue(getGiftCatalogue());
     setConfig(getBrandConfig());
   };
 
@@ -126,6 +165,18 @@ export default function AdminPage() {
     setPasswordInput("");
   };
 
+  // --- Helper: Read local image file as Base64 Data URI ---
+  const handleFileConversion = (file: File, callback: (dataUrl: string) => void) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        callback(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // --- Enquiries handlers ---
   const handleStatusChange = (id: string, newStatus: EventEnquiry["status"]) => {
     updateEnquiryStatus(id, newStatus);
     loadData();
@@ -134,7 +185,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDeleteEnquiry = (id: string) => {
     if (confirm("Are you sure you want to remove this enquiry?")) {
       deleteEnquiry(id);
       loadData();
@@ -144,9 +195,13 @@ export default function AdminPage() {
     }
   };
 
+  // --- Portfolio handlers ---
   const handleAddProject = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProject.title || !newProject.image) return;
+    if (!newProject.title || !newProject.image) {
+      alert("Please provide both a project title and an image.");
+      return;
+    }
     addPortfolioItem(newProject);
     setIsAddPortfolioOpen(false);
     setNewProject({
@@ -162,6 +217,74 @@ export default function AdminPage() {
     loadData();
   };
 
+  const handleSaveEditedProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProject) return;
+    updatePortfolioItem(editingProject.id, editingProject);
+    setEditingProject(null);
+    loadData();
+  };
+
+  const handleDeletePortfolioProject = (id: string, title: string) => {
+    if (confirm(`Are you sure you want to delete "${title}" from the portfolio?`)) {
+      deletePortfolioItem(id);
+      loadData();
+    }
+  };
+
+  // --- Gifts handlers ---
+  const handleAddGift = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGift.name || !newGift.image) {
+      alert("Please provide a gift package title and an image.");
+      return;
+    }
+    addGiftItem({
+      name: newGift.name,
+      category: newGift.category,
+      price: Number(newGift.price) || 0,
+      description: newGift.description,
+      details: ["Curated by Adeola", "Quality guaranteed", "Custom presentation"],
+      image: newGift.image,
+      inStock: newGift.inStock,
+      popular: newGift.popular,
+    });
+    setIsAddGiftOpen(false);
+    setNewGift({
+      name: "",
+      category: "Wrapping of EruIyawo",
+      price: 35000,
+      description: "",
+      image: "",
+      inStock: true,
+      popular: false,
+    });
+    loadData();
+  };
+
+  const handleSaveEditedGift = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGift) return;
+    updateGiftItem(editingGift.id, editingGift);
+    setEditingGift(null);
+    loadData();
+  };
+
+  const handleDeleteGiftItem = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete "${name}" from the Gifts catalogue?`)) {
+      deleteGiftItem(id);
+      loadData();
+    }
+  };
+
+  const handleDeleteGiftRequest = (id: string) => {
+    if (confirm("Are you sure you want to delete this gift request?")) {
+      deleteGiftRequest(id);
+      loadData();
+    }
+  };
+
+  // --- Settings handler ---
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     updateBrandConfig(config);
@@ -200,7 +323,8 @@ export default function AdminPage() {
       `"${(enq.message || "").replace(/"/g, '""')}"`,
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -236,11 +360,10 @@ export default function AdminPage() {
           </div>
 
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-brand-plum mb-2">
-            Admin Portal
+            Admin Studio Portal
           </h1>
           <p className="text-xs text-brand-plum/70 font-sans mb-6">
-            Enter the authorized admin password to access lead inquiries, Gifts by Adeola orders,
-            and portfolio management.
+            Enter the authorized admin password to manage leads, portfolio showcases, and Gifts by Adeola catalogue.
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -263,7 +386,7 @@ export default function AdminPage() {
 
             <button
               type="submit"
-              className="w-full py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-colors shadow-sm"
+              className="w-full py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-colors shadow-sm cursor-pointer"
             >
               Sign In to Dashboard
             </button>
@@ -286,7 +409,7 @@ export default function AdminPage() {
   return (
     <div className="pt-24 pb-20 bg-brand-warm-white min-h-screen">
       {/* Top Admin Sub-Header */}
-      <div className="bg-brand-plum text-white py-4 px-4 sm:px-6 lg:px-8 border-b border-brand-plum-dark sticky top-0 z-30">
+      <div className="bg-brand-plum text-white py-4 px-4 sm:px-6 lg:px-8 border-b border-brand-plum-dark sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
@@ -309,7 +432,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-xs font-sans font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-xs font-sans font-medium transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Log Out</span>
@@ -324,7 +447,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab("enquiries")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 ${
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "enquiries"
                 ? "bg-brand-purple text-white shadow-xs"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
@@ -339,24 +462,8 @@ export default function AdminPage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab("gifts")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 ${
-              activeTab === "gifts"
-                ? "bg-brand-pink text-white shadow-xs"
-                : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
-            }`}
-          >
-            <Gift className="w-4 h-4" />
-            <span>Gifts by Adeola Requests</span>
-            <span className="px-1.5 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink text-[10px] ml-1">
-              {gifts.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab("portfolio")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 ${
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "portfolio"
                 ? "bg-brand-plum text-white shadow-xs"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
@@ -364,22 +471,38 @@ export default function AdminPage() {
           >
             <ImageIcon className="w-4 h-4" />
             <span>Portfolio Manager</span>
-            <span className="px-1.5 py-0.5 rounded-full bg-brand-warm-border text-brand-plum text-[10px] ml-1">
+            <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
               {portfolio.length}
             </span>
           </button>
 
           <button
             type="button"
+            onClick={() => setActiveTab("gifts")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "gifts"
+                ? "bg-brand-pink text-white shadow-xs"
+                : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
+            }`}
+          >
+            <Gift className="w-4 h-4" />
+            <span>Gifts by Adeola</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink text-[10px] ml-1">
+              {giftCatalogue.length + gifts.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("settings")}
-            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 ${
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "settings"
                 ? "bg-brand-plum text-white shadow-xs"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
             <Settings className="w-4 h-4" />
-            <span>Contact Settings</span>
+            <span>Studio Settings</span>
           </button>
         </div>
 
@@ -443,7 +566,7 @@ export default function AdminPage() {
                     key={st}
                     type="button"
                     onClick={() => setStatusFilter(st)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer ${
                       statusFilter === st
                         ? "bg-brand-plum text-white font-semibold"
                         : "bg-brand-warm-gray text-brand-plum/70 hover:bg-brand-warm-border"
@@ -458,7 +581,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={exportEnquiriesCSV}
-                className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-brand-warm-border hover:border-brand-purple text-brand-plum text-xs font-semibold uppercase tracking-wider transition-colors shrink-0"
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-brand-warm-border hover:border-brand-purple text-brand-plum text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5 text-brand-purple" />
                 <span>Export CSV</span>
@@ -561,8 +684,8 @@ export default function AdminPage() {
                               </a>
                               <button
                                 type="button"
-                                onClick={() => handleDelete(enq.id)}
-                                className="p-2 inline-flex items-center text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                onClick={() => handleDeleteEnquiry(enq.id)}
+                                className="p-2 inline-flex items-center text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                 title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -579,104 +702,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 2: GIFTS BY ADEOLA REQUESTS */}
-        {activeTab === "gifts" && (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-brand-warm-border shadow-xs flex items-center justify-between">
-              <div>
-                <h3 className="font-serif text-2xl font-bold text-brand-plum">
-                  Gifts by Adeola Inquiries & Orders
-                </h3>
-                <p className="text-xs text-brand-plum/70 font-sans mt-1">
-                  Custom gift hampers and catalogue orders submitted by clients.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {gifts.map((req) => (
-                <div
-                  key={req.id}
-                  className="bg-white rounded-2xl p-6 border border-brand-pink/20 shadow-xs space-y-4"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-[10px] font-mono text-brand-pink font-semibold">
-                        {req.id}
-                      </span>
-                      <h4 className="font-serif text-xl font-bold text-brand-plum">
-                        {req.fullName}
-                      </h4>
-                      <p className="text-xs text-brand-plum/70 font-sans">
-                        Occasion: <strong>{req.occasion}</strong> • For: <strong>{req.recipientName}</strong>
-                      </p>
-                    </div>
-
-                    <select
-                      value={req.status}
-                      onChange={(e) =>
-                        updateGiftStatus(req.id, e.target.value as GiftRequest["status"])
-                      }
-                      className="text-xs font-sans px-2.5 py-1 rounded-full border border-brand-pink/30 bg-brand-blush-pink text-brand-pink font-semibold focus:outline-hidden"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Sourcing">Sourcing</option>
-                      <option value="Assembled">Assembled</option>
-                      <option value="Delivered">Delivered</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2 text-xs font-sans bg-brand-warm-white p-4 rounded-xl border border-brand-warm-border/60">
-                    <div>
-                      <strong className="text-brand-plum">Budget: </strong>
-                      <span className="text-brand-purple font-semibold">{req.budget}</span>
-                    </div>
-                    <div>
-                      <strong className="text-brand-plum">Target Delivery: </strong>
-                      <span>{req.deliveryDate || "Not set"}</span>
-                    </div>
-                    <div>
-                      <strong className="text-brand-plum">Address: </strong>
-                      <span>{req.deliveryAddress || "Lagos"}</span>
-                    </div>
-                    {req.itemsRequested && (
-                      <div>
-                        <strong className="text-brand-plum">Items / Theme: </strong>
-                        <p className="text-brand-plum/80 mt-0.5">{req.itemsRequested}</p>
-                      </div>
-                    )}
-                    {req.personalMessage && (
-                      <div>
-                        <strong className="text-brand-plum">Calligraphy Note: </strong>
-                        <p className="italic text-brand-plum/80 mt-0.5">"{req.personalMessage}"</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-brand-warm-border">
-                    <span className="text-[11px] text-brand-plum/50 font-sans">
-                      {req.phone} • {req.email}
-                    </span>
-
-                    <a
-                      href={`https://wa.me/${req.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
-                        req.fullName
-                      )}!%20This%20is%20Adeola%20from%20Gifts%20by%20Adeola%20following%20up%20on%20your%20custom%20gift%20request.`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#25D366] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#20ba59] transition-colors"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>WhatsApp Adeola</span>
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: PORTFOLIO MANAGER */}
+        {/* TAB 2: PORTFOLIO SHOWCASE MANAGER (EDIT & DELETE ENABLED) */}
         {activeTab === "portfolio" && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -685,14 +711,14 @@ export default function AdminPage() {
                   Portfolio Showcase Manager
                 </h3>
                 <p className="text-xs text-brand-plum/70 font-sans mt-1">
-                  Highlight verified projects, add new gallery pieces, or manage active showcases.
+                  Upload new projects, edit titles and images, or remove existing projects from the live portfolio.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={() => setIsAddPortfolioOpen(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New Project</span>
@@ -703,34 +729,284 @@ export default function AdminPage() {
               {portfolio.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs space-y-3"
+                  className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
                 >
-                  <div className="relative aspect-[16/10] bg-brand-plum">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum">
-                        {item.category}
-                      </span>
+                  <div>
+                    <div className="relative aspect-[16/10] bg-brand-plum overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute top-3 left-3 flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-xs">
+                          {item.category}
+                        </span>
+                        {item.featured && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-5 pt-3">
+                      <h4 className="font-serif text-lg font-bold text-brand-plum leading-snug">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
+                        {item.subtitle}
+                      </p>
+                      <div className="text-[11px] text-brand-gold font-sans font-medium mt-2">
+                        {item.location} • {item.year}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-5 pt-2">
-                    <h4 className="font-serif text-lg font-bold text-brand-plum">{item.title}</h4>
-                    <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
-                      {item.subtitle}
-                    </p>
-                    <div className="text-[11px] text-brand-gold font-sans font-medium mt-2">
-                      {item.location} • {item.year}
-                    </div>
+                  {/* Edit and Delete Actions */}
+                  <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setEditingProject(item)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-soft-lavender hover:bg-brand-purple hover:text-white text-brand-purple text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      <span>Edit Project</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePortfolioProject(item.id, item.title)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* TAB 3: GIFTS BY ADEOLA (CATALOGUE UPLOADS & CUSTOM ORDERS) */}
+        {activeTab === "gifts" && (
+          <div className="space-y-6">
+            {/* Sub-Tabs Selector */}
+            <div className="bg-white p-4 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGiftsSubTab("catalogue")}
+                  className={`px-4 py-2 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-colors cursor-pointer ${
+                    giftsSubTab === "catalogue"
+                      ? "bg-brand-pink text-white shadow-xs"
+                      : "bg-brand-warm-gray text-brand-plum/70 hover:bg-brand-warm-border"
+                  }`}
+                >
+                  <ShoppingBag className="w-3.5 h-3.5 inline-block mr-1.5" />
+                  <span>Gift Catalogue & Image Uploader ({giftCatalogue.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGiftsSubTab("orders")}
+                  className={`px-4 py-2 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-colors cursor-pointer ${
+                    giftsSubTab === "orders"
+                      ? "bg-brand-plum text-white shadow-xs"
+                      : "bg-brand-warm-gray text-brand-plum/70 hover:bg-brand-warm-border"
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5 inline-block mr-1.5" />
+                  <span>Client Gift Orders ({gifts.length})</span>
+                </button>
+              </div>
+
+              {giftsSubTab === "catalogue" && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddGiftOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add New Gift Item</span>
+                </button>
+              )}
+            </div>
+
+            {/* Sub-View 1: Gift Catalogue Manager */}
+            {giftsSubTab === "catalogue" && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {giftCatalogue.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-2xl border border-brand-pink/20 overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-pink/40 transition-colors"
+                  >
+                    <div>
+                      <div className="relative aspect-[16/10] bg-brand-blush-pink overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute top-3 left-3 flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-pink shadow-xs">
+                            {item.category}
+                          </span>
+                          {item.inStock ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-emerald-500 text-white shadow-xs">
+                              In Stock
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-gray-500 text-white shadow-xs">
+                              Sold Out
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-5 pt-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-serif text-lg font-bold text-brand-plum leading-snug">
+                            {item.name}
+                          </h4>
+                          <span className="text-xs font-bold text-brand-purple shrink-0">
+                            ₦{item.price.toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setEditingGift(item)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blush-pink hover:bg-brand-pink hover:text-white text-brand-pink text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        <span>Edit Item</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteGiftItem(item.id, item.name)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Sub-View 2: Client Custom Gift Orders */}
+            {giftsSubTab === "orders" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {gifts.length === 0 ? (
+                  <div className="col-span-2 bg-white p-12 text-center text-brand-plum/50 rounded-2xl border border-brand-warm-border">
+                    No custom gift orders recorded yet.
+                  </div>
+                ) : (
+                  gifts.map((req) => (
+                    <div
+                      key={req.id}
+                      className="bg-white rounded-2xl p-6 border border-brand-pink/20 shadow-xs space-y-4"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <span className="text-[10px] font-mono text-brand-pink font-semibold">
+                            {req.id}
+                          </span>
+                          <h4 className="font-serif text-xl font-bold text-brand-plum">
+                            {req.fullName}
+                          </h4>
+                          <p className="text-xs text-brand-plum/70 font-sans">
+                            Occasion: <strong>{req.occasion}</strong> • For: <strong>{req.recipientName}</strong>
+                          </p>
+                        </div>
+
+                        <select
+                          value={req.status}
+                          onChange={(e) =>
+                            updateGiftStatus(req.id, e.target.value as GiftRequest["status"])
+                          }
+                          className="text-xs font-sans px-2.5 py-1 rounded-full border border-brand-pink/30 bg-brand-blush-pink text-brand-pink font-semibold focus:outline-hidden"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Sourcing">Sourcing</option>
+                          <option value="Assembled">Assembled</option>
+                          <option value="Delivered">Delivered</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2 text-xs font-sans bg-brand-warm-white p-4 rounded-xl border border-brand-warm-border/60">
+                        <div>
+                          <strong className="text-brand-plum">Budget: </strong>
+                          <span className="text-brand-purple font-semibold">{req.budget}</span>
+                        </div>
+                        <div>
+                          <strong className="text-brand-plum">Target Delivery: </strong>
+                          <span>{req.deliveryDate || "Not set"}</span>
+                        </div>
+                        <div>
+                          <strong className="text-brand-plum">Address: </strong>
+                          <span>{req.deliveryAddress || "Lagos"}</span>
+                        </div>
+                        {req.itemsRequested && (
+                          <div>
+                            <strong className="text-brand-plum">Items / Theme: </strong>
+                            <p className="text-brand-plum/80 mt-0.5">{req.itemsRequested}</p>
+                          </div>
+                        )}
+                        {req.personalMessage && (
+                          <div>
+                            <strong className="text-brand-plum">Calligraphy Note: </strong>
+                            <p className="italic text-brand-plum/80 mt-0.5">"{req.personalMessage}"</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-brand-warm-border">
+                        <span className="text-[11px] text-brand-plum/50 font-sans">
+                          {req.phone} • {req.email}
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteGiftRequest(req.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+
+                          <a
+                            href={`https://wa.me/${req.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                              req.fullName
+                            )}!%20This%20is%20Adeola%20from%20Gifts%20by%20Adeola%20following%20up%20on%20your%20custom%20gift%20request.`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#25D366] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#20ba59] transition-colors"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>WhatsApp Client</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -741,13 +1017,13 @@ export default function AdminPage() {
               Studio Contact & Social Information
             </h3>
             <p className="text-xs text-brand-plum/70 font-sans mb-6">
-              Update the official phone, email, and Instagram links shown across the website.
+              Update the official phone, email, address, and Instagram links shown across the website.
             </p>
 
             <form onSubmit={handleSaveSettings} className="space-y-4 text-xs font-sans">
               <div>
                 <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Studio Phone
+                  Studio Phone / Hotline
                 </label>
                 <input
                   type="text"
@@ -783,7 +1059,7 @@ export default function AdminPage() {
 
               <div>
                 <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Official Instagram URL
+                  Official Instagram URL (Event 21)
                 </label>
                 <input
                   type="url"
@@ -795,7 +1071,7 @@ export default function AdminPage() {
 
               <div>
                 <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Location Text
+                  Physical Studio Address
                 </label>
                 <input
                   type="text"
@@ -815,7 +1091,7 @@ export default function AdminPage() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  className="px-8 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold uppercase tracking-widest text-xs transition-colors shadow-sm"
+                  className="px-8 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold uppercase tracking-widest text-xs transition-colors shadow-sm cursor-pointer"
                 >
                   Save Changes
                 </button>
@@ -825,14 +1101,14 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* Selected Enquiry Detail Drawer / Modal */}
+      {/* MODAL 1: Selected Enquiry Detail Modal */}
       {selectedEnquiry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
           <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setSelectedEnquiry(null)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60"
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -903,7 +1179,7 @@ export default function AdminPage() {
               </div>
               <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 col-span-2">
                 <span className="text-brand-plum/50 block text-[10px] uppercase font-semibold">
-                  Estimated Budget Range
+                  Estimated Budget
                 </span>
                 <span className="font-semibold text-brand-purple text-sm">
                   {selectedEnquiry.budgetRange}
@@ -948,8 +1224,8 @@ export default function AdminPage() {
 
               <button
                 type="button"
-                onClick={() => handleDelete(selectedEnquiry.id)}
-                className="text-xs text-red-600 hover:underline font-sans"
+                onClick={() => handleDeleteEnquiry(selectedEnquiry.id)}
+                className="text-xs text-red-600 hover:underline font-sans cursor-pointer"
               >
                 Delete Lead
               </button>
@@ -958,14 +1234,14 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Add Portfolio Project Modal */}
+      {/* MODAL 2: Add New Portfolio Project */}
       {isAddPortfolioOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
           <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setIsAddPortfolioOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60"
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1021,6 +1297,7 @@ export default function AdminPage() {
                     <option value="Traditional">Traditional</option>
                     <option value="Ballrooms & Decor">Ballrooms & Decor</option>
                     <option value="Celebrations">Celebrations</option>
+                    <option value="Proposals">Proposals</option>
                   </select>
                 </div>
                 <div>
@@ -1048,18 +1325,57 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div>
-                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Image URL or Path *
+              {/* Image Upload from Computer OR URL */}
+              <div className="p-4 rounded-xl bg-brand-warm-white border border-brand-warm-border space-y-3">
+                <label className="block uppercase font-semibold text-brand-plum/80">
+                  Project Photograph *
                 </label>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={portfolioAddFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileConversion(file, (dataUrl) => {
+                          setNewProject({ ...newProject, image: dataUrl });
+                        });
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => portfolioAddFileRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Device</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or enter image URL below</span>
+                </div>
+
                 <input
                   type="text"
                   required
-                  placeholder="/images/ballroom-first-dance.jpg or https://..."
+                  placeholder="/images/... or https://..."
                   value={newProject.image}
                   onChange={(e) => setNewProject({ ...newProject, image: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
                 />
+
+                {newProject.image && (
+                  <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-brand-warm-border bg-black/5 mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={newProject.image}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1075,19 +1391,589 @@ export default function AdminPage() {
                 />
               </div>
 
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="featured-checkbox"
+                  checked={newProject.featured}
+                  onChange={(e) => setNewProject({ ...newProject, featured: e.target.checked })}
+                  className="rounded text-brand-purple focus:ring-brand-purple"
+                />
+                <label htmlFor="featured-checkbox" className="text-xs text-brand-plum font-medium">
+                  Feature on homepage highlights
+                </label>
+              </div>
+
               <div className="pt-2 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsAddPortfolioOpen(false)}
-                  className="px-5 py-2.5 rounded-full border border-brand-warm-border text-brand-plum font-semibold text-xs uppercase tracking-wider"
+                  className="px-5 py-2.5 rounded-full border border-brand-warm-border text-brand-plum font-semibold text-xs uppercase tracking-wider cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm"
+                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
                 >
                   Publish Project
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Edit Existing Portfolio Project */}
+      {editingProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setEditingProject(null)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-4">
+              Edit Portfolio Project
+            </h3>
+
+            <form onSubmit={handleSaveEditedProject} className="space-y-4 text-xs font-sans">
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Project Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingProject.title}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, title: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                />
+              </div>
+
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Subtitle / Summary
+                </label>
+                <input
+                  type="text"
+                  value={editingProject.subtitle}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, subtitle: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={editingProject.category}
+                    onChange={(e) =>
+                      setEditingProject({
+                        ...editingProject,
+                        category: e.target.value as PortfolioItem["category"],
+                      })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  >
+                    <option value="Weddings">Weddings</option>
+                    <option value="Traditional">Traditional</option>
+                    <option value="Ballrooms & Decor">Ballrooms & Decor</option>
+                    <option value="Celebrations">Celebrations</option>
+                    <option value="Proposals">Proposals</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Year
+                  </label>
+                  <input
+                    type="text"
+                    value={editingProject.year}
+                    onChange={(e) =>
+                      setEditingProject({ ...editingProject, year: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={editingProject.location}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, location: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                />
+              </div>
+
+              {/* Image Upload or URL */}
+              <div className="p-4 rounded-xl bg-brand-warm-white border border-brand-warm-border space-y-3">
+                <label className="block uppercase font-semibold text-brand-plum/80">
+                  Project Photograph
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={portfolioEditFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileConversion(file, (dataUrl) => {
+                          setEditingProject({ ...editingProject, image: dataUrl });
+                        });
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => portfolioEditFileRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload New Photo</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or edit URL below</span>
+                </div>
+
+                <input
+                  type="text"
+                  required
+                  value={editingProject.image}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, image: e.target.value })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
+                />
+
+                {editingProject.image && (
+                  <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-brand-warm-border bg-black/5 mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={editingProject.image}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={editingProject.description}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, description: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="edit-featured-checkbox"
+                  checked={editingProject.featured || false}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, featured: e.target.checked })
+                  }
+                  className="rounded text-brand-purple focus:ring-brand-purple"
+                />
+                <label htmlFor="edit-featured-checkbox" className="text-xs text-brand-plum font-medium">
+                  Feature on homepage highlights
+                </label>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingProject(null)}
+                  className="px-5 py-2.5 rounded-full border border-brand-warm-border text-brand-plum font-semibold text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: Add New Gift Catalogue Item (Image Upload Enabled) */}
+      {isAddGiftOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setIsAddGiftOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-4">
+              Add New Item to Gifts by Adeola
+            </h3>
+
+            <form onSubmit={handleAddGift} className="space-y-4 text-xs font-sans">
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Package / Item Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Royal EruIyawo Velvet & Acrylic Wrapping"
+                  value={newGift.name}
+                  onChange={(e) => setNewGift({ ...newGift, name: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={newGift.category}
+                    onChange={(e) =>
+                      setNewGift({
+                        ...newGift,
+                        category: e.target.value as GiftItem["category"],
+                      })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  >
+                    <option value="Wrapping of EruIyawo">Wrapping of EruIyawo</option>
+                    <option value="Corporate Gifts">Corporate Gifts</option>
+                    <option value="Hampers">Hampers</option>
+                    <option value="Souvenirs">Souvenirs</option>
+                    <option value="Celebration">Celebration</option>
+                    <option value="Bespoke">Bespoke</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Price (in NGN ₦)
+                  </label>
+                  <input
+                    type="number"
+                    value={newGift.price}
+                    onChange={(e) => setNewGift({ ...newGift, price: Number(e.target.value) })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
+                </div>
+              </div>
+
+              {/* Image Upload for Gift by Adeola */}
+              <div className="p-4 rounded-xl bg-brand-blush-pink/30 border border-brand-pink/20 space-y-3">
+                <label className="block uppercase font-semibold text-brand-plum/80">
+                  Gift Photograph *
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={giftAddFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileConversion(file, (dataUrl) => {
+                          setNewGift({ ...newGift, image: dataUrl });
+                        });
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => giftAddFileRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Device</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or enter image URL below</span>
+                </div>
+
+                <input
+                  type="text"
+                  required
+                  placeholder="/images/... or https://..."
+                  value={newGift.image}
+                  onChange={(e) => setNewGift({ ...newGift, image: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-pink"
+                />
+
+                {newGift.image && (
+                  <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-brand-warm-border bg-black/5 mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={newGift.image}
+                      alt="Gift Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Detail the materials, items included, or budget suitability..."
+                  value={newGift.description}
+                  onChange={(e) => setNewGift({ ...newGift, description: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-pink"
+                />
+              </div>
+
+              <div className="flex items-center gap-4 pt-1">
+                <label className="flex items-center gap-2 text-xs text-brand-plum font-medium">
+                  <input
+                    type="checkbox"
+                    checked={newGift.inStock}
+                    onChange={(e) => setNewGift({ ...newGift, inStock: e.target.checked })}
+                    className="rounded text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span>Currently Available / In Stock</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs text-brand-plum font-medium">
+                  <input
+                    type="checkbox"
+                    checked={newGift.popular}
+                    onChange={(e) => setNewGift({ ...newGift, popular: e.target.checked })}
+                    className="rounded text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span>Highlight as Bestseller</span>
+                </label>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddGiftOpen(false)}
+                  className="px-5 py-2.5 rounded-full border border-brand-warm-border text-brand-plum font-semibold text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-7 py-2.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                >
+                  Add Gift Package
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: Edit Existing Gift Catalogue Item */}
+      {editingGift && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setEditingGift(null)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-brand-warm-gray text-brand-plum/60 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-4">
+              Edit Gift Item
+            </h3>
+
+            <form onSubmit={handleSaveEditedGift} className="space-y-4 text-xs font-sans">
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Package / Item Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingGift.name}
+                  onChange={(e) => setEditingGift({ ...editingGift, name: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-pink"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={editingGift.category}
+                    onChange={(e) =>
+                      setEditingGift({
+                        ...editingGift,
+                        category: e.target.value as GiftItem["category"],
+                      })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-pink"
+                  >
+                    <option value="Wrapping of EruIyawo">Wrapping of EruIyawo</option>
+                    <option value="Corporate Gifts">Corporate Gifts</option>
+                    <option value="Hampers">Hampers</option>
+                    <option value="Souvenirs">Souvenirs</option>
+                    <option value="Celebration">Celebration</option>
+                    <option value="Bespoke">Bespoke</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Price (in NGN ₦)
+                  </label>
+                  <input
+                    type="number"
+                    value={editingGift.price}
+                    onChange={(e) =>
+                      setEditingGift({ ...editingGift, price: Number(e.target.value) })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-pink"
+                  />
+                </div>
+              </div>
+
+              {/* Upload image for gift */}
+              <div className="p-4 rounded-xl bg-brand-blush-pink/30 border border-brand-pink/20 space-y-3">
+                <label className="block uppercase font-semibold text-brand-plum/80">
+                  Gift Photograph
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={giftEditFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileConversion(file, (dataUrl) => {
+                          setEditingGift({ ...editingGift, image: dataUrl });
+                        });
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => giftEditFileRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload New Photo</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or edit URL below</span>
+                </div>
+
+                <input
+                  type="text"
+                  required
+                  value={editingGift.image}
+                  onChange={(e) => setEditingGift({ ...editingGift, image: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-pink"
+                />
+
+                {editingGift.image && (
+                  <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-brand-warm-border bg-black/5 mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={editingGift.image}
+                      alt="Gift Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={editingGift.description}
+                  onChange={(e) =>
+                    setEditingGift({ ...editingGift, description: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-pink"
+                />
+              </div>
+
+              <div className="flex items-center gap-4 pt-1">
+                <label className="flex items-center gap-2 text-xs text-brand-plum font-medium">
+                  <input
+                    type="checkbox"
+                    checked={editingGift.inStock}
+                    onChange={(e) =>
+                      setEditingGift({ ...editingGift, inStock: e.target.checked })
+                    }
+                    className="rounded text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span>Currently Available / In Stock</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs text-brand-plum font-medium">
+                  <input
+                    type="checkbox"
+                    checked={editingGift.popular || false}
+                    onChange={(e) =>
+                      setEditingGift({ ...editingGift, popular: e.target.checked })
+                    }
+                    className="rounded text-brand-pink focus:ring-brand-pink"
+                  />
+                  <span>Highlight as Bestseller</span>
+                </label>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingGift(null)}
+                  className="px-5 py-2.5 rounded-full border border-brand-warm-border text-brand-plum font-semibold text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-7 py-2.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>

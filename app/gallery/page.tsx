@@ -1,23 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, Eye, ArrowUpRight } from "lucide-react";
-import { PORTFOLIO_DATA } from "@/lib/data";
+import { getPortfolio } from "@/lib/store";
 import { PortfolioItem } from "@/lib/types";
 import LightboxModal from "@/components/LightboxModal";
 
 export default function GalleryPage() {
+  const [items, setItems] = useState<PortfolioItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
 
-  const categories = ["All", "Weddings", "Traditional", "Ballrooms & Decor", "Celebrations"];
+  useEffect(() => {
+    setItems(getPortfolio());
+    const handleUpdate = () => {
+      setItems(getPortfolio());
+    };
+    window.addEventListener("events21_portfolio_updated", handleUpdate);
+    return () => window.removeEventListener("events21_portfolio_updated", handleUpdate);
+  }, []);
+
+  const categories = ["All", "Weddings", "Traditional", "Ballrooms & Decor", "Celebrations", "Proposals"];
 
   const filteredItems =
     activeCategory === "All"
-      ? PORTFOLIO_DATA
-      : PORTFOLIO_DATA.filter((item) => item.category === activeCategory);
+      ? items
+      : items.filter((item) => item.category === activeCategory);
 
   return (
     <div className="pt-28 pb-20 md:pt-36 md:pb-28">

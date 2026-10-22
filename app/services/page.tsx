@@ -111,7 +111,7 @@ export default function ServicesPage() {
                   </Link>
 
                   <a
-                    href={`https://wa.me/2348123456789?text=Hello%20Event%2021!%20I%20would%20like%20to%20enquire%20about%20your%20*${encodeURIComponent(
+                    href={`https://wa.me/2348060549596?text=Hello%20Event%2021!%20I%20would%20like%20to%20enquire%20about%20your%20*${encodeURIComponent(
                       service.title
                     )}*`}
                     target="_blank"

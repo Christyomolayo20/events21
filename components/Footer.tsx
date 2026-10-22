@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Logo from "./Logo";
-import { Instagram, Phone, Mail, MapPin, ArrowUpRight, Lock, X } from "lucide-react";
+import { Instagram, Phone, Mail, MapPin, ArrowUpRight, MessageSquare, X } from "lucide-react";
 
 export default function Footer() {
   const [activeModal, setActiveModal] = useState<"privacy" | "terms" | null>(null);
@@ -16,39 +16,44 @@ export default function Footer() {
             {/* Col 1: Brand & Tagline (span 2) */}
             <div className="lg:col-span-2 space-y-4">
               <Logo variant="white" size="md" />
-              <p className="text-white/70 text-sm leading-relaxed max-w-sm font-sans pt-2">
-                A bespoke event planning, styling, and management studio based in Lagos, Nigeria.
-                Crafting meaningful celebrations, luxury weddings, and unforgettable moments with
-                seamless execution.
+              <p className="text-white/75 text-sm leading-relaxed max-w-sm font-sans pt-2">
+                A premier royal event planning, styling, and management studio based in Lagos,
+                Nigeria. Specializing in luxury weddings, stately retirement celebrations, romantic
+                proposals, and bespoke cultural gifting.
               </p>
-              <div className="pt-2 flex items-center gap-4">
+
+              {/* Social Channels: Both Event 21 and Gifts by Adeola */}
+              <div className="pt-2 flex flex-wrap items-center gap-3">
                 <a
                   href="https://www.instagram.com/events_21/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-sans transition-colors"
-                  aria-label="Event 21 on Instagram"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-sans transition-colors"
+                  aria-label="Event 21 Instagram"
                 >
-                  <Instagram className="w-4 h-4 text-brand-pink" />
+                  <Instagram className="w-3.5 h-3.5 text-brand-gold" />
                   <span>@events_21</span>
                   <ArrowUpRight className="w-3 h-3 text-white/50" />
                 </a>
 
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-white/60 hover:text-white text-xs font-sans transition-colors"
-                  title="Admin Portal"
+                <a
+                  href="https://www.instagram.com/giftsbyadeola/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-pink/20 hover:bg-brand-pink/30 text-white text-xs font-sans transition-colors border border-brand-pink/30"
+                  aria-label="Gifts by Adeola Instagram"
                 >
-                  <Lock className="w-3 h-3 text-brand-gold" />
-                  <span>Admin</span>
-                </Link>
+                  <Instagram className="w-3.5 h-3.5 text-brand-pink" />
+                  <span>@giftsbyadeola</span>
+                  <ArrowUpRight className="w-3 h-3 text-white/50" />
+                </a>
               </div>
             </div>
 
             {/* Col 2: Navigation */}
             <div>
               <h4 className="text-xs uppercase tracking-widest text-brand-gold font-semibold mb-4">
-                Explore
+                Explore Event 21
               </h4>
               <ul className="space-y-2.5 text-sm text-white/70 font-sans">
                 <li>
@@ -58,7 +63,7 @@ export default function Footer() {
                 </li>
                 <li>
                   <Link href="/about" className="hover:text-white transition-colors">
-                    About Event 21
+                    About Our Studio
                   </Link>
                 </li>
                 <li>
@@ -73,7 +78,7 @@ export default function Footer() {
                 </li>
                 <li>
                   <Link href="/contact" className="hover:text-white transition-colors">
-                    Contact & Inquiries
+                    Plan Your Celebration
                   </Link>
                 </li>
               </ul>
@@ -91,59 +96,71 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gifts-by-adeola#celebration" className="hover:text-brand-pink transition-colors">
-                    Celebration Hampers
+                  <Link href="/gifts-by-adeola" className="hover:text-brand-pink transition-colors">
+                    Wrapping of EruIyawo
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gifts-by-adeola#bridal" className="hover:text-brand-pink transition-colors">
-                    Bridal Suite Sets
+                  <Link href="/gifts-by-adeola" className="hover:text-brand-pink transition-colors">
+                    Corporate Gifts
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gifts-by-adeola#corporate" className="hover:text-brand-pink transition-colors">
-                    Executive Corporate Gifts
+                  <Link href="/gifts-by-adeola" className="hover:text-brand-pink transition-colors">
+                    Thoughtful Hampers
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gifts-by-adeola#bespoke" className="hover:text-brand-pink transition-colors">
-                    Bespoke Gift Requests
+                  <Link href="/gifts-by-adeola" className="hover:text-brand-pink transition-colors">
+                    Guest Souvenirs
                   </Link>
                 </li>
               </ul>
             </div>
 
-            {/* Col 4: Contact & Location */}
+            {/* Col 4: Verified Contact & Address */}
             <div>
               <h4 className="text-xs uppercase tracking-widest text-brand-gold font-semibold mb-4">
-                Connect
+                Lagos Studio
               </h4>
               <ul className="space-y-3 text-sm text-white/70 font-sans">
                 <li className="flex items-start gap-2.5">
                   <MapPin className="w-4 h-4 text-brand-gold shrink-0 mt-0.5" />
-                  <span>Lagos, Nigeria</span>
+                  <span className="leading-snug">
+                    No 12, Johnson Estate, Ojodu Berger, Lagos, Lagos, Nigeria
+                  </span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Phone className="w-4 h-4 text-brand-gold shrink-0" />
-                  <a href="tel:+2348123456789" className="hover:text-white transition-colors">
-                    +234 812 345 6789
+                  <a href="tel:08060549596" className="hover:text-white transition-colors">
+                    08060549596
                   </a>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Mail className="w-4 h-4 text-brand-gold shrink-0" />
-                  <a href="mailto:hello@events21.ng" className="hover:text-white transition-colors">
-                    hello@events21.ng
+                  <a
+                    href="mailto:Royaltyeventservice@gmail.com"
+                    className="hover:text-white transition-colors break-all"
+                  >
+                    Royaltyeventservice@gmail.com
                   </a>
                 </li>
                 <li className="pt-2">
-                  <span className="text-xs text-white/50 block">By Appointment Only</span>
-                  <span className="text-xs text-white/50 block">Mon – Sat: 9am – 6pm</span>
+                  <a
+                    href="https://wa.me/2348060549596?text=Hello%20Event%2021!%20I%20would%20like%20to%20enquire%20about%20your%20services."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366] hover:text-white text-xs font-semibold uppercase tracking-wider transition-all"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>WhatsApp: 08060549596</span>
+                  </a>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* Bottom Bar */}
+          {/* Bottom Bar (Admin removed entirely from user side) */}
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50 font-sans">
             <p>© {new Date().getFullYear()} Event 21 & Gifts by Adeola. All rights reserved.</p>
             <div className="flex items-center gap-6">
@@ -161,9 +178,6 @@ export default function Footer() {
               >
                 Terms of Service
               </button>
-              <Link href="/admin" className="hover:text-brand-gold transition-colors">
-                Admin Access
-              </Link>
             </div>
           </div>
         </div>
@@ -191,19 +205,12 @@ export default function Footer() {
                     paramount importance.
                   </p>
                   <p>
-                    <strong>Information Collection:</strong> We collect contact information (such as
-                    your name, telephone number, email, event preferences, and guest requirements) solely
+                    <strong>Information Collection:</strong> We collect contact information solely
                     to respond to your event inquiries and fulfill custom gifting orders.
                   </p>
                   <p>
-                    <strong>Use of Information:</strong> Client data is strictly used for event
-                    coordination, vendor liaison, and order delivery. We do not sell, rent, or lease your
-                    personal data to any third parties.
-                  </p>
-                  <p>
-                    <strong>Image & Portfolio Usage:</strong> Event photographs and video materials are
-                    shared on our portfolio and social channels only with client consent and proper
-                    courtesies.
+                    <strong>Location:</strong> No 12, Johnson Estate, Ojodu Berger, Lagos, Lagos,
+                    Nigeria.
                   </p>
                 </>
               ) : (
@@ -213,19 +220,8 @@ export default function Footer() {
                     agree to our service terms.
                   </p>
                   <p>
-                    <strong>Consultations & Retainers:</strong> Event dates are secured upon execution
-                    of a formal agreement and receipt of the agreed deposit. Detailed timelines and
-                    vendor management commence upon contract ratification.
-                  </p>
-                  <p>
-                    <strong>Gifts by Adeola Orders:</strong> Bespoke gift hampers and custom party boxes
-                    require advance ordering to ensure timely sourcing and assembly. Delivery is
-                    conducted across Lagos and nationwide via insured couriers.
-                  </p>
-                  <p>
-                    <strong>Modifications:</strong> In the rare event of date rescheduling or scope
-                    adjustment, client requests are accommodated subject to vendor and calendar
-                    availability.
+                    <strong>Gifts by Adeola Orders:</strong> Wrapping of EruIyawo, corporate gifts,
+                    hampers, and souvenirs require advance booking for optimal artisan preparation.
                   </p>
                 </>
               )}

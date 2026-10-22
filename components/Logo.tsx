@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface LogoProps {
-  variant?: "full" | "minimal" | "white" | "with-gifts";
+  variant?: "full" | "minimal" | "white";
   size?: "sm" | "md" | "lg";
   className?: string;
   showSubtitle?: boolean;
@@ -39,30 +39,22 @@ export default function Logo({
         />
       </div>
 
-      {/* Brand Wordmark */}
+      {/* Brand Wordmark (Strictly Event 21) */}
       <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          <span
-            className={`font-serif tracking-wider font-bold leading-none ${
-              variant === "white"
-                ? "text-white"
-                : "text-brand-plum group-hover:text-brand-purple transition-colors"
-            } ${isSmall ? "text-lg" : isLarge ? "text-2xl md:text-3xl" : "text-xl"}`}
-          >
-            EVENTS 21
-          </span>
-
-          {variant === "with-gifts" && (
-            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-medium tracking-wide bg-brand-blush-pink text-brand-pink border border-brand-pink/20">
-              + Gifts by Adeola
-            </span>
-          )}
-        </div>
+        <span
+          className={`font-serif tracking-wider font-bold leading-none ${
+            variant === "white"
+              ? "text-white"
+              : "text-brand-plum group-hover:text-brand-purple transition-colors"
+          } ${isSmall ? "text-lg" : isLarge ? "text-2xl md:text-3xl" : "text-xl"}`}
+        >
+          EVENTS 21
+        </span>
 
         {showSubtitle && (
           <span
-            className={`font-sans tracking-[0.2em] uppercase font-semibold text-[9px] md:text-[10px] mt-0.5 ${
-              variant === "white" ? "text-gray-300" : "text-brand-gold"
+            className={`font-sans tracking-[0.2em] uppercase font-semibold text-[9px] md:text-[10px] mt-1 ${
+              variant === "white" ? "text-amber-200" : "text-brand-gold"
             }`}
           >
             All Your Event Needs

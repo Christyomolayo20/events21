@@ -35,7 +35,7 @@ function ContactContent() {
 
           <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed">
             Every memorable event starts with an intentional conversation. Complete the enquiry
-            brief below, or reach out to our team directly via WhatsApp or email.
+            brief below, or reach out to our team directly via WhatsApp or telephone.
           </p>
         </div>
 
@@ -57,7 +57,9 @@ function ContactContent() {
                     <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
                       Location
                     </span>
-                    <span className="font-medium">Lagos, Nigeria</span>
+                    <span className="font-medium text-xs leading-relaxed block">
+                      No 12, Johnson Estate, Ojodu Berger, Lagos, Lagos, Nigeria
+                    </span>
                     <span className="block text-xs text-brand-plum/60 mt-0.5">
                       Available for travel nationwide
                     </span>
@@ -70,13 +72,13 @@ function ContactContent() {
                   </div>
                   <div>
                     <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
-                      Phone
+                      Hotline & Telephone
                     </span>
                     <a
-                      href="tel:+2348123456789"
-                      className="font-medium hover:text-brand-purple transition-colors"
+                      href="tel:08060549596"
+                      className="font-medium hover:text-brand-purple transition-colors text-base font-mono"
                     >
-                      +234 812 345 6789
+                      08060549596
                     </a>
                   </div>
                 </div>
@@ -87,13 +89,13 @@ function ContactContent() {
                   </div>
                   <div>
                     <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
-                      Email
+                      Email Address
                     </span>
                     <a
-                      href="mailto:hello@events21.ng"
-                      className="font-medium hover:text-brand-purple transition-colors"
+                      href="mailto:Royaltyeventservice@gmail.com"
+                      className="font-medium hover:text-brand-purple transition-colors break-all text-xs"
                     >
-                      hello@events21.ng
+                      Royaltyeventservice@gmail.com
                     </a>
                   </div>
                 </div>
@@ -104,16 +106,26 @@ function ContactContent() {
                   </div>
                   <div>
                     <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
-                      Official Instagram
+                      Instagram Pages
                     </span>
-                    <a
-                      href="https://www.instagram.com/events_21/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-brand-purple hover:underline"
-                    >
-                      @events_21
-                    </a>
+                    <div className="space-y-0.5">
+                      <a
+                        href="https://www.instagram.com/events_21/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-brand-purple hover:underline block text-xs"
+                      >
+                        Event 21: @events_21
+                      </a>
+                      <a
+                        href="https://www.instagram.com/giftsbyadeola/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-brand-pink hover:underline block text-xs"
+                      >
+                        Gifts by Adeola: @giftsbyadeola
+                      </a>
+                    </div>
                   </div>
                 </div>
 
@@ -125,9 +137,9 @@ function ContactContent() {
                     <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
                       Consultation Hours
                     </span>
-                    <span className="font-medium">Mon – Sat: 9:00am – 6:00pm</span>
+                    <span className="font-medium text-xs">Mon – Sat: 9:00am – 6:00pm</span>
                     <span className="block text-xs text-brand-plum/60 mt-0.5">
-                      Consultations by appointment
+                      Consultations strictly by appointment
                     </span>
                   </div>
                 </div>
@@ -136,36 +148,40 @@ function ContactContent() {
               {/* Instant WhatsApp banner */}
               <div className="pt-4 border-t border-brand-warm-border">
                 <a
-                  href="https://wa.me/2348123456789?text=Hello%20Event%2021!%20I%20would%20like%20to%20plan%20an%20event."
+                  href="https://wa.me/2348060549596?text=Hello%20Event%2021!%20I%20would%20like%20to%20plan%20an%20event."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs uppercase tracking-wider font-semibold transition-colors shadow-xs"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Chat on WhatsApp</span>
+                  <span>Chat on WhatsApp: 08060549596</span>
                 </a>
               </div>
             </div>
 
-            {/* Gifts note */}
-            <div className="p-6 rounded-3xl bg-[#FFF9FB] border border-brand-pink/20">
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-brand-pink font-sans block mb-1">
+            {/* Gifts by Adeola callout */}
+            <div className="p-6 rounded-3xl bg-[#FFF9FB] border border-brand-pink/20 space-y-2">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-brand-pink font-sans block">
                 Gifts by Adeola
               </span>
-              <h4 className="font-serif text-lg font-bold text-brand-plum mb-2">
-                Need curated gifting?
+              <h4 className="font-serif text-lg font-bold text-brand-plum">
+                Curated Gifting on a Budget
               </h4>
-              <p className="text-xs text-brand-plum/70 font-sans leading-relaxed mb-4">
-                Explore our dedicated gifting sub-brand for personalized bridal party boxes, VIP guest
-                hampers, and corporate favors.
+              <p className="text-xs text-brand-plum/70 font-sans leading-relaxed">
+                Corporate gifts, hampers, guest souvenirs, and bespoke wrapping of traditional Yoruba
+                EruIyawo.
               </p>
-              <a
-                href="/gifts-by-adeola"
-                className="text-xs text-brand-pink font-semibold uppercase tracking-wider hover:underline inline-flex items-center gap-1"
-              >
-                <span>Visit Gifts by Adeola</span>
-                <span>→</span>
-              </a>
+              <div className="pt-2">
+                <a
+                  href="https://www.instagram.com/giftsbyadeola/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-brand-pink font-semibold uppercase tracking-wider hover:underline inline-flex items-center gap-1"
+                >
+                  <span>Visit @giftsbyadeola</span>
+                  <span>→</span>
+                </a>
+              </div>
             </div>
           </div>
 

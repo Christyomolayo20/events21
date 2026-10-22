@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Sparkles, MessageSquare, CheckCircle2, Package, Gift, Heart, Send, X, ShieldCheck, Truck, Clock } from "lucide-react";
-import { GIFTS_CATALOGUE } from "@/lib/data";
+import { Sparkles, MessageSquare, CheckCircle2, Package, Gift, Heart, Send, X, Truck, Instagram, ArrowUpRight } from "lucide-react";
+import { getGiftCatalogue, saveGiftRequest } from "@/lib/store";
 import { GiftItem } from "@/lib/types";
-import { saveGiftRequest } from "@/lib/store";
 
 export default function GiftsByAdeolaPage() {
+  const [catalogue, setCatalogue] = useState<GiftItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customSubmitted, setCustomSubmitted] = useState(false);
@@ -18,26 +18,39 @@ export default function GiftsByAdeolaPage() {
     email: "",
     phone: "",
     recipientName: "",
-    occasion: "Bridal Party Proposal",
-    budget: "₦50,000 – ₦100,000",
+    occasion: "",
+    budget: "",
     itemsRequested: "",
     deliveryDate: "",
     deliveryAddress: "",
     personalMessage: "",
   });
 
-  const categories = ["All", "Celebration", "Bridal Suite", "Corporate", "Milestones", "Bespoke"];
+  useEffect(() => {
+    setCatalogue(getGiftCatalogue());
+    const handleUpdate = () => setCatalogue(getGiftCatalogue());
+    window.addEventListener("events21_gift_catalogue_updated", handleUpdate);
+    return () => window.removeEventListener("events21_gift_catalogue_updated", handleUpdate);
+  }, []);
+
+  const categories = [
+    "All",
+    "Wrapping of EruIyawo",
+    "Corporate Gifts",
+    "Hampers",
+    "Souvenirs",
+  ];
 
   const filteredItems =
     activeCategory === "All"
-      ? GIFTS_CATALOGUE
-      : GIFTS_CATALOGUE.filter((item) => item.category === activeCategory);
+      ? catalogue
+      : catalogue.filter((item) => item.category === activeCategory);
 
   const getWhatsAppOrderLink = (gift: GiftItem) => {
-    const text = `Hello Gifts by Adeola! I would like to order the *${encodeURIComponent(
+    const text = `Hello Gifts by Adeola! I would like to order / enquire about the *${encodeURIComponent(
       gift.name
     )}* (₦${gift.price.toLocaleString()}).%0A%0ACould you confirm availability, delivery timelines in Lagos, and personalization options?`;
-    return `https://wa.me/2348123456789?text=${text}`;
+    return `https://wa.me/2348060549596?text=${text}`;
   };
 
   const handleCustomSubmit = (e: React.FormEvent) => {
@@ -51,31 +64,31 @@ export default function GiftsByAdeolaPage() {
       customForm.fullName
     )}%0A*Occasion:* ${encodeURIComponent(customForm.occasion)}%0A*Recipient:* ${encodeURIComponent(
       customForm.recipientName
-    )}%0A*Budget:* ${encodeURIComponent(customForm.budget)}%0A*Delivery Date:* ${encodeURIComponent(
+    )}%0A*Target Budget:* ${encodeURIComponent(customForm.budget)}%0A*Delivery Date:* ${encodeURIComponent(
       customForm.deliveryDate || "TBD"
     )}%0A*Address:* ${encodeURIComponent(
       customForm.deliveryAddress
-    )}%0A*Details:* ${encodeURIComponent(customForm.itemsRequested)}`;
+    )}%0A*Details / EruIyawo:* ${encodeURIComponent(customForm.itemsRequested)}`;
 
-    return `https://wa.me/2348123456789?text=${text}`;
+    return `https://wa.me/2348060549596?text=${text}`;
   };
 
   const faqs = [
     {
+      q: "What is Wrapping of EruIyawo?",
+      a: "EruIyawo is the traditional Yoruba engagement bridal gift presentation. We take your gifts, luggage, fabrics, tubers of yam, and ceremonial items, and wrap them in royal matching fabrics, ribbons, acrylic display cases, and bespoke calligraphy labels fit for the traditional Alaga ceremony.",
+    },
+    {
+      q: "Can you work within my specific budget?",
+      a: "Yes! Our core philosophy is: 'We help you curate thoughtful gifts on a budget.' Whether you have ₦30,000 or ₦500,000+, Adeola designs packages that look premium and thoughtful without unnecessary markup.",
+    },
+    {
       q: "Where do you deliver?",
-      a: "We offer dedicated hand delivery across all areas of Lagos (Island & Mainland) and partner with insured logistics couriers for delivery across Nigeria.",
+      a: "We offer dedicated hand delivery across all areas of Lagos (Ojodu Berger, Mainland, Island, Ikeja, Lekki) and dispatch via insured couriers nationwide across Nigeria.",
     },
     {
-      q: "Can I personalize the ribbon, colors, and items?",
-      a: "Yes! Every box includes handwritten calligraphy notes and satin ribbon matching. We can also custom print names on robes, tumblers, and glassware.",
-    },
-    {
-      q: "Do you handle bulk corporate or wedding guest favors?",
-      a: "Absolutely. We specialize in quantities from 10 to 500+ units with tiered volume pricing and branded company or couple monograms.",
-    },
-    {
-      q: "How early should I place an order?",
-      a: "Standard hampers require 24–48 hours notice. Custom or bulk orders typically require 5–10 days for optimal sourcing and bespoke assembly.",
+      q: "Do you handle corporate appreciation gifts & bulk souvenirs?",
+      a: "Yes, we handle orders from 10 to 500+ units for corporate retreats, end-of-year banquets, and wedding guest favor boxes with custom branding.",
     },
   ];
 
@@ -86,22 +99,37 @@ export default function GiftsByAdeolaPage() {
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-blush-pink border border-brand-pink/25 text-brand-pink text-xs font-sans tracking-widest uppercase font-semibold mb-4">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Gifts by Adeola • Connected Gifting Studio</span>
+            <span>Gifts by Adeola</span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-6">
-            Make Every Gift <br />
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
+            Thoughtful Gifts. <br />
             <span className="italic font-normal font-serif text-brand-pink">
-              Feel Personal.
+              Curated on a Budget.
             </span>
           </h1>
 
-          <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed max-w-2xl mx-auto">
-            Thoughtfully curated celebration hampers, bridal suite sets, and bespoke luxury gifting.
-            Created by Adeola to complement life&apos;s most meaningful milestones.
+          {/* Exact Brand Copy from User */}
+          <p className="text-base sm:text-lg text-brand-plum/85 font-sans leading-relaxed max-w-2xl mx-auto mb-6 font-medium">
+            We help you curate thoughtful gifts on a budget. Corporate Gifts, Hampers, Souvenirs &
+            Wrapping of EruIyawo.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+          {/* Direct Link to Official Instagram: https://www.instagram.com/giftsbyadeola/ */}
+          <div className="mb-8">
+            <a
+              href="https://www.instagram.com/giftsbyadeola/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-brand-pink hover:text-white text-brand-pink border border-brand-pink/30 text-xs font-sans font-semibold tracking-wide transition-all shadow-xs group"
+            >
+              <Instagram className="w-4 h-4 text-brand-pink group-hover:text-white transition-colors" />
+              <span>Visit Official Instagram: @giftsbyadeola</span>
+              <ArrowUpRight className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
+            </a>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               type="button"
               onClick={() => setIsCustomModalOpen(true)}
@@ -112,26 +140,40 @@ export default function GiftsByAdeolaPage() {
             </button>
 
             <a
-              href="https://wa.me/2348123456789?text=Hello%20Adeola!%20I%20am%20interested%20in%20your%20gifting%20services."
+              href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20am%20interested%20in%20wrapping%20of%20EruIyawo%20or%20curated%20gifting%20on%20a%20budget."
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border border-brand-pink/30 hover:border-brand-pink text-brand-pink bg-white/80 text-xs font-semibold uppercase tracking-widest transition-colors"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Chat with Adeola</span>
+              <span>Chat on WhatsApp (08060549596)</span>
             </a>
           </div>
         </div>
 
-        {/* Value Highlights */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        {/* 4 Core Pillars Highlights */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           <div className="p-6 rounded-2xl bg-white border border-brand-pink/15 text-center shadow-xs">
             <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-3">
               <Package className="w-5 h-5" />
             </div>
-            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">Keepsake Packaging</h4>
+            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
+              Wrapping of EruIyawo
+            </h4>
             <p className="text-xs text-brand-plum/65 font-sans">
-              Rigid presentation boxes, double-faced satin ribbon & wax seals.
+              Royal presentation of traditional Yoruba engagement gifts & luggage.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white border border-brand-pink/15 text-center shadow-xs">
+            <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-3">
+              <Gift className="w-5 h-5" />
+            </div>
+            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
+              Corporate Gifts
+            </h4>
+            <p className="text-xs text-brand-plum/65 font-sans">
+              Branded executive packages, retreats, and year-end client appreciation.
             </p>
           </div>
 
@@ -139,9 +181,11 @@ export default function GiftsByAdeolaPage() {
             <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-3">
               <Heart className="w-5 h-5" />
             </div>
-            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">Calligraphy Notes</h4>
+            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
+              Thoughtful Hampers
+            </h4>
             <p className="text-xs text-brand-plum/65 font-sans">
-              Every order includes a personalized, handwritten message card.
+              Celebration gift baskets, wine duos, and milestone hampers on a budget.
             </p>
           </div>
 
@@ -149,9 +193,11 @@ export default function GiftsByAdeolaPage() {
             <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-3">
               <Truck className="w-5 h-5" />
             </div>
-            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">Doorstep Delivery</h4>
+            <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
+              Event Souvenirs
+            </h4>
             <p className="text-xs text-brand-plum/65 font-sans">
-              Careful, timed hand delivery throughout Lagos and nationwide shipping.
+              Custom VIP guest favors, scented diffusers, and keepsake tokens.
             </p>
           </div>
         </div>
@@ -165,7 +211,7 @@ export default function GiftsByAdeolaPage() {
               The Collection
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-brand-plum">
-              Curated Gift Sets & Hampers
+              Curated Gift Sets & Services
             </h2>
           </div>
 
@@ -198,12 +244,11 @@ export default function GiftsByAdeolaPage() {
               <div>
                 {/* Photo */}
                 <div className="relative aspect-[4/3] w-full bg-[#FAF3F6] overflow-hidden">
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={gift.image}
                     alt={gift.name}
-                    fill
-                    className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute top-3 right-3">
                     <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-pink border border-brand-pink/20 shadow-xs">
@@ -235,7 +280,7 @@ export default function GiftsByAdeolaPage() {
 
                   <div className="border-t border-brand-pink/15 pt-3">
                     <span className="text-[10px] uppercase tracking-wider font-semibold text-brand-gold font-sans block mb-2">
-                      Package Includes:
+                      Package Highlights:
                     </span>
                     <ul className="space-y-1.5">
                       {gift.details.map((detail, idx) => (
@@ -258,7 +303,7 @@ export default function GiftsByAdeolaPage() {
                   className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-blush-pink hover:bg-brand-pink text-brand-pink hover:text-white border border-brand-pink/30 text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Order on WhatsApp (₦{gift.price.toLocaleString()})</span>
+                  <span>Order on WhatsApp (08060549596)</span>
                 </a>
               </div>
             </div>
@@ -342,20 +387,20 @@ export default function GiftsByAdeolaPage() {
               <form onSubmit={handleCustomSubmit}>
                 <div className="mb-6">
                   <span className="text-[10px] font-sans uppercase tracking-widest text-brand-pink font-semibold">
-                    Bespoke Curation
+                    Bespoke Curation On A Budget
                   </span>
                   <h3 className="font-serif text-2xl font-bold text-brand-plum mt-1">
-                    Request a Custom Gift Box
+                    Request Custom Gifting or EruIyawo Wrapping
                   </h3>
                   <p className="text-xs text-brand-plum/70 font-sans mt-1">
-                    Tell us what you have in mind and we will design a personalized proposal.
+                    Tell us what you have in mind and your target budget limit.
                   </p>
                 </div>
 
                 <div className="space-y-4 text-xs font-sans">
                   <div>
                     <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                      Your Name *
+                      Your Full Name *
                     </label>
                     <input
                       type="text"
@@ -375,7 +420,7 @@ export default function GiftsByAdeolaPage() {
                       <input
                         type="tel"
                         required
-                        placeholder="+234 801 234 5678"
+                        placeholder="08060549596"
                         value={customForm.phone}
                         onChange={(e) => setCustomForm({ ...customForm, phone: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-pink/25 bg-[#FFF9FB] text-sm text-brand-plum focus:outline-brand-pink"
@@ -403,7 +448,7 @@ export default function GiftsByAdeolaPage() {
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Bride / Husband"
+                        placeholder="e.g. Bride, Groom, Corporate Staff"
                         value={customForm.recipientName}
                         onChange={(e) =>
                           setCustomForm({ ...customForm, recipientName: e.target.value })
@@ -413,11 +458,11 @@ export default function GiftsByAdeolaPage() {
                     </div>
                     <div>
                       <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                        Occasion
+                        Occasion / Service
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. 30th Birthday, Bridal Shower"
+                        placeholder="e.g. Wrapping of EruIyawo, Corporate, Birthday"
                         value={customForm.occasion}
                         onChange={(e) => setCustomForm({ ...customForm, occasion: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-pink/25 bg-[#FFF9FB] text-sm text-brand-plum focus:outline-brand-pink"
@@ -428,18 +473,15 @@ export default function GiftsByAdeolaPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                        Estimated Budget
+                        Your Budget (Open Input)
                       </label>
-                      <select
+                      <input
+                        type="text"
+                        placeholder="e.g. ₦40,000 or ₦100,000"
                         value={customForm.budget}
                         onChange={(e) => setCustomForm({ ...customForm, budget: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-pink/25 bg-[#FFF9FB] text-sm text-brand-plum focus:outline-brand-pink"
-                      >
-                        <option value="₦35,000 – ₦50,000">₦35,000 – ₦50,000</option>
-                        <option value="₦50,000 – ₦100,000">₦50,000 – ₦100,000</option>
-                        <option value="₦100,000 – ₦250,000">₦100,000 – ₦250,000</option>
-                        <option value="₦250,000+ (Bulk / VIP)">₦250,000+ (Bulk / VIP)</option>
-                      </select>
+                      />
                     </div>
                     <div>
                       <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
@@ -462,7 +504,7 @@ export default function GiftsByAdeolaPage() {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Lekki Phase 1, Lagos"
+                      placeholder="e.g. No 12, Johnson Estate, Ojodu Berger, Lagos"
                       value={customForm.deliveryAddress}
                       onChange={(e) =>
                         setCustomForm({ ...customForm, deliveryAddress: e.target.value })
@@ -473,11 +515,11 @@ export default function GiftsByAdeolaPage() {
 
                   <div>
                     <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                      Items or Theme Preference
+                      Items / EruIyawo Details
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="e.g. Perfume, silk robe with initials, champagne, scented candle, blush and gold ribbons..."
+                      placeholder="e.g. 10 engagement luggage trunks, tubers of yam, fabrics, custom bridal tags in royal purple..."
                       value={customForm.itemsRequested}
                       onChange={(e) =>
                         setCustomForm({ ...customForm, itemsRequested: e.target.value })
