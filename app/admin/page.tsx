@@ -23,6 +23,7 @@ import {
   deleteGiftItem,
   getBrandConfig,
   updateBrandConfig,
+  compressImageFile,
 } from "@/lib/store";
 import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem } from "@/lib/types";
 import {
@@ -57,6 +58,7 @@ import {
   ShoppingBag,
   Star,
   Images,
+  Loader2,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -115,6 +117,14 @@ export default function AdminPage() {
   // Settings form
   const [settingsSaved, setSettingsSaved] = useState(false);
 
+  // Photos processing & feedback toast
+  const [isProcessingPhotos, setIsProcessingPhotos] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
   // File input refs
   const portfolioAddFileRef = useRef<HTMLInputElement>(null);
   const portfolioEditFileRef = useRef<HTMLInputElement>(null);
@@ -172,36 +182,38 @@ export default function AdminPage() {
     setPasswordInput("");
   };
 
-  // --- Helper: Read single file as Base64 Data URI ---
-  const handleFileConversion = (file: File, callback: (dataUrl: string) => void) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        callback(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+  // --- Helper: Read and compress single file as Data URI ---
+  const handleFileConversion = async (file: File, callback: (dataUrl: string) => void) => {
+    try {
+      setIsProcessingPhotos(true);
+      const compressed = await compressImageFile(file, 1600, 1600, 0.82);
+      callback(compressed);
+    } catch (err) {
+      console.error("Image processing error:", err);
+      alert("Could not process this image. Please select a valid JPEG or PNG file.");
+    } finally {
+      setIsProcessingPhotos(false);
+    }
   };
 
-  // --- Helper: Read multiple files as Base64 Data URIs ---
-  const handleMultipleFileConversion = (
+  // --- Helper: Read and compress multiple files as Data URIs ---
+  const handleMultipleFileConversion = async (
     files: FileList | null,
     callback: (dataUrls: string[]) => void
   ) => {
     if (!files || files.length === 0) return;
-    const promises = Array.from(files).map(
-      (file) =>
-        new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            if (typeof reader.result === "string") resolve(reader.result);
-          };
-          reader.readAsDataURL(file);
-        })
-    );
-    Promise.all(promises).then((results) => {
+    try {
+      setIsProcessingPhotos(true);
+      const fileList = Array.from(files);
+      const promises = fileList.map((file) => compressImageFile(file, 1600, 1600, 0.82));
+      const results = await Promise.all(promises);
       callback(results);
-    });
+    } catch (err) {
+      console.error("Multiple images processing error:", err);
+      alert("Could not process some photos. Please try again.");
+    } finally {
+      setIsProcessingPhotos(false);
+    }
   };
 
   // --- Enquiries handlers ---
@@ -223,111 +235,162 @@ export default function AdminPage() {
     }
   };
 
-  // --- Portfolio Handlers (Multiple Upload Supported) ---
+  // --- Portfolio Handlers (Multiple Upload & Compression Supported) ---
   const handleAddProject = (e: React.FormEvent) => {
     e.preventDefault();
-    const coverImage = newProject.image || (newProject.gallery.length > 0 ? newProject.gallery[0] : "");
-    if (!newProject.title || !coverImage) {
-      alert("Please provide a project title and upload at least one photograph.");
+    if (!newProject.title.trim()) {
+      alert("Please provide a project title.");
       return;
     }
-    const finalGallery = newProject.gallery.length > 0 ? newProject.gallery : [coverImage];
 
-    addPortfolioItem({
-      title: newProject.title,
-      subtitle: newProject.subtitle,
-      category: newProject.category,
-      year: newProject.year,
-      location: newProject.location,
-      image: coverImage,
-      gallery: finalGallery,
-      description: newProject.description,
-      featured: newProject.featured,
-    });
+    const rawGallery = newProject.gallery || [];
+    const coverCandidate = newProject.image || rawGallery[0] || "";
 
-    setIsAddPortfolioOpen(false);
-    setNewProject({
-      title: "",
-      subtitle: "",
-      category: "Weddings",
-      year: new Date().getFullYear().toString(),
-      location: "Lagos, Nigeria",
-      image: "",
-      gallery: [],
-      description: "",
-      featured: false,
-    });
-    setNewProjectUrlInput("");
-    loadData();
+    if (!coverCandidate && rawGallery.length === 0) {
+      alert("Please upload at least one photograph for this project.");
+      return;
+    }
+
+    const finalGallery = rawGallery.length > 0 ? rawGallery : [coverCandidate];
+    const finalCover = coverCandidate || finalGallery[0] || "";
+
+    try {
+      addPortfolioItem({
+        title: newProject.title.trim(),
+        subtitle: newProject.subtitle,
+        category: newProject.category,
+        year: newProject.year,
+        location: newProject.location,
+        image: finalCover,
+        gallery: finalGallery,
+        description: newProject.description,
+        featured: newProject.featured,
+      });
+
+      setIsAddPortfolioOpen(false);
+      setNewProject({
+        title: "",
+        subtitle: "",
+        category: "Weddings",
+        year: new Date().getFullYear().toString(),
+        location: "Lagos, Nigeria",
+        image: "",
+        gallery: [],
+        description: "",
+        featured: false,
+      });
+      setNewProjectUrlInput("");
+      loadData();
+      showToast(`Project "${newProject.title.trim()}" added to portfolio with ${finalGallery.length} photos!`);
+    } catch (err) {
+      console.error("Add portfolio project error:", err);
+      alert("Could not add project. Please try again.");
+    }
   };
 
   const handleSaveEditedProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProject) return;
-    const gallery =
-      editingProject.gallery && editingProject.gallery.length > 0
-        ? editingProject.gallery
-        : [editingProject.image];
-    const coverImage = editingProject.image || gallery[0] || "";
 
-    if (!editingProject.title || !coverImage) {
-      alert("Please provide a project title and at least one photograph.");
+    if (!editingProject.title.trim()) {
+      alert("Please provide a project title.");
       return;
     }
 
-    updatePortfolioItem(editingProject.id, {
-      ...editingProject,
-      image: coverImage,
-      gallery: gallery,
-    });
-    setEditingProject(null);
-    setEditProjectUrlInput("");
-    loadData();
+    const rawGallery = editingProject.gallery || [];
+    const coverCandidate = editingProject.image || rawGallery[0] || "";
+
+    if (!coverCandidate && rawGallery.length === 0) {
+      alert("Please upload at least one photograph for this project.");
+      return;
+    }
+
+    const finalGallery = rawGallery.length > 0 ? rawGallery : [coverCandidate];
+    const finalCover = coverCandidate || finalGallery[0] || "";
+
+    try {
+      updatePortfolioItem(editingProject.id, {
+        ...editingProject,
+        title: editingProject.title.trim(),
+        image: finalCover,
+        gallery: finalGallery,
+      });
+      setEditingProject(null);
+      setEditProjectUrlInput("");
+      loadData();
+      showToast(`"${editingProject.title.trim()}" saved successfully with ${finalGallery.length} photos!`);
+    } catch (err) {
+      console.error("Save portfolio project error:", err);
+      alert("Could not save project changes. Please try again.");
+    }
   };
 
   const handleDeletePortfolioProject = (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete "${title}" from the portfolio?`)) {
       deletePortfolioItem(id);
       loadData();
+      showToast(`Deleted "${title}" from portfolio.`);
     }
   };
 
   // --- Gifts Handlers ---
   const handleAddGift = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGift.name || !newGift.image) {
+    if (!newGift.name.trim() || !newGift.image) {
       alert("Please provide a gift package title and an image.");
       return;
     }
-    addGiftItem({
-      name: newGift.name,
-      category: newGift.category,
-      price: Number(newGift.price) || 0,
-      description: newGift.description,
-      details: ["Curated by Adeola", "Quality guaranteed", "Custom presentation"],
-      image: newGift.image,
-      inStock: newGift.inStock,
-      popular: newGift.popular,
-    });
-    setIsAddGiftOpen(false);
-    setNewGift({
-      name: "",
-      category: "Wrapping of EruIyawo",
-      price: 35000,
-      description: "",
-      image: "",
-      inStock: true,
-      popular: false,
-    });
-    loadData();
+
+    try {
+      addGiftItem({
+        name: newGift.name.trim(),
+        category: newGift.category,
+        price: Number(newGift.price) || 0,
+        description: newGift.description,
+        details: ["Curated by Adeola", "Quality guaranteed", "Custom presentation"],
+        image: newGift.image,
+        inStock: newGift.inStock,
+        popular: newGift.popular,
+      });
+      setIsAddGiftOpen(false);
+      setNewGift({
+        name: "",
+        category: "Wrapping of EruIyawo",
+        price: 35000,
+        description: "",
+        image: "",
+        inStock: true,
+        popular: false,
+      });
+      loadData();
+      showToast(`"${newGift.name.trim()}" added to Gifts catalogue!`);
+    } catch (err) {
+      console.error("Add gift error:", err);
+      alert("Could not add gift. Please try again.");
+    }
   };
 
   const handleSaveEditedGift = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingGift) return;
-    updateGiftItem(editingGift.id, editingGift);
-    setEditingGift(null);
-    loadData();
+
+    if (!editingGift.name.trim() || !editingGift.image) {
+      alert("Please provide a gift title and upload an image.");
+      return;
+    }
+
+    try {
+      updateGiftItem(editingGift.id, {
+        ...editingGift,
+        name: editingGift.name.trim(),
+      });
+      setEditingGift(null);
+      loadData();
+      showToast(`"${editingGift.name.trim()}" updated successfully!`);
+    } catch (err) {
+      console.error("Save gift error:", err);
+      alert("Could not save gift changes. Please try again.");
+    }
   };
 
   const handleDeleteGiftItem = (id: string, name: string) => {
@@ -467,7 +530,15 @@ export default function AdminPage() {
 
   // Authenticated Admin Dashboard
   return (
-    <div className="pt-24 pb-20 bg-brand-warm-white min-h-screen">
+    <div className="pt-24 pb-20 bg-brand-warm-white min-h-screen relative">
+      {/* Toast Notification Banner */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 max-w-md px-5 py-3.5 rounded-2xl bg-brand-plum text-white shadow-2xl border border-brand-gold/40 flex items-center gap-3 animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-brand-gold shrink-0" />
+          <p className="text-xs font-sans font-medium">{toastMessage}</p>
+        </div>
+      )}
+
       {/* Top Admin Sub-Header */}
       <div className="bg-brand-plum text-white py-4 px-4 sm:px-6 lg:px-8 border-b border-brand-plum-dark sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -1428,28 +1499,43 @@ export default function AdminPage() {
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      handleMultipleFileConversion(e.target.files, (urls) => {
-                        setNewProject((prev) => {
-                          const updatedGallery = [...prev.gallery, ...urls];
-                          return {
-                            ...prev,
-                            gallery: updatedGallery,
-                            image: prev.image || updatedGallery[0] || "",
-                          };
+                      if (e.target.files) {
+                        handleMultipleFileConversion(e.target.files, (urls) => {
+                          setNewProject((prev) => {
+                            const updatedGallery = [...prev.gallery, ...urls];
+                            return {
+                              ...prev,
+                              gallery: updatedGallery,
+                              image: prev.image || updatedGallery[0] || "",
+                            };
+                          });
                         });
-                      });
+                      }
+                      e.target.value = "";
                     }}
                   />
 
                   <button
                     type="button"
+                    disabled={isProcessingPhotos}
                     onClick={() => portfolioAddFileRef.current?.click()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload Multiple Photos</span>
+                    {isProcessingPhotos ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isProcessingPhotos ? "Compressing Photos..." : "Upload Multiple Photos"}</span>
                   </button>
                 </div>
+
+                {isProcessingPhotos && (
+                  <div className="p-3 rounded-xl bg-brand-soft-lavender text-brand-purple flex items-center gap-2 text-xs font-semibold animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Compressing & optimizing photos for instant loading...</span>
+                  </div>
+                )}
 
                 {/* Or add via URL */}
                 <div className="flex items-center gap-2 pt-1">
@@ -1584,9 +1670,11 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                  disabled={isProcessingPhotos}
+                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center gap-2"
                 >
-                  Publish Project ({newProject.gallery.length} Photos)
+                  {isProcessingPhotos && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isProcessingPhotos ? "Processing..." : `Publish Project (${newProject.gallery.length} Photos)`}</span>
                 </button>
               </div>
             </form>
@@ -1715,30 +1803,46 @@ export default function AdminPage() {
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      handleMultipleFileConversion(e.target.files, (urls) => {
-                        setEditingProject((prev) => {
-                          if (!prev) return null;
-                          const currentGallery = prev.gallery && prev.gallery.length > 0 ? prev.gallery : [prev.image];
-                          const updatedGallery = [...currentGallery, ...urls];
-                          return {
-                            ...prev,
-                            gallery: updatedGallery,
-                            image: prev.image || updatedGallery[0] || "",
-                          };
+                      if (e.target.files) {
+                        handleMultipleFileConversion(e.target.files, (urls) => {
+                          setEditingProject((prev) => {
+                            if (!prev) return null;
+                            const currentGallery =
+                              prev.gallery && prev.gallery.length > 0 ? prev.gallery : [prev.image];
+                            const updatedGallery = [...currentGallery, ...urls];
+                            return {
+                              ...prev,
+                              gallery: updatedGallery,
+                              image: prev.image || updatedGallery[0] || "",
+                            };
+                          });
                         });
-                      });
+                      }
+                      e.target.value = "";
                     }}
                   />
 
                   <button
                     type="button"
+                    disabled={isProcessingPhotos}
                     onClick={() => portfolioEditFileRef.current?.click()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload More Photos</span>
+                    {isProcessingPhotos ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isProcessingPhotos ? "Compressing Photos..." : "Upload More Photos"}</span>
                   </button>
                 </div>
+
+                {isProcessingPhotos && (
+                  <div className="p-3 rounded-xl bg-brand-soft-lavender text-brand-purple flex items-center gap-2 text-xs font-semibold animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Compressing & optimizing photos for instant loading...</span>
+                  </div>
+                )}
 
                 {/* Or add via URL */}
                 <div className="flex items-center gap-2 pt-1">
@@ -1880,9 +1984,11 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                  disabled={isProcessingPhotos}
+                  className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center gap-2"
                 >
-                  Save Changes ({(editingProject.gallery || []).length} Photos)
+                  {isProcessingPhotos && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isProcessingPhotos ? "Processing Photos..." : `Save Changes (${(editingProject.gallery || []).length} Photos)`}</span>
                 </button>
               </div>
             </form>
@@ -1974,21 +2080,34 @@ export default function AdminPage() {
                       const file = e.target.files?.[0];
                       if (file) {
                         handleFileConversion(file, (dataUrl) => {
-                          setNewGift({ ...newGift, image: dataUrl });
+                          setNewGift((prev) => ({ ...prev, image: dataUrl }));
                         });
                       }
+                      e.target.value = "";
                     }}
                   />
                   <button
                     type="button"
+                    disabled={isProcessingPhotos}
                     onClick={() => giftAddFileRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                    className="px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload from Device</span>
+                    {isProcessingPhotos ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isProcessingPhotos ? "Compressing Photo..." : "Upload from Device"}</span>
                   </button>
                   <span className="text-[11px] text-brand-plum/50">or enter image URL below</span>
                 </div>
+
+                {isProcessingPhotos && (
+                  <div className="p-3 rounded-xl bg-brand-blush-pink text-brand-pink flex items-center gap-2 text-xs font-semibold animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Compressing & optimizing photo...</span>
+                  </div>
+                )}
 
                 <input
                   type="text"
@@ -2056,9 +2175,11 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                  disabled={isProcessingPhotos}
+                  className="px-7 py-2.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center gap-2"
                 >
-                  Add Gift Package
+                  {isProcessingPhotos && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isProcessingPhotos ? "Processing..." : "Add Gift Package"}</span>
                 </button>
               </div>
             </form>
@@ -2150,21 +2271,34 @@ export default function AdminPage() {
                       const file = e.target.files?.[0];
                       if (file) {
                         handleFileConversion(file, (dataUrl) => {
-                          setEditingGift({ ...editingGift, image: dataUrl });
+                          setEditingGift((prev) => (prev ? { ...prev, image: dataUrl } : null));
                         });
                       }
+                      e.target.value = "";
                     }}
                   />
                   <button
                     type="button"
+                    disabled={isProcessingPhotos}
                     onClick={() => giftEditFileRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                    className="px-4 py-2 rounded-xl bg-brand-pink hover:bg-brand-pink-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload New Photo</span>
+                    {isProcessingPhotos ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isProcessingPhotos ? "Compressing Photo..." : "Upload New Photo"}</span>
                   </button>
                   <span className="text-[11px] text-brand-plum/50">or edit URL below</span>
                 </div>
+
+                {isProcessingPhotos && (
+                  <div className="p-3 rounded-xl bg-brand-blush-pink text-brand-pink flex items-center gap-2 text-xs font-semibold animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Compressing & optimizing photo...</span>
+                  </div>
+                )}
 
                 <input
                   type="text"
@@ -2236,9 +2370,11 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                  disabled={isProcessingPhotos}
+                  className="px-7 py-2.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center gap-2"
                 >
-                  Save Changes
+                  {isProcessingPhotos && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isProcessingPhotos ? "Processing..." : "Save Changes"}</span>
                 </button>
               </div>
             </form>
