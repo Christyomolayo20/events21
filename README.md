@@ -1,4 +1,6 @@
-# Event 21 & Gifts by Adeola
+# Event 21 (Royalty Twenty One Events) & Gifts by Adeola
+
+> Event 21 (Royalty Twenty One Events) transforms weddings, birthdays, proposals, retirement milestones, and special gatherings into extraordinary experiences that feel like stepping into a palace ballroom. With meticulous planning, breathtaking décor, and attention to every detail.
 
 A premium, minimalist, photography-led website and management system for **Event 21** and its connected gifting sub-brand, **Gifts by Adeola**, based in Lagos, Nigeria.
 
@@ -6,7 +8,7 @@ A premium, minimalist, photography-led website and management system for **Event
 
 ## 🌟 Brand & Design Highlights
 
-- **Visual Direction:** Boutique studio aesthetic, editorial typography, generous white space, restrained luxury.
+- **Visual Direction:** Boutique royal studio aesthetic, editorial typography (Cormorant Garamond & Plus Jakarta Sans), generous white space, restrained luxury.
 - **Brand Palette:**
   - Primary Purple: `#6E35A5`
   - Deep Plum: `#30213A`
@@ -15,14 +17,14 @@ A premium, minimalist, photography-led website and management system for **Event
   - Blush Pink: `#FFF0F5`
   - Warm White: `#FFFCF8`
   - Gold Accents: `#C5A059`
-- **Authentic Portfolio (The Kayodes):**
+- **Authentic Portfolio (The Kayodes & Royal Ballroom):**
   - **Traditional Yoruba Wedding:** Regal wine aso-oke, ceremonial staffs, heirloom beadwork, cultural protocols.
   - **White Wedding Ceremony:** High-neck bridal lace, tailored white tuxedo, intimate editorial portraits.
-  - **The Ballroom Symphony:** Indoor cold fireworks, dry-ice low fog clouds, cascading crystal icicle lighting, tiered wedding cake.
+  - **The Ballroom Symphony:** Grand ballroom pyrotechnics, dry-ice low fog clouds, cascading crystal icicle lighting, tiered wedding cake.
 - **Integrated Sub-Brand (Gifts by Adeola):**
-  - Curated celebration hampers, bridal suite sets, and executive boxes with prices in Nigerian Naira (NGN ₦).
-  - One-click **WhatsApp Direct Ordering** buttons carrying product details and pricing into the chat.
-  - Interactive Custom Gift Builder for personalized bridesmaid proposals and corporate orders.
+  - Official Instagram: [https://www.instagram.com/giftsbyadeola/](https://www.instagram.com/giftsbyadeola/)
+  - Exact brand promise: *"We help you curate thoughtful gifts on a budget. Corporate Gifts, Hampers, Souvenirs & Wrapping of EruIyawo."*
+  - One-click **WhatsApp Direct Ordering** (`08060549596`) carrying product details and pricing into the chat.
 
 ---
 
@@ -30,7 +32,7 @@ A premium, minimalist, photography-led website and management system for **Event
 
 An administrative control center is built into the website.
 
-- **URL:** `/admin` (or click the lock icon in the navigation / footer)
+- **URL:** `/admin` (hidden from public navigation and footer)
 - **Password:** `Event$21`
 
 ### Admin Features:
@@ -39,13 +41,13 @@ An administrative control center is built into the website.
    - One-click **WhatsApp Reply** pre-populating client name and event type.
    - One-click **Email Reply**.
    - **Export to CSV** for spreadsheets and CRM importing.
-2. **Gifts by Adeola Orders Tracker:**
-   - View custom gift briefs and recipient details.
-   - Update order status (Pending, Sourcing, Assembled, Delivered).
+2. **Gifts by Adeola Catalogue & Uploads:**
+   - Add new gift items, upload photos directly from your device, set prices in NGN, and edit/delete existing packages.
+   - Track custom gift client orders with status updates and WhatsApp reply.
 3. **Portfolio & Gallery Showcase Manager:**
-   - Add new projects with photos, category, year, and description.
+   - Edit existing projects, delete projects, and upload new photos from your device or via URL.
 4. **Studio Contact Settings:**
-   - Real-time editing of official phone number, WhatsApp number, email, and Instagram handle.
+   - Real-time editing of official phone number (`08060549596`), email (`Royaltyeventservice@gmail.com`), address (*No 12, Johnson Estate, Ojodu Berger, Lagos, Nigeria*), and Instagram handles.
 
 ---
 
@@ -68,32 +70,28 @@ npm run start
 ## 📁 Project Architecture
 
 - **`app/`**: Next.js App Router
-  - `page.tsx` - Homepage (Hero, About, Services, Portfolio, Gifts by Adeola, Contact)
+  - `page.tsx` - Homepage (Royal Hero, About, Services, Portfolio, Gifts by Adeola, Contact)
   - `about/page.tsx` - Detailed story, brand values, 4-stage planning process
-  - `services/page.tsx` - Detailed breakdown of planning, styling, and coordination services
-  - `gallery/page.tsx` - Filterable portfolio with high-resolution Lightbox viewer
+  - `services/page.tsx` - Detailed breakdown of planning, styling, romantic proposals, and retirement parties
+  - `gallery/page.tsx` - Filterable portfolio with high-resolution Lightbox story viewer
   - `gifts-by-adeola/page.tsx` - Dedicated gifting boutique, catalogue, and custom request modal
-  - `contact/page.tsx` - Interactive event enquiry brief and studio contact avenues
+  - `contact/page.tsx` - Interactive blank event enquiry brief and studio contact avenues
   - `admin/page.tsx` - Password-protected Admin Control Center (`Event$21`)
   - `api/enquiries/` - Event enquiry API endpoint
   - `api/admin/login/` - Admin authentication endpoint
 - **`components/`**: Reusable UI components
-  - `Navbar.tsx` - Sticky header with mobile drawer and Gifts by Adeola highlight
-  - `Footer.tsx` - Minimal footer with verified contacts and privacy modal
-  - `Logo.tsx` - Event 21 brand mark and sub-brand rendering
-  - `Hero.tsx` - Photography-led hero section
+  - `Navbar.tsx` - Sticky header with mobile drawer (pure Event 21 brand mark)
+  - `Footer.tsx` - Minimal footer with verified contacts, address, and Instagram links
+  - `Logo.tsx` - Event 21 brand mark
+  - `Hero.tsx` - Full ballroom backdrop with multi-layered royal plum veils and crown crest
   - `AboutSection.tsx` - Editorial "Every Celebration Has a Story"
-  - `ServicesSection.tsx` - Clean 6-service grid
-  - `PortfolioSection.tsx` - Project grid with category filtering
-  - `GiftsSection.tsx` - Gifts by Adeola preview section
+  - `ServicesSection.tsx` - Clean 6-service grid including Proposal and Retirement celebrations
+  - `PortfolioSection.tsx` - Reactive project grid with category filtering
+  - `GiftsSection.tsx` - Gifts by Adeola preview section with Instagram link
   - `ContactSection.tsx` - Conversion section with embedded brief form
-  - `EnquiryForm.tsx` - Validated form with WhatsApp backup
+  - `EnquiryForm.tsx` - Completely blank form with open budget text input
   - `LightboxModal.tsx` - Keyboard-accessible modal image viewer
-  - `WhatsAppButton.tsx` - Floating WhatsApp concierge assistant
-- **`lib/`**:
-  - `types.ts` - TypeScript data definitions
-  - `data.ts` - Brand config, services, real portfolio items, and initial gift catalogue
-  - `store.ts` - Client persistence, reactive state, and admin auth helpers
+  - `WhatsAppButton.tsx` - Floating WhatsApp concierge assistant connected to `08060549596`
 - **`public/images/`**:
   - `events21-logo.jpg` - Official Event 21 logo
   - `the-kayodes-traditional.jpg` - The Kayodes traditional Yoruba wedding
