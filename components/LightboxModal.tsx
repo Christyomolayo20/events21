@@ -15,6 +15,18 @@ interface LightboxModalProps {
 
 export default function LightboxModal({ item, items, onClose, onSelect }: LightboxModalProps) {
   const currentIndex = item ? items.findIndex((i) => i.id === item.id) : -1;
+  const [activeImageIndex, setActiveImageIndex] = React.useState(0);
+
+  // Reset active image index when item changes
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [item?.id]);
+
+  const projectImages = item
+    ? item.gallery && item.gallery.length > 0
+      ? item.gallery
+      : [item.image]
+    : [];
 
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -45,33 +57,35 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
 
   if (!item) return null;
 
+  const currentDisplayImage = projectImages[activeImageIndex] || item.image;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-brand-plum-dark/90 backdrop-blur-md animate-fade-in">
       {/* Close button */}
       <button
         type="button"
         onClick={onClose}
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 p-2.5 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 p-2.5 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden cursor-pointer"
         aria-label="Close modal"
       >
         <X className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
-      {/* Prev button */}
+      {/* Prev Project button */}
       <button
         type="button"
         onClick={handlePrev}
-        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden"
+        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden cursor-pointer"
         aria-label="Previous item"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
 
-      {/* Next button */}
+      {/* Next Project button */}
       <button
         type="button"
         onClick={handleNext}
-        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden"
+        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden cursor-pointer"
         aria-label="Next item"
       >
         <ChevronRight className="w-6 h-6" />
@@ -82,16 +96,43 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
         className="relative max-w-5xl w-full bg-brand-plum rounded-2xl overflow-hidden shadow-modal border border-white/10 flex flex-col lg:flex-row max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Image Container */}
-        <div className="relative w-full lg:w-3/5 h-72 sm:h-96 lg:h-auto bg-black flex items-center justify-center min-h-[320px] lg:min-h-[540px]">
-          <Image
-            src={item.image}
-            alt={item.title}
-            fill
-            className="object-contain"
-            priority
-            sizes="(max-width: 1024px) 100vw, 60vw"
-          />
+        {/* Image Container with Multiple Images Support */}
+        <div className="relative w-full lg:w-3/5 bg-black flex flex-col justify-between min-h-[340px] lg:min-h-[540px]">
+          <div className="relative flex-1 w-full flex items-center justify-center p-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={currentDisplayImage}
+              alt={item.title}
+              className="max-h-[60vh] max-w-full object-contain mx-auto"
+            />
+          </div>
+
+          {/* Multiple Photo Thumbnails Strip if project has multiple images */}
+          {projectImages.length > 1 && (
+            <div className="p-3 bg-brand-plum-dark/80 backdrop-blur-xs border-t border-white/10 flex items-center justify-between gap-3">
+              <span className="text-[11px] text-brand-gold font-sans font-medium shrink-0">
+                {activeImageIndex + 1} of {projectImages.length} Photos
+              </span>
+
+              <div className="flex items-center gap-2 overflow-x-auto py-1 px-1">
+                {projectImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`relative w-12 h-9 rounded-md overflow-hidden border transition-all shrink-0 cursor-pointer ${
+                      activeImageIndex === idx
+                        ? "border-brand-gold ring-1 ring-brand-gold scale-105"
+                        : "border-white/20 opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Details Container */}

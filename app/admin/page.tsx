@@ -55,6 +55,8 @@ import {
   Check,
   Eye,
   ShoppingBag,
+  Star,
+  Images,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -78,19 +80,24 @@ export default function AdminPage() {
   // Gifts Sub-Tab
   const [giftsSubTab, setGiftsSubTab] = useState<"catalogue" | "orders">("catalogue");
 
-  // Portfolio Modals State
+  // Portfolio Multi-Image Add State
   const [isAddPortfolioOpen, setIsAddPortfolioOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<PortfolioItem | null>(null);
   const [newProject, setNewProject] = useState({
     title: "",
     subtitle: "",
     category: "Weddings" as PortfolioItem["category"],
     year: new Date().getFullYear().toString(),
     location: "Lagos, Nigeria",
-    image: "",
+    image: "", // primary cover image
+    gallery: [] as string[], // array of all project images
     description: "",
     featured: false,
   });
+  const [newProjectUrlInput, setNewProjectUrlInput] = useState("");
+
+  // Portfolio Multi-Image Edit State
+  const [editingProject, setEditingProject] = useState<PortfolioItem | null>(null);
+  const [editProjectUrlInput, setEditProjectUrlInput] = useState("");
 
   // Gift Item Modals State
   const [isAddGiftOpen, setIsAddGiftOpen] = useState(false);
@@ -165,7 +172,7 @@ export default function AdminPage() {
     setPasswordInput("");
   };
 
-  // --- Helper: Read local image file as Base64 Data URI ---
+  // --- Helper: Read single file as Base64 Data URI ---
   const handleFileConversion = (file: File, callback: (dataUrl: string) => void) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -174,6 +181,27 @@ export default function AdminPage() {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  // --- Helper: Read multiple files as Base64 Data URIs ---
+  const handleMultipleFileConversion = (
+    files: FileList | null,
+    callback: (dataUrls: string[]) => void
+  ) => {
+    if (!files || files.length === 0) return;
+    const promises = Array.from(files).map(
+      (file) =>
+        new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (typeof reader.result === "string") resolve(reader.result);
+          };
+          reader.readAsDataURL(file);
+        })
+    );
+    Promise.all(promises).then((results) => {
+      callback(results);
+    });
   };
 
   // --- Enquiries handlers ---
@@ -195,14 +223,28 @@ export default function AdminPage() {
     }
   };
 
-  // --- Portfolio handlers ---
+  // --- Portfolio Handlers (Multiple Upload Supported) ---
   const handleAddProject = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProject.title || !newProject.image) {
-      alert("Please provide both a project title and an image.");
+    const coverImage = newProject.image || (newProject.gallery.length > 0 ? newProject.gallery[0] : "");
+    if (!newProject.title || !coverImage) {
+      alert("Please provide a project title and upload at least one photograph.");
       return;
     }
-    addPortfolioItem(newProject);
+    const finalGallery = newProject.gallery.length > 0 ? newProject.gallery : [coverImage];
+
+    addPortfolioItem({
+      title: newProject.title,
+      subtitle: newProject.subtitle,
+      category: newProject.category,
+      year: newProject.year,
+      location: newProject.location,
+      image: coverImage,
+      gallery: finalGallery,
+      description: newProject.description,
+      featured: newProject.featured,
+    });
+
     setIsAddPortfolioOpen(false);
     setNewProject({
       title: "",
@@ -211,17 +253,35 @@ export default function AdminPage() {
       year: new Date().getFullYear().toString(),
       location: "Lagos, Nigeria",
       image: "",
+      gallery: [],
       description: "",
       featured: false,
     });
+    setNewProjectUrlInput("");
     loadData();
   };
 
   const handleSaveEditedProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProject) return;
-    updatePortfolioItem(editingProject.id, editingProject);
+    const gallery =
+      editingProject.gallery && editingProject.gallery.length > 0
+        ? editingProject.gallery
+        : [editingProject.image];
+    const coverImage = editingProject.image || gallery[0] || "";
+
+    if (!editingProject.title || !coverImage) {
+      alert("Please provide a project title and at least one photograph.");
+      return;
+    }
+
+    updatePortfolioItem(editingProject.id, {
+      ...editingProject,
+      image: coverImage,
+      gallery: gallery,
+    });
     setEditingProject(null);
+    setEditProjectUrlInput("");
     loadData();
   };
 
@@ -232,7 +292,7 @@ export default function AdminPage() {
     }
   };
 
-  // --- Gifts handlers ---
+  // --- Gifts Handlers ---
   const handleAddGift = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGift.name || !newGift.image) {
@@ -284,7 +344,7 @@ export default function AdminPage() {
     }
   };
 
-  // --- Settings handler ---
+  // --- Settings Handler ---
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     updateBrandConfig(config);
@@ -470,7 +530,7 @@ export default function AdminPage() {
             }`}
           >
             <ImageIcon className="w-4 h-4" />
-            <span>Portfolio Manager</span>
+            <span>Portfolio Showcase Manager</span>
             <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
               {portfolio.length}
             </span>
@@ -509,7 +569,6 @@ export default function AdminPage() {
         {/* TAB 1: ENQUIRIES */}
         {activeTab === "enquiries" && (
           <div className="space-y-6">
-            {/* Quick Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
                 <span className="text-[10px] uppercase tracking-wider text-brand-plum/50 font-semibold block">
@@ -545,9 +604,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Filter Bar & Export */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-              {/* Search */}
               <div className="relative w-full md:w-80">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-plum/40" />
                 <input
@@ -559,7 +616,6 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Status Filter Pills */}
               <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
                 {["All", "New", "Contacted", "In Review", "Booked", "Archived"].map((st) => (
                   <button
@@ -577,7 +633,6 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              {/* CSV Export */}
               <button
                 type="button"
                 onClick={exportEnquiriesCSV}
@@ -588,7 +643,6 @@ export default function AdminPage() {
               </button>
             </div>
 
-            {/* Enquiries List / Table */}
             <div className="bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-sans">
@@ -702,7 +756,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 2: PORTFOLIO SHOWCASE MANAGER (EDIT & DELETE ENABLED) */}
+        {/* TAB 2: PORTFOLIO SHOWCASE MANAGER (MULTIPLE IMAGE UPLOAD ENABLED) */}
         {activeTab === "portfolio" && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -711,89 +765,121 @@ export default function AdminPage() {
                   Portfolio Showcase Manager
                 </h3>
                 <p className="text-xs text-brand-plum/70 font-sans mt-1">
-                  Upload new projects, edit titles and images, or remove existing projects from the live portfolio.
+                  Upload multiple photos per project, set primary cover images, edit details, or remove projects.
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={() => setIsAddPortfolioOpen(true)}
+                onClick={() => {
+                  setNewProject({
+                    title: "",
+                    subtitle: "",
+                    category: "Weddings",
+                    year: new Date().getFullYear().toString(),
+                    location: "Lagos, Nigeria",
+                    image: "",
+                    gallery: [],
+                    description: "",
+                    featured: false,
+                  });
+                  setNewProjectUrlInput("");
+                  setIsAddPortfolioOpen(true);
+                }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add New Project</span>
+                <span>Add New Project (Multi-Upload)</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {portfolio.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
-                >
-                  <div>
-                    <div className="relative aspect-[16/10] bg-brand-plum overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute top-3 left-3 flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-xs">
-                          {item.category}
-                        </span>
-                        {item.featured && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
-                            Featured
+              {portfolio.map((item) => {
+                const photoCount = item.gallery && item.gallery.length > 0 ? item.gallery.length : 1;
+
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
+                  >
+                    <div>
+                      <div className="relative aspect-[16/10] bg-brand-plum overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute top-3 left-3 flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-xs">
+                            {item.category}
                           </span>
-                        )}
+                          {item.featured && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
+                              Featured
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Multiple photos count badge */}
+                        <div className="absolute top-3 right-3">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-black/60 text-white backdrop-blur-xs shadow-xs flex items-center gap-1">
+                            <Images className="w-3 h-3 text-brand-gold" />
+                            <span>{photoCount} {photoCount === 1 ? "Photo" : "Photos"}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-5 pt-3">
+                        <h4 className="font-serif text-lg font-bold text-brand-plum leading-snug">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
+                          {item.subtitle}
+                        </p>
+                        <div className="text-[11px] text-brand-gold font-sans font-medium mt-2">
+                          {item.location} • {item.year}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="p-5 pt-3">
-                      <h4 className="font-serif text-lg font-bold text-brand-plum leading-snug">
-                        {item.title}
-                      </h4>
-                      <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
-                        {item.subtitle}
-                      </p>
-                      <div className="text-[11px] text-brand-gold font-sans font-medium mt-2">
-                        {item.location} • {item.year}
-                      </div>
+                    {/* Edit and Delete Actions */}
+                    <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const gallery = item.gallery && item.gallery.length > 0 ? item.gallery : [item.image];
+                          setEditingProject({
+                            ...item,
+                            gallery: gallery,
+                          });
+                          setEditProjectUrlInput("");
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-soft-lavender hover:bg-brand-purple hover:text-white text-brand-purple text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        <span>Edit Photos ({photoCount})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePortfolioProject(item.id, item.title)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                      </button>
                     </div>
                   </div>
-
-                  {/* Edit and Delete Actions */}
-                  <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => setEditingProject(item)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-soft-lavender hover:bg-brand-purple hover:text-white text-brand-purple text-xs font-semibold transition-colors cursor-pointer"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                      <span>Edit Project</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePortfolioProject(item.id, item.title)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-semibold transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* TAB 3: GIFTS BY ADEOLA (CATALOGUE UPLOADS & CUSTOM ORDERS) */}
+        {/* TAB 3: GIFTS BY ADEOLA (CATALOGUE UPLOADS & ORDERS) */}
         {activeTab === "gifts" && (
           <div className="space-y-6">
-            {/* Sub-Tabs Selector */}
             <div className="bg-white p-4 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <button
@@ -835,7 +921,6 @@ export default function AdminPage() {
               )}
             </div>
 
-            {/* Sub-View 1: Gift Catalogue Manager */}
             {giftsSubTab === "catalogue" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {giftCatalogue.map((item) => (
@@ -882,7 +967,6 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Action buttons */}
                     <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
                       <button
                         type="button"
@@ -907,7 +991,6 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* Sub-View 2: Client Custom Gift Orders */}
             {giftsSubTab === "orders" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {gifts.length === 0 ? (
@@ -1125,7 +1208,6 @@ export default function AdminPage() {
               </p>
             </div>
 
-            {/* Status Selector */}
             <div className="mb-6 p-4 rounded-xl bg-brand-warm-white border border-brand-warm-border/80 flex items-center justify-between">
               <span className="text-xs font-sans font-semibold uppercase tracking-wider text-brand-plum/70">
                 Enquiry Status:
@@ -1145,7 +1227,6 @@ export default function AdminPage() {
               </select>
             </div>
 
-            {/* Details Grid */}
             <div className="grid grid-cols-2 gap-4 text-xs font-sans mb-6">
               <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60">
                 <span className="text-brand-plum/50 block text-[10px] uppercase font-semibold">
@@ -1187,7 +1268,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Client Message */}
             <div className="mb-6">
               <h4 className="text-xs uppercase tracking-wider font-semibold text-brand-plum/80 font-sans mb-2">
                 Client Message & Vision:
@@ -1197,7 +1277,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="pt-4 border-t border-brand-warm-border flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <a
@@ -1234,10 +1313,10 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* MODAL 2: Add New Portfolio Project */}
+      {/* MODAL 2: Add New Portfolio Project (MULTIPLE IMAGE UPLOADS ENABLED) */}
       {isAddPortfolioOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
-          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setIsAddPortfolioOpen(false)}
@@ -1246,9 +1325,14 @@ export default function AdminPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-4">
-              Add New Project to Gallery
-            </h3>
+            <div className="mb-4">
+              <h3 className="font-serif text-2xl font-bold text-brand-plum">
+                Add New Project to Gallery
+              </h3>
+              <p className="text-xs text-brand-plum/60 font-sans mt-0.5">
+                Upload multiple photographs for this celebration and designate your preferred cover photo.
+              </p>
+            </div>
 
             <form onSubmit={handleAddProject} className="space-y-4 text-xs font-sans">
               <div>
@@ -1325,55 +1409,141 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Image Upload from Computer OR URL */}
-              <div className="p-4 rounded-xl bg-brand-warm-white border border-brand-warm-border space-y-3">
-                <label className="block uppercase font-semibold text-brand-plum/80">
-                  Project Photograph *
-                </label>
+              {/* MULTIPLE IMAGES UPLOAD SECTION */}
+              <div className="p-4 rounded-2xl bg-brand-warm-white border border-brand-warm-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block uppercase font-semibold text-brand-plum/90">
+                    Project Gallery Photos ({newProject.gallery.length} added)
+                  </label>
+                  <span className="text-[11px] text-brand-purple font-medium">
+                    Multiple uploads supported
+                  </span>
+                </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <input
                     ref={portfolioAddFileRef}
                     type="file"
+                    multiple
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleFileConversion(file, (dataUrl) => {
-                          setNewProject({ ...newProject, image: dataUrl });
+                      handleMultipleFileConversion(e.target.files, (urls) => {
+                        setNewProject((prev) => {
+                          const updatedGallery = [...prev.gallery, ...urls];
+                          return {
+                            ...prev,
+                            gallery: updatedGallery,
+                            image: prev.image || updatedGallery[0] || "",
+                          };
                         });
-                      }
+                      });
                     }}
                   />
+
                   <button
                     type="button"
                     onClick={() => portfolioAddFileRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload from Device</span>
+                    <span>Upload Multiple Photos</span>
                   </button>
-                  <span className="text-[11px] text-brand-plum/50">or enter image URL below</span>
                 </div>
 
-                <input
-                  type="text"
-                  required
-                  placeholder="/images/... or https://..."
-                  value={newProject.image}
-                  onChange={(e) => setNewProject({ ...newProject, image: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
-                />
+                {/* Or add via URL */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Or paste an image URL/path (/images/... or https://...)"
+                    value={newProjectUrlInput}
+                    onChange={(e) => setNewProjectUrlInput(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-brand-warm-border bg-white text-xs text-brand-plum focus:outline-brand-purple"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newProjectUrlInput.trim()) return;
+                      const url = newProjectUrlInput.trim();
+                      setNewProject((prev) => {
+                        const updated = [...prev.gallery, url];
+                        return {
+                          ...prev,
+                          gallery: updated,
+                          image: prev.image || updated[0] || "",
+                        };
+                      });
+                      setNewProjectUrlInput("");
+                    }}
+                    className="px-3 py-2 rounded-lg bg-brand-plum text-white text-xs font-semibold hover:bg-brand-purple transition-colors cursor-pointer shrink-0"
+                  >
+                    Add URL
+                  </button>
+                </div>
 
-                {newProject.image && (
-                  <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-brand-warm-border bg-black/5 mt-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={newProject.image}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
+                {/* Thumbnails of all uploaded images */}
+                {newProject.gallery.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    {newProject.gallery.map((imgUrl, idx) => {
+                      const isCover = newProject.image === imgUrl || (idx === 0 && !newProject.image);
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`relative rounded-xl overflow-hidden border-2 bg-black/5 aspect-[4/3] group/thumb ${
+                            isCover ? "border-brand-gold ring-2 ring-brand-gold/30" : "border-brand-warm-border"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={imgUrl}
+                            alt={`Upload ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+
+                          {/* Cover badge */}
+                          {isCover ? (
+                            <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-brand-gold text-brand-plum font-bold text-[9px] uppercase tracking-wider shadow-sm flex items-center gap-1">
+                              <Star className="w-2.5 h-2.5 fill-brand-plum" />
+                              <span>Cover</span>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setNewProject({ ...newProject, image: imgUrl })}
+                              className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-white/90 hover:bg-brand-gold hover:text-brand-plum text-brand-plum font-semibold text-[9px] uppercase tracking-wider shadow-sm transition-colors cursor-pointer"
+                            >
+                              Set Cover
+                            </button>
+                          )}
+
+                          {/* Remove button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const filtered = newProject.gallery.filter((_, i) => i !== idx);
+                              const newCover =
+                                newProject.image === imgUrl
+                                  ? filtered[0] || ""
+                                  : newProject.image;
+                              setNewProject({
+                                ...newProject,
+                                gallery: filtered,
+                                image: newCover,
+                              });
+                            }}
+                            className="absolute top-1.5 right-1.5 p-1 rounded-md bg-red-600/90 hover:bg-red-700 text-white shadow-sm transition-colors cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-6 border-2 border-dashed border-brand-warm-border rounded-xl text-center text-brand-plum/50 text-xs">
+                    No photographs added yet. Select multiple photos from your device above.
                   </div>
                 )}
               </div>
@@ -1416,7 +1586,7 @@ export default function AdminPage() {
                   type="submit"
                   className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
                 >
-                  Publish Project
+                  Publish Project ({newProject.gallery.length} Photos)
                 </button>
               </div>
             </form>
@@ -1424,10 +1594,10 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* MODAL 3: Edit Existing Portfolio Project */}
+      {/* MODAL 3: Edit Existing Portfolio Project (MULTIPLE IMAGE UPLOADS ENABLED) */}
       {editingProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
-          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setEditingProject(null)}
@@ -1436,9 +1606,14 @@ export default function AdminPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-4">
-              Edit Portfolio Project
-            </h3>
+            <div className="mb-4">
+              <h3 className="font-serif text-2xl font-bold text-brand-plum">
+                Edit Portfolio Project & Photos
+              </h3>
+              <p className="text-xs text-brand-plum/60 font-sans mt-0.5">
+                Add more photos, rearrange your cover picture, or remove old photos.
+              </p>
+            </div>
 
             <form onSubmit={handleSaveEditedProject} className="space-y-4 text-xs font-sans">
               <div>
@@ -1521,56 +1696,147 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Image Upload or URL */}
-              <div className="p-4 rounded-xl bg-brand-warm-white border border-brand-warm-border space-y-3">
-                <label className="block uppercase font-semibold text-brand-plum/80">
-                  Project Photograph
-                </label>
+              {/* EDIT MULTIPLE IMAGES SECTION */}
+              <div className="p-4 rounded-2xl bg-brand-warm-white border border-brand-warm-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block uppercase font-semibold text-brand-plum/90">
+                    Project Gallery Photos ({(editingProject.gallery || []).length} total)
+                  </label>
+                  <span className="text-[11px] text-brand-purple font-medium">
+                    Add more or delete photos
+                  </span>
+                </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <input
                     ref={portfolioEditFileRef}
                     type="file"
+                    multiple
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleFileConversion(file, (dataUrl) => {
-                          setEditingProject({ ...editingProject, image: dataUrl });
+                      handleMultipleFileConversion(e.target.files, (urls) => {
+                        setEditingProject((prev) => {
+                          if (!prev) return null;
+                          const currentGallery = prev.gallery && prev.gallery.length > 0 ? prev.gallery : [prev.image];
+                          const updatedGallery = [...currentGallery, ...urls];
+                          return {
+                            ...prev,
+                            gallery: updatedGallery,
+                            image: prev.image || updatedGallery[0] || "",
+                          };
                         });
-                      }
+                      });
                     }}
                   />
+
                   <button
                     type="button"
                     onClick={() => portfolioEditFileRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload New Photo</span>
+                    <span>Upload More Photos</span>
                   </button>
-                  <span className="text-[11px] text-brand-plum/50">or edit URL below</span>
                 </div>
 
-                <input
-                  type="text"
-                  required
-                  value={editingProject.image}
-                  onChange={(e) =>
-                    setEditingProject({ ...editingProject, image: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
-                />
+                {/* Or add via URL */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Or paste an image URL/path (/images/... or https://...)"
+                    value={editProjectUrlInput}
+                    onChange={(e) => setEditProjectUrlInput(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-brand-warm-border bg-white text-xs text-brand-plum focus:outline-brand-purple"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!editProjectUrlInput.trim()) return;
+                      const url = editProjectUrlInput.trim();
+                      setEditingProject((prev) => {
+                        if (!prev) return null;
+                        const current = prev.gallery && prev.gallery.length > 0 ? prev.gallery : [prev.image];
+                        const updated = [...current, url];
+                        return {
+                          ...prev,
+                          gallery: updated,
+                          image: prev.image || updated[0] || "",
+                        };
+                      });
+                      setEditProjectUrlInput("");
+                    }}
+                    className="px-3 py-2 rounded-lg bg-brand-plum text-white text-xs font-semibold hover:bg-brand-purple transition-colors cursor-pointer shrink-0"
+                  >
+                    Add URL
+                  </button>
+                </div>
 
-                {editingProject.image && (
-                  <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-brand-warm-border bg-black/5 mt-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={editingProject.image}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
+                {/* Thumbnails of all uploaded images */}
+                {editingProject.gallery && editingProject.gallery.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    {editingProject.gallery.map((imgUrl, idx) => {
+                      const isCover =
+                        editingProject.image === imgUrl ||
+                        (idx === 0 && !editingProject.image);
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`relative rounded-xl overflow-hidden border-2 bg-black/5 aspect-[4/3] group/thumb ${
+                            isCover ? "border-brand-gold ring-2 ring-brand-gold/30" : "border-brand-warm-border"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={imgUrl}
+                            alt={`Photo ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+
+                          {/* Cover badge */}
+                          {isCover ? (
+                            <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-brand-gold text-brand-plum font-bold text-[9px] uppercase tracking-wider shadow-sm flex items-center gap-1">
+                              <Star className="w-2.5 h-2.5 fill-brand-plum" />
+                              <span>Cover</span>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setEditingProject({ ...editingProject, image: imgUrl })}
+                              className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-white/90 hover:bg-brand-gold hover:text-brand-plum text-brand-plum font-semibold text-[9px] uppercase tracking-wider shadow-sm transition-colors cursor-pointer"
+                            >
+                              Set Cover
+                            </button>
+                          )}
+
+                          {/* Remove button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const filtered = (editingProject.gallery || []).filter((_, i) => i !== idx);
+                              const newCover =
+                                editingProject.image === imgUrl
+                                  ? filtered[0] || ""
+                                  : editingProject.image;
+                              setEditingProject({
+                                ...editingProject,
+                                gallery: filtered,
+                                image: newCover,
+                              });
+                            }}
+                            className="absolute top-1.5 right-1.5 p-1 rounded-md bg-red-600/90 hover:bg-red-700 text-white shadow-sm transition-colors cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-6 border-2 border-dashed border-brand-warm-border rounded-xl text-center text-brand-plum/50 text-xs">
+                    No photographs in this project gallery. Click upload above to add photos.
                   </div>
                 )}
               </div>
@@ -1616,7 +1882,7 @@ export default function AdminPage() {
                   type="submit"
                   className="px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
                 >
-                  Save Changes
+                  Save Changes ({(editingProject.gallery || []).length} Photos)
                 </button>
               </div>
             </form>
@@ -1869,7 +2135,6 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Upload image for gift */}
               <div className="p-4 rounded-xl bg-brand-blush-pink/30 border border-brand-pink/20 space-y-3">
                 <label className="block uppercase font-semibold text-brand-plum/80">
                   Gift Photograph
