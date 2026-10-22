@@ -1229,8 +1229,8 @@ export default function AdminPage() {
                 </label>
                 <input
                   type="text"
-                  value={config.location}
-                  onChange={(e) => setConfig({ ...config, location: e.target.value })}
+                  value={config.address}
+                  onChange={(e) => setConfig({ ...config, address: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
                 />
               </div>
