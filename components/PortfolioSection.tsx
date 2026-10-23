@@ -67,29 +67,21 @@ export default function PortfolioSection() {
 
         {/* Portfolio Masonry / Editorial Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map((item, index) => {
-            // Give subtle varied proportions for an editorial feel
-            const isWide = index === 0 || index === 3;
-
+          {filteredItems.map((item) => {
             return (
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className={`group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-500 shadow-xs hover:shadow-elevated flex flex-col ${
-                  isWide ? "md:col-span-2 lg:col-span-2" : "col-span-1"
-                }`}
+                className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-500 shadow-xs hover:shadow-elevated flex flex-col justify-between w-full max-w-[420px] mx-auto"
               >
                 {/* Photo Container */}
-                <div
-                  className={`relative w-full overflow-hidden bg-brand-plum ${
-                    isWide ? "aspect-[16/9] sm:aspect-[21/9]" : "aspect-[4/3] sm:aspect-[1/1]"
-                  }`}
-                >
+                <div className="relative w-full h-[360px] sm:h-[400px] overflow-hidden bg-brand-plum shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{ objectPosition: "center center" }}
                   />
                   {/* Subtle hover overlay */}
                   <div className="absolute inset-0 bg-brand-plum-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -108,7 +100,7 @@ export default function PortfolioSection() {
                 </div>
 
                 {/* Caption Bar */}
-                <div className="p-5 sm:p-6 flex items-start justify-between gap-4 bg-white">
+                <div className="p-5 sm:p-6 flex items-start justify-between gap-4 bg-white grow">
                   <div>
                     <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-plum group-hover:text-brand-purple transition-colors">
                       {item.title}
