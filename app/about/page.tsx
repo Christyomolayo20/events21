@@ -1,12 +1,11 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, CheckCircle2, Heart, Award, Sparkles, Clock, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Heart, Sparkles, Clock, Crown, Users } from "lucide-react";
 
 export const metadata = {
   title: "About Us | Event 21 • Lagos Event Planning Studio",
   description:
-    "Learn about Event 21, our approach to luxury Nigerian wedding planning, cultural celebrations, and effortless execution in Lagos and beyond.",
+    "Meet the passionate team behind Event 21 and Gifts by Adeola. Discover our royal approach to luxury Nigerian wedding planning, cultural celebrations, and flawless execution.",
 };
 
 export default function AboutPage() {
@@ -37,6 +36,41 @@ export default function AboutPage() {
     },
   ];
 
+  const teamShowcase = [
+    {
+      image: "/images/about-team-portrait.jpg",
+      badge: "The Full Team",
+      title: "The Event 21 Production Family",
+      subtitle: "Passionate stylists & day-of coordination specialists",
+      description:
+        "Our unified squad coordinates backstage logistics, vendor handoffs, and guest protocol with effortless grace.",
+    },
+    {
+      image: "/images/about-founder-welcome.jpg",
+      badge: "Creative Direction",
+      title: "Vibrant Energy & Leadership",
+      subtitle: "Led by Adeola • Founder & Lead Stylist",
+      description:
+        "Bringing contagious joy, theatrical precision, and high-fashion aesthetics to every celebration.",
+    },
+    {
+      image: "/images/about-team-seated.jpg",
+      badge: "Coordination Squad",
+      title: "Unified Precision & Teamwork",
+      subtitle: "On-the-ground event day management",
+      description:
+        "Every team member knows their exact cue, ensuring zero client stress from morning preparations to the last dance.",
+    },
+    {
+      image: "/images/about-founder-boys.jpg",
+      badge: "Family & Legacy",
+      title: "Built on Heart, Culture & Family",
+      subtitle: "Next-generation royal leadership",
+      description:
+        "Event planning rooted in authentic love, familial devotion, and creating memories that endure for generations.",
+    },
+  ];
+
   return (
     <div className="pt-28 pb-20 md:pt-36 md:pb-28">
       {/* Hero Section */}
@@ -44,47 +78,137 @@ export default function AboutPage() {
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-4">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Our Philosophy</span>
+            <span>Our Story & Team</span>
           </div>
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-6">
-            Crafting Celebrations That <br />
+            The Passion, The People, <br />
             <span className="italic font-normal font-serif text-brand-purple">
-              Resonate for a Lifetime.
+              The Royal Experience.
             </span>
           </h1>
           <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed">
             At Event 21, we believe the best celebrations are not merely attended; they are felt.
-            Rooted in Lagos, we blend authentic Nigerian cultural warmth with world-class production
-            refinement.
+            Rooted in Lagos, our dedicated planners, stylists, and coordination crew bring unwavering
+            warmth, cultural reverence, and minute-by-minute execution to your most cherished milestones.
           </p>
         </div>
 
-        {/* Feature Imagery Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mx-auto">
-          <div className="md:col-span-7 relative aspect-[16/11] rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border bg-brand-plum">
-            <Image
-              src="/images/the-kayodes-traditional.jpg"
-              alt="The Kayodes Traditional Yoruba Wedding"
-              fill
-              className="object-cover object-top"
-              sizes="(max-width: 768px) 100vw, 60vw"
-              priority
-            />
+        {/* Feature Hero Showcase: Royal Crest Emblem + Main Team Photo */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto items-stretch">
+          {/* Brand Crest Seal (1st Image) */}
+          <div className="lg:col-span-4 rounded-3xl p-8 bg-gradient-to-br from-brand-warm-white via-white to-brand-soft-lavender/40 border border-brand-purple/20 shadow-xs flex flex-col justify-between items-center text-center">
+            <div className="w-full flex flex-col items-center">
+              <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden shadow-subtle border border-brand-warm-border bg-white mb-6 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/royalty-events-crest.jpg"
+                  alt="Royalty One Twenty One Events Brand Crest"
+                  className="w-full h-full object-contain object-center"
+                />
+              </div>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-purple/10 text-brand-purple text-[11px] font-sans font-semibold uppercase tracking-widest mb-2">
+                <Crown className="w-3.5 h-3.5 text-brand-gold" />
+                <span>Royal Brand Emblem</span>
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-brand-plum">
+                Royalty One 21
+              </h3>
+              <p className="font-serif italic text-sm text-brand-purple mt-1">
+                Curating Regal Experiences. Orchestrating Royalty.
+              </p>
+            </div>
+
+            <div className="pt-6 border-t border-brand-warm-border/60 w-full">
+              <p className="text-xs text-brand-plum/70 font-sans leading-relaxed">
+                A mark of royal poise, cultural grandeur, and timeless memories created in Lagos, Nigeria.
+              </p>
+            </div>
           </div>
-          <div className="md:col-span-5 relative aspect-[4/5] rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border bg-brand-plum">
-            <Image
-              src="/images/the-kayodes-white-wedding.jpg"
-              alt="The Kayodes White Wedding Coordination"
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 768px) 100vw, 40vw"
+
+          {/* Main Team Portrait (5th Image) */}
+          <div className="lg:col-span-8 rounded-3xl overflow-hidden shadow-elevated border border-brand-warm-border bg-brand-plum relative min-h-[360px] sm:min-h-[440px] flex flex-col justify-end">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/about-team-portrait.jpg"
+              alt="The Event 21 Team and Crew"
+              className="absolute inset-0 w-full h-full object-cover object-center"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/90 via-brand-plum-dark/25 to-transparent" />
+            <div className="relative z-10 p-6 sm:p-10 text-white">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[11px] font-sans font-semibold uppercase tracking-wider mb-2">
+                <Users className="w-3.5 h-3.5 text-brand-gold" />
+                <span>The Event 21 Family</span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold">
+                United in Passion, Driven by Excellence
+              </h2>
+              <p className="text-xs sm:text-sm text-white/85 font-sans max-w-xl mt-1 leading-relaxed">
+                From pre-event setup to the final guest farewell, our lead coordinators and stylists ensure every celebration flows with seamless elegance.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Showcase Gallery Grid (2nd, 3rd, 4th, 5th Images) */}
+      <section className="py-16 md:py-24 bg-brand-warm-white/60 border-y border-brand-warm-border/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto text-center mb-14">
+            <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2">
+              Our People & Spirit
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-brand-plum">
+              Meet the Faces Behind Event 21
+            </h2>
+            <p className="text-sm text-brand-plum/70 font-sans mt-3">
+              Real people, genuine smiles, and a relentless commitment to orchestrating perfection for your special day.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {teamShowcase.map((card, idx) => (
+              <div
+                key={idx}
+                className="group bg-white rounded-3xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between"
+              >
+                {/* Image Container with Exact 400px Fixed Height */}
+                <div className="relative w-full h-[320px] sm:h-[380px] overflow-hidden bg-brand-plum shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{ objectPosition: "center center" }}
+                  />
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="px-3.5 py-1.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-brand-plum shadow-xs">
+                      {card.badge}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="p-6 sm:p-7 flex flex-col justify-between grow">
+                  <div>
+                    <span className="text-[11px] uppercase tracking-wider font-semibold text-brand-gold font-sans block mb-1">
+                      {card.subtitle}
+                    </span>
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-plum mb-2 group-hover:text-brand-purple transition-colors">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed">
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Brand Values & Principles */}
-      <section className="py-16 md:py-24 bg-white border-y border-brand-warm-border/60">
+      <section className="py-16 md:py-24 bg-white border-b border-brand-warm-border/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-xl mx-auto text-center mb-14">
             <span className="text-xs uppercase tracking-widest text-brand-gold font-semibold font-sans block mb-2">
@@ -126,7 +250,7 @@ export default function AboutPage() {
               <h3 className="font-serif text-xl font-bold text-brand-plum">Bespoke Hospitality</h3>
               <p className="text-sm text-brand-plum/70 font-sans leading-relaxed">
                 From guest arrival greeting to VIP hostessing and custom souvenir curation via
-                <strong>Gifts by Adeola</strong>, every attendee experiences warmth and luxury.
+                <strong> Gifts by Adeola</strong>, every attendee experiences warmth and luxury.
               </p>
             </div>
           </div>

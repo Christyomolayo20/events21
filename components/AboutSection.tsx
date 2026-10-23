@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 
@@ -12,21 +11,20 @@ export default function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Complementary Editorial Photo (5 cols) */}
           <div className="lg:col-span-5 order-2 lg:order-1">
-            <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border aspect-[4/5] bg-brand-plum">
-              <Image
-                src="/images/the-kayodes-portrait.jpg"
-                alt="Event 21 Fine Art Editorial Styling"
-                fill
-                className="object-cover object-top"
-                sizes="(max-width: 1024px) 100vw, 42vw"
+            <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border aspect-[5/4] sm:aspect-[4/3] lg:aspect-[5/4] bg-brand-plum">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/about-team-portrait.jpg"
+                alt="The Event 21 Team and Crew"
+                className="w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <p className="font-serif italic text-lg text-brand-soft-lavender">
                   "All Your Event Needs"
                 </p>
                 <p className="text-xs font-sans uppercase tracking-widest text-brand-gold mt-1">
-                  The Kayodes • Pre-Wedding Editorial
+                  The Event 21 Team • Lagos, Nigeria
                 </p>
               </div>
             </div>
