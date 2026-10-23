@@ -73,26 +73,21 @@ export default function GalleryPage() {
       {/* Gallery Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map((item, index) => {
-            const isTaller = index % 3 === 0;
-
+          {filteredItems.map((item) => {
             return (
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between"
+                className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[420px] mx-auto"
               >
                 {/* Photo */}
-                <div
-                  className={`relative w-full overflow-hidden bg-brand-plum ${
-                    isTaller ? "aspect-[4/5]" : "aspect-[4/3]"
-                  }`}
-                >
+                <div className="relative w-full h-[360px] sm:h-[400px] overflow-hidden bg-brand-plum shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{ objectPosition: "center center" }}
                   />
                   <div className="absolute inset-0 bg-brand-plum-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-brand-plum text-xs font-sans font-semibold uppercase tracking-wider transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
