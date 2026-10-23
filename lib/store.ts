@@ -293,13 +293,25 @@ export function deleteGiftRequest(id: string): void {
   }
 }
 
-// --- GIFTS CATALOGUE (ADMIN EDITABLE & IMAGE UPLOAD) ---
+// --- GIFTS CATALOGUE (ADMIN EDITABLE & IMAGE/VIDEO UPLOAD) ---
 export function getGiftCatalogue(): GiftItem[] {
   if (typeof window === "undefined") return GIFTS_CATALOGUE;
   if (cacheGifts) return cacheGifts;
   const stored = safeLocalStorageGet<GiftItem[]>(GIFT_CATALOGUE_KEY, GIFTS_CATALOGUE);
-  cacheGifts = stored;
-  return stored;
+  // Merge any new default videoUrl or updated images
+  const merged = stored.map((item) => {
+    const defaultMatch = GIFTS_CATALOGUE.find((d) => d.id === item.id);
+    if (defaultMatch) {
+      return {
+        ...item,
+        videoUrl: item.videoUrl || defaultMatch.videoUrl,
+        mediaType: item.mediaType || defaultMatch.mediaType,
+      };
+    }
+    return item;
+  });
+  cacheGifts = merged;
+  return merged;
 }
 
 export function addGiftItem(item: Omit<GiftItem, "id">): GiftItem {
@@ -343,13 +355,27 @@ export function deleteGiftItem(id: string): void {
   }
 }
 
-// --- PORTFOLIO (ADMIN EDIT, MULTI-IMAGE & DELETE) ---
+// --- PORTFOLIO (ADMIN EDIT, MULTI-IMAGE, VIDEO & DELETE) ---
 export function getPortfolio(): PortfolioItem[] {
   if (typeof window === "undefined") return PORTFOLIO_DATA;
   if (cachePortfolio) return cachePortfolio;
   const stored = safeLocalStorageGet<PortfolioItem[]>(PORTFOLIO_KEY, PORTFOLIO_DATA);
-  cachePortfolio = stored;
-  return stored;
+  const merged = stored.map((item) => {
+    const defaultMatch = PORTFOLIO_DATA.find((d) => d.id === item.id);
+    if (defaultMatch) {
+      return {
+        ...item,
+        videoUrl: item.videoUrl || defaultMatch.videoUrl,
+        mediaType: item.mediaType || defaultMatch.mediaType,
+        image: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.image : item.image,
+        title: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.title : item.title,
+        subtitle: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.subtitle : item.subtitle,
+      };
+    }
+    return item;
+  });
+  cachePortfolio = merged;
+  return merged;
 }
 
 export function addPortfolioItem(item: Omit<PortfolioItem, "id">): PortfolioItem {

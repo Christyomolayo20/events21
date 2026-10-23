@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Heart, Sparkles, Clock, Crown, Users, Award, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Heart, Sparkles, Clock, Crown, Users, Award, Check } from "lucide-react";
 
 export const metadata = {
   title: "About Us | Event 21 • Lagos Event Planning Studio & Gifts by Adeola",
@@ -95,6 +95,107 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* COMPREHENSIVE ABOUT EVENT 21 EDITORIAL SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-14 md:mb-20">
+        <div className="bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-warm-border shadow-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+            {/* Team Portrait Container with Fixed Height & Top-Center Focus */}
+            <div className="lg:col-span-5 order-2 lg:order-1">
+              <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border h-[340px] sm:h-[420px] w-full bg-brand-plum">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/about-team-portrait.jpg"
+                  alt="The Event 21 Team and Crew in Lagos"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center center" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6 text-white">
+                  <p className="font-serif italic text-lg text-brand-soft-lavender">
+                    "All Your Event Needs"
+                  </p>
+                  <p className="text-xs font-sans uppercase tracking-widest text-brand-gold mt-1">
+                    The Event 21 Team • Lagos, Nigeria
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Editorial Content */}
+            <div className="lg:col-span-7 order-1 lg:order-2 space-y-5">
+              <div className="inline-block text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans">
+                About Event 21
+              </div>
+
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-[1.2]">
+                Every Celebration{" "}
+                <span className="italic font-normal font-serif text-brand-purple">
+                  Has a Story.
+                </span>
+              </h2>
+
+              <div className="space-y-3.5 text-sm sm:text-base text-brand-plum/80 font-sans leading-relaxed font-light">
+                <p>
+                  Based in Lagos, Nigeria, <strong>Event 21</strong> is a bespoke event planning and
+                  styling boutique founded on a singular conviction: that extraordinary events are
+                  born from thoughtful curation, authentic storytelling, and meticulous attention to
+                  every detail.
+                </p>
+                <p>
+                  Whether bringing to life a multi-day traditional Yoruba wedding steeped in regal
+                  heritage, directing a contemporary ballroom white wedding with dramatic stagecraft,
+                  or designing an intimate milestone dinner, we bridge the gap between creative vision
+                  and effortless execution.
+                </p>
+                <p className="text-xs sm:text-sm text-brand-plum/70">
+                  You should never feel like a coordinator at your own milestone. We handle the
+                  budgets, timelines, vendor handoffs, and logistics so you can savor every emotion
+                  with the people you love.
+                </p>
+              </div>
+
+              {/* Core Values / Pillars */}
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center gap-2.5 text-xs font-sans text-brand-plum font-medium">
+                  <div className="w-5 h-5 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3" />
+                  </div>
+                  <span>Curated &amp; Vetted Vendor Network</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs font-sans text-brand-plum font-medium">
+                  <div className="w-5 h-5 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3" />
+                  </div>
+                  <span>Minute-by-Minute Day-of Timelines</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs font-sans text-brand-plum font-medium">
+                  <div className="w-5 h-5 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3" />
+                  </div>
+                  <span>Cultural Heritage &amp; Protocol Precision</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs font-sans text-brand-plum font-medium">
+                  <div className="w-5 h-5 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3" />
+                  </div>
+                  <span>Gifts by Adeola Sub-brand Integration</span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-sm"
+                >
+                  <span>Book a Consultation</span>
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CEO & Creative Director Spotlight (Using 2nd Image) */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-14 md:mb-20">
         <div className="bg-gradient-to-br from-brand-warm-white via-white to-brand-soft-lavender/30 rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-purple/20 shadow-subtle">
@@ -156,24 +257,14 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              {/* Direct Touchpoints */}
-              <div className="pt-2 flex flex-wrap items-center gap-4">
-                <a
-                  href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20connect%20with%20you%20regarding%20an%20upcoming%20event."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Connect with Adeola (08060549596)</span>
-                </a>
-
+              {/* Direct Touchpoint: Only Book a Consultation as requested */}
+              <div className="pt-2">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-1.5 px-6 py-3 rounded-full border border-brand-warm-border text-brand-plum hover:text-brand-purple text-xs font-semibold uppercase tracking-wider transition-colors bg-white"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-md"
                 >
-                  <span>Book Consultation</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span>Book a Consultation</span>
+                  <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -214,15 +305,15 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Couple Heritage Showcase (Using 1st Image) */}
+          {/* Couple Heritage Showcase with Top-Centered Framing */}
           <div className="rounded-3xl overflow-hidden shadow-xs border border-brand-warm-border bg-white flex flex-col justify-between">
-            <div className="relative w-full h-[280px] sm:h-[300px] overflow-hidden bg-brand-plum shrink-0">
+            <div className="relative w-full h-[320px] sm:h-[350px] overflow-hidden bg-brand-plum shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/the-kayodes-traditional-couple.jpg"
                 alt="The Kayodes - Authentic Yoruba Wedding Couple Styled by Event 21"
-                className="w-full h-full object-cover object-center"
-                style={{ objectPosition: "center center" }}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "top center" }}
               />
               <div className="absolute top-4 left-4 z-10">
                 <span className="px-3.5 py-1.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-brand-plum shadow-xs">
@@ -247,7 +338,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Showcase Gallery Grid */}
+      {/* Team Showcase Gallery Grid with Top-Centered Framing */}
       <section className="py-12 md:py-16 bg-brand-warm-white/70 border-y border-brand-warm-border/60 mb-14 md:mb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center mb-10 md:mb-12">
@@ -268,14 +359,14 @@ export default function AboutPage() {
                 key={idx}
                 className="group bg-white rounded-3xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between"
               >
-                {/* Image Container with Fixed Height & Centered Focus */}
-                <div className="relative w-full h-[300px] sm:h-[340px] overflow-hidden bg-brand-plum shrink-0">
+                {/* Image Container with Fixed Height & Top-Centered Focus */}
+                <div className="relative w-full h-[320px] sm:h-[360px] overflow-hidden bg-brand-plum shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={card.image}
                     alt={card.title}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-                    style={{ objectPosition: "center center" }}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{ objectPosition: "top center" }}
                   />
                   <div className="absolute top-4 left-4 z-10">
                     <span className="px-3.5 py-1.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-brand-plum shadow-xs">
@@ -388,8 +479,8 @@ export default function AboutPage() {
           <div className="relative z-10 max-w-xl mx-auto space-y-4">
             <h3 className="font-serif text-3xl font-bold">Ready to Start Your Planning Journey?</h3>
             <p className="text-white/80 text-sm font-sans">
-              Schedule an introductory consultation with Adeola Oyeyode and our lead planners to discuss dates,
-              venues, and design concepts.
+              Schedule an introductory consultation with our lead planners to discuss dates, venues, and
+              design concepts.
             </p>
             <div className="pt-2">
               <Link

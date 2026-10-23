@@ -17,6 +17,7 @@ import {
   Crown,
   Eye,
   Award,
+  Play,
 } from "lucide-react";
 import { getGiftCatalogue, saveGiftRequest } from "@/lib/store";
 import { GiftItem } from "@/lib/types";
@@ -26,6 +27,7 @@ export default function GiftsByAdeolaPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customSubmitted, setCustomSubmitted] = useState(false);
+  const [activeGiftVideo, setActiveGiftVideo] = useState<{ title: string; url: string } | null>(null);
 
   const [customForm, setCustomForm] = useState({
     fullName: "",
@@ -251,6 +253,21 @@ export default function GiftsByAdeolaPage() {
                       Traditional Staging
                     </span>
                   </div>
+                  <div className="absolute top-4 right-4 z-10">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveGiftVideo({
+                          title: "Traditional Eru Iyawo Wrapping Live Reel",
+                          url: "https://assets.mixkit.co/videos/preview/mixkit-hands-wrapping-a-gift-box-with-ribbon-42013-large.mp4",
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-pink text-white shadow-md hover:bg-brand-pink-hover transition-colors cursor-pointer"
+                    >
+                      <Play className="w-3 h-3 fill-white" />
+                      <span>Watch Reel</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="p-6 sm:p-7">
@@ -406,7 +423,7 @@ export default function GiftsByAdeolaPage() {
             >
               <div>
                 {/* Photo with fixed height & centered */}
-                <div className="relative w-full h-[260px] sm:h-[280px] bg-[#FAF3F6] overflow-hidden shrink-0">
+                <div className="relative w-full h-[280px] sm:h-[300px] bg-[#FAF3F6] overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={gift.image}
@@ -424,6 +441,18 @@ export default function GiftsByAdeolaPage() {
                       <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-pink text-white shadow-xs">
                         Most Requested
                       </span>
+                    </div>
+                  )}
+                  {gift.videoUrl && (
+                    <div className="absolute bottom-3 left-3 z-10">
+                      <button
+                        type="button"
+                        onClick={() => setActiveGiftVideo({ title: gift.name, url: gift.videoUrl! })}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-pink text-white shadow-md hover:bg-brand-pink-hover transition-colors cursor-pointer"
+                      >
+                        <Play className="w-3 h-3 fill-white" />
+                        <span>Watch Video</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -705,6 +734,36 @@ export default function GiftsByAdeolaPage() {
                 </form>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* Video Player Modal */}
+      {activeGiftVideo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setActiveGiftVideo(null)}
+        >
+          <div
+            className="relative max-w-2xl w-full bg-brand-plum rounded-3xl overflow-hidden p-4 sm:p-6 border border-white/20 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10 text-white">
+              <h4 className="font-serif text-lg font-bold">{activeGiftVideo.title}</h4>
+              <button
+                type="button"
+                onClick={() => setActiveGiftVideo(null)}
+                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <video
+              src={activeGiftVideo.url}
+              controls
+              autoPlay
+              playsInline
+              className="w-full max-h-[65vh] rounded-2xl mx-auto bg-black"
+            />
           </div>
         </div>
       )}

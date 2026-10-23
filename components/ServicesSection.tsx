@@ -37,14 +37,14 @@ export default function ServicesSection() {
               className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
             >
               <div>
-                {/* Photo with fixed height & width, well-centered */}
-                <div className="relative w-full h-[260px] sm:h-[280px] bg-brand-plum overflow-hidden shrink-0">
+                {/* Photo with fixed height & width, top-centered to prevent clipping */}
+                <div className="relative w-full h-[320px] sm:h-[350px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={service.image}
                     alt={service.title}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-                    style={{ objectPosition: "center center" }}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{ objectPosition: "top center" }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity" />
                 </div>

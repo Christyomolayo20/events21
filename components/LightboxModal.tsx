@@ -3,7 +3,7 @@
 import React, { useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { X, ChevronLeft, ChevronRight, Calendar, MapPin, Sparkles } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Calendar, MapPin, Sparkles, Play, Video as VideoIcon } from "lucide-react";
 import { PortfolioItem } from "@/lib/types";
 
 interface LightboxModalProps {
@@ -16,11 +16,13 @@ interface LightboxModalProps {
 export default function LightboxModal({ item, items, onClose, onSelect }: LightboxModalProps) {
   const currentIndex = item ? items.findIndex((i) => i.id === item.id) : -1;
   const [activeImageIndex, setActiveImageIndex] = React.useState(0);
+  const [viewMode, setViewMode] = React.useState<"image" | "video">("image");
 
-  // Reset active image index when item changes
+  // Reset active image index and view mode when item changes
   useEffect(() => {
     setActiveImageIndex(0);
-  }, [item?.id]);
+    setViewMode(item?.videoUrl ? "video" : "image");
+  }, [item?.id, item?.videoUrl]);
 
   const projectImages = item
     ? item.gallery && item.gallery.length > 0
@@ -96,24 +98,64 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
         className="relative max-w-5xl w-full bg-brand-plum rounded-2xl overflow-hidden shadow-modal border border-white/10 flex flex-col lg:flex-row max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Image Container with Multiple Images Support */}
+        {/* Media Container with Image & Video Support */}
         <div className="relative w-full lg:w-3/5 bg-black flex flex-col justify-between min-h-[340px] lg:min-h-[540px]">
           <div className="relative flex-1 w-full flex items-center justify-center p-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={currentDisplayImage}
-              alt={item.title}
-              className="max-h-[60vh] max-w-full object-contain mx-auto"
-            />
+            {viewMode === "video" && item.videoUrl ? (
+              <video
+                src={item.videoUrl}
+                controls
+                autoPlay
+                playsInline
+                loop
+                className="max-h-[60vh] max-w-full rounded-lg mx-auto"
+              />
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={currentDisplayImage}
+                alt={item.title}
+                className="max-h-[60vh] max-w-full object-contain mx-auto"
+              />
+            )}
           </div>
 
-          {/* Multiple Photo Thumbnails Strip if project has multiple images */}
-          {projectImages.length > 1 && (
-            <div className="p-3 bg-brand-plum-dark/80 backdrop-blur-xs border-t border-white/10 flex items-center justify-between gap-3">
-              <span className="text-[11px] text-brand-gold font-sans font-medium shrink-0">
-                {activeImageIndex + 1} of {projectImages.length} Photos
-              </span>
+          {/* Media Navigation & Thumbnail Strip */}
+          <div className="p-3 bg-brand-plum-dark/90 backdrop-blur-xs border-t border-white/10 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              {item.videoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setViewMode("video")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium transition-all ${
+                    viewMode === "video"
+                      ? "bg-brand-purple text-white shadow-xs"
+                      : "bg-white/10 text-white/70 hover:bg-white/20"
+                  }`}
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Video Reel</span>
+                </button>
+              )}
 
+              {projectImages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setViewMode("image")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium transition-all ${
+                    viewMode === "image"
+                      ? "bg-brand-purple text-white shadow-xs"
+                      : "bg-white/10 text-white/70 hover:bg-white/20"
+                  }`}
+                >
+                  <VideoIcon className="w-3.5 h-3.5" />
+                  <span>Photos ({projectImages.length})</span>
+                </button>
+              )}
+            </div>
+
+            {/* Thumbnail Strip */}
+            {viewMode === "image" && projectImages.length > 1 && (
               <div className="flex items-center gap-2 overflow-x-auto py-1 px-1">
                 {projectImages.map((img, idx) => (
                   <button
@@ -131,8 +173,8 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Details Container */}

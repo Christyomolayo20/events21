@@ -175,15 +175,13 @@ export default function GiftsSection() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
 
-            <a
-              href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20discuss%20wrapping%20of%20Eru%20Iyawo%20or%20curated%20gifting%20on%20a%20budget."
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/contact"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3.5 rounded-full border border-brand-pink/30 hover:border-brand-pink text-brand-pink text-xs uppercase tracking-widest font-semibold transition-colors bg-brand-blush-pink/40"
             >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Chat with Adeola</span>
-            </a>
+              <span>Book a Consultation</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </div>

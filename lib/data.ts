@@ -59,7 +59,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     tagline: "Honoring a Lifetime of Excellence & Legacy",
     description:
       "A distinguished career calls for an honorable, elegant send-off. We orchestrate stately retirement receptions, tribute dinners, and celebratory galas designed to commemorate decades of dedication with prestige.",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+    image: "/images/milestone-matriarch-celebration.jpg",
     inclusions: [
       "Legacy tribute production, photo retrospectives & video staging",
       "VIP dignitary protocol, seating logistics & guest greeting",
@@ -93,7 +93,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     tagline: "Sophisticated Gatherings with Distinct Personality",
     description:
       "From intimate 30th, 40th, and 50th milestone dinners to opulent ballroom banquets and romantic anniversary celebrations. Every gathering is tailored to reflect the celebrant's unique taste.",
-    image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1200&q=80",
+    image: "/images/milestone-matriarch-celebration.jpg",
     inclusions: [
       "Thematic concept development and tablescape artistry",
       "Custom stationery, place cards, and personalized menus",
@@ -177,6 +177,8 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
     year: "2024",
     location: "Lagos, Nigeria",
     image: "/images/ballroom-first-dance.jpg",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-wedding-couple-dancing-under-the-lights-42998-large.mp4",
+    mediaType: "video",
     featured: true,
     description:
       "The pinnacle reception moment: a dramatic first dance in heavy low fog, illuminated by cascading crystal icicles, burgundy ceiling drapery, and indoor cold pyrotechnics that created an awe-inspiring royal spectacle for guests.",
@@ -229,21 +231,22 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
   },
   {
     id: "milestone-anniversary-soiree",
-    title: "The Velvet Soirée: Milestone Celebration",
-    subtitle: "An intimate gathering celebrating decades of excellence, curated with personal stories and music.",
+    title: "The Golden Jubilee: Milestone Birthday & Retirement Gala",
+    subtitle: "A regal Nigerian celebration of longevity, grace, and matriarchal excellence in bespoke aso-oke.",
     category: "Celebrations",
-    year: "2023",
+    year: "2024",
     location: "Ikoyi, Lagos",
-    image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1200&q=80",
-    featured: false,
+    image: "/images/milestone-matriarch-celebration.jpg",
+    featured: true,
     description:
-      "An exclusive private dinner for close family and friends. Features customized cocktail pairings, a live acoustic trio, and bespoke welcome gifts presented to each guest.",
+      "A distinguished milestone celebration honoring decades of grace and family legacy. Styled in traditional emerald green and royal navy aso-oke with hand-selected coral beads and coordinating gold accessories. Coordinated with VIP dignitary protocol and musical tribute staging.",
     highlights: [
-      "Intimate guest flow and customized 4-course menu",
-      "Live saxophone and acoustic performance",
-      "Personalized favor boxes from Gifts by Adeola",
+      "Custom royal green & navy aso-oke styling",
+      "Traditional coral heirloom jewelry curation",
+      "VIP dignitary greeting and seating protocol",
+      "Milestone retrospective and musical tributes",
     ],
-    gallery: ["https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1200&q=80"],
+    gallery: ["/images/milestone-matriarch-celebration.jpg"],
   },
 ];
 
@@ -262,6 +265,8 @@ export const GIFTS_CATALOGUE: GiftItem[] = [
       "Display arrangement and coordination for traditional Alaga presentation",
     ],
     image: "/images/eru-iyawo-traditional-green.jpg",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-hands-wrapping-a-gift-box-with-ribbon-42013-large.mp4",
+    mediaType: "video",
     popular: true,
     inStock: true,
   },

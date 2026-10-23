@@ -45,9 +45,9 @@ export default function ServicesPage() {
               id={service.id}
               className={`scroll-mt-32 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-brand-warm-border shadow-xs hover:shadow-subtle transition-all`}
             >
-              {/* Image Column with Fixed Height & Centered Focus */}
+              {/* Image Column with Fixed Height & Top-Centered Focus */}
               <div
-                className={`lg:col-span-6 relative rounded-2xl overflow-hidden h-[280px] sm:h-[340px] lg:h-[380px] w-full bg-brand-plum shadow-md ${
+                className={`lg:col-span-6 relative rounded-2xl overflow-hidden h-[320px] sm:h-[380px] lg:h-[420px] w-full bg-brand-plum shadow-md ${
                   isEven ? "lg:order-2" : "lg:order-1"
                 }`}
               >
@@ -55,8 +55,8 @@ export default function ServicesPage() {
                 <img
                   src={service.image}
                   alt={service.title}
-                  className="w-full h-full object-cover object-center"
-                  style={{ objectPosition: "center center" }}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "top center" }}
                 />
               </div>
 

@@ -36,6 +36,8 @@ export interface GiftItem {
   description: string;
   details: string[];
   image: string;
+  videoUrl?: string;
+  mediaType?: "image" | "video";
   popular?: boolean;
   inStock: boolean;
 }
@@ -64,6 +66,8 @@ export interface PortfolioItem {
   year: string;
   location: string;
   image: string;
+  videoUrl?: string;
+  mediaType?: "image" | "video";
   featured?: boolean;
   description: string;
   highlights?: string[];

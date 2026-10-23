@@ -58,6 +58,7 @@ import {
   ShoppingBag,
   Star,
   Images,
+  Video,
   Loader2,
 } from "lucide-react";
 
@@ -94,6 +95,7 @@ export default function AdminPage() {
     gallery: [] as string[], // array of all project images
     description: "",
     featured: false,
+    videoUrl: "",
   });
   const [newProjectUrlInput, setNewProjectUrlInput] = useState("");
 
@@ -110,6 +112,7 @@ export default function AdminPage() {
     price: 35000,
     description: "",
     image: "",
+    videoUrl: "",
     inStock: true,
     popular: false,
   });
@@ -127,9 +130,13 @@ export default function AdminPage() {
 
   // File input refs
   const portfolioAddFileRef = useRef<HTMLInputElement>(null);
+  const portfolioAddVideoRef = useRef<HTMLInputElement>(null);
   const portfolioEditFileRef = useRef<HTMLInputElement>(null);
+  const portfolioEditVideoRef = useRef<HTMLInputElement>(null);
   const giftAddFileRef = useRef<HTMLInputElement>(null);
+  const giftAddVideoRef = useRef<HTMLInputElement>(null);
   const giftEditFileRef = useRef<HTMLInputElement>(null);
+  const giftEditVideoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const authed = checkAdminAuth();
@@ -216,6 +223,25 @@ export default function AdminPage() {
     }
   };
 
+  // --- Helper: Read video file as Data URI ---
+  const handleVideoFileConversion = (file: File, callback: (videoData: string) => void) => {
+    if (file.size > 20 * 1024 * 1024) {
+      alert("This video file exceeds 20MB. For optimal web playback and storage, please choose a clip under 20MB or enter a direct video URL.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (typeof e.target?.result === "string") {
+        callback(e.target.result);
+        showToast("Video reel uploaded and attached successfully!");
+      }
+    };
+    reader.onerror = () => {
+      alert("Could not load video file. Please check the file format or enter a video URL.");
+    };
+    reader.readAsDataURL(file);
+  };
+
   // --- Enquiries handlers ---
   const handleStatusChange = (id: string, newStatus: EventEnquiry["status"]) => {
     updateEnquiryStatus(id, newStatus);
@@ -265,6 +291,8 @@ export default function AdminPage() {
         gallery: finalGallery,
         description: newProject.description,
         featured: newProject.featured,
+        videoUrl: newProject.videoUrl?.trim() || undefined,
+        mediaType: newProject.videoUrl?.trim() ? "video" : "image",
       });
 
       setIsAddPortfolioOpen(false);
@@ -278,6 +306,7 @@ export default function AdminPage() {
         gallery: [],
         description: "",
         featured: false,
+        videoUrl: "",
       });
       setNewProjectUrlInput("");
       loadData();
@@ -314,6 +343,8 @@ export default function AdminPage() {
         title: editingProject.title.trim(),
         image: finalCover,
         gallery: finalGallery,
+        videoUrl: editingProject.videoUrl?.trim() || undefined,
+        mediaType: editingProject.videoUrl?.trim() ? "video" : "image",
       });
       setEditingProject(null);
       setEditProjectUrlInput("");
@@ -349,6 +380,8 @@ export default function AdminPage() {
         description: newGift.description,
         details: ["Curated by Adeola", "Quality guaranteed", "Custom presentation"],
         image: newGift.image,
+        videoUrl: newGift.videoUrl?.trim() || undefined,
+        mediaType: newGift.videoUrl?.trim() ? "video" : "image",
         inStock: newGift.inStock,
         popular: newGift.popular,
       });
@@ -359,6 +392,7 @@ export default function AdminPage() {
         price: 35000,
         description: "",
         image: "",
+        videoUrl: "",
         inStock: true,
         popular: false,
       });
@@ -383,6 +417,8 @@ export default function AdminPage() {
       updateGiftItem(editingGift.id, {
         ...editingGift,
         name: editingGift.name.trim(),
+        videoUrl: editingGift.videoUrl?.trim() || undefined,
+        mediaType: editingGift.videoUrl?.trim() ? "video" : "image",
       });
       setEditingGift(null);
       loadData();
@@ -853,6 +889,7 @@ export default function AdminPage() {
                     gallery: [],
                     description: "",
                     featured: false,
+                    videoUrl: "",
                   });
                   setNewProjectUrlInput("");
                   setIsAddPortfolioOpen(true);
@@ -892,8 +929,14 @@ export default function AdminPage() {
                           )}
                         </div>
 
-                        {/* Multiple photos count badge */}
-                        <div className="absolute top-3 right-3">
+                        {/* Multiple photos & video badge */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                          {item.videoUrl && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-xs flex items-center gap-1">
+                              <Video className="w-3 h-3 fill-brand-plum" />
+                              <span>Video</span>
+                            </span>
+                          )}
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-black/60 text-white backdrop-blur-xs shadow-xs flex items-center gap-1">
                             <Images className="w-3 h-3 text-brand-gold" />
                             <span>{photoCount} {photoCount === 1 ? "Photo" : "Photos"}</span>
@@ -1021,6 +1064,14 @@ export default function AdminPage() {
                             </span>
                           )}
                         </div>
+                        {item.videoUrl && (
+                          <div className="absolute top-3 right-3">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-xs flex items-center gap-1">
+                              <Video className="w-3 h-3 fill-brand-plum" />
+                              <span>Video</span>
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="p-5 pt-3">
@@ -1634,6 +1685,73 @@ export default function AdminPage() {
                 )}
               </div>
 
+              {/* VIDEO REEL UPLOAD SECTION */}
+              <div className="p-4 rounded-2xl bg-brand-soft-lavender/40 border border-brand-purple/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block uppercase font-semibold text-brand-plum/90 flex items-center gap-2">
+                    <Video className="w-4 h-4 text-brand-purple" />
+                    <span>Video Reel (Optional)</span>
+                  </label>
+                  <span className="text-[11px] text-brand-purple font-medium">
+                    Upload MP4 / WebM or paste video URL
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    ref={portfolioAddVideoRef}
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleVideoFileConversion(file, (dataUrl) => {
+                          setNewProject((prev) => ({ ...prev, videoUrl: dataUrl }));
+                        });
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => portfolioAddVideoRef.current?.click()}
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Upload Video File</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or enter video link below</span>
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Paste direct video URL or embed path (e.g. /videos/dance.mp4 or https://...)"
+                  value={newProject.videoUrl}
+                  onChange={(e) => setNewProject({ ...newProject, videoUrl: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border bg-white text-xs text-brand-plum focus:outline-brand-purple"
+                />
+
+                {newProject.videoUrl && (
+                  <div className="relative rounded-xl overflow-hidden border border-brand-purple/30 bg-black mt-2">
+                    <video
+                      src={newProject.videoUrl}
+                      controls
+                      className="w-full max-h-48 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setNewProject({ ...newProject, videoUrl: "" })}
+                      className="absolute top-2 right-2 px-2.5 py-1 rounded-md bg-red-600/90 hover:bg-red-700 text-white text-[11px] font-semibold cursor-pointer shadow-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove Video</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
                   Description
@@ -1945,6 +2063,75 @@ export default function AdminPage() {
                 )}
               </div>
 
+              {/* VIDEO REEL UPLOAD SECTION */}
+              <div className="p-4 rounded-2xl bg-brand-soft-lavender/40 border border-brand-purple/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block uppercase font-semibold text-brand-plum/90 flex items-center gap-2">
+                    <Video className="w-4 h-4 text-brand-purple" />
+                    <span>Video Reel (Optional)</span>
+                  </label>
+                  <span className="text-[11px] text-brand-purple font-medium">
+                    Upload MP4 / WebM or edit video URL
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    ref={portfolioEditVideoRef}
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleVideoFileConversion(file, (dataUrl) => {
+                          setEditingProject((prev) => (prev ? { ...prev, videoUrl: dataUrl } : null));
+                        });
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => portfolioEditVideoRef.current?.click()}
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Upload New Video</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or edit video URL below</span>
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Paste direct video URL or embed path (e.g. /videos/dance.mp4 or https://...)"
+                  value={editingProject.videoUrl || ""}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, videoUrl: e.target.value })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border bg-white text-xs text-brand-plum focus:outline-brand-purple"
+                />
+
+                {editingProject.videoUrl && (
+                  <div className="relative rounded-xl overflow-hidden border border-brand-purple/30 bg-black mt-2">
+                    <video
+                      src={editingProject.videoUrl}
+                      controls
+                      className="w-full max-h-48 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditingProject({ ...editingProject, videoUrl: "" })}
+                      className="absolute top-2 right-2 px-2.5 py-1 rounded-md bg-red-600/90 hover:bg-red-700 text-white text-[11px] font-semibold cursor-pointer shadow-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove Video</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
                   Description
@@ -2126,6 +2313,70 @@ export default function AdminPage() {
                       alt="Gift Preview"
                       className="w-full h-full object-cover"
                     />
+                  </div>
+                )}
+              </div>
+
+              {/* Optional Gift Video Reel Upload */}
+              <div className="p-4 rounded-xl bg-brand-soft-lavender/30 border border-brand-purple/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block uppercase font-semibold text-brand-plum/80 flex items-center gap-1.5">
+                    <Video className="w-3.5 h-3.5 text-brand-purple" />
+                    <span>Gift Video Reel (Optional)</span>
+                  </label>
+                  <span className="text-[10px] text-brand-purple font-medium">MP4 / WebM / Link</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={giftAddVideoRef}
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleVideoFileConversion(file, (dataUrl) => {
+                          setNewGift((prev) => ({ ...prev, videoUrl: dataUrl }));
+                        });
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => giftAddVideoRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Upload Video Reel</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or enter video link below</span>
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Paste direct video URL (e.g. /videos/eru-iyawo.mp4 or https://...)"
+                  value={newGift.videoUrl || ""}
+                  onChange={(e) => setNewGift({ ...newGift, videoUrl: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
+                />
+
+                {newGift.videoUrl && (
+                  <div className="relative rounded-lg overflow-hidden border border-brand-purple/30 bg-black mt-2">
+                    <video
+                      src={newGift.videoUrl}
+                      controls
+                      className="w-full max-h-40 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setNewGift({ ...newGift, videoUrl: "" })}
+                      className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-red-600/90 hover:bg-red-700 text-white text-[10px] font-semibold cursor-pointer shadow-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove Video</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -2316,6 +2567,72 @@ export default function AdminPage() {
                       alt="Gift Preview"
                       className="w-full h-full object-cover"
                     />
+                  </div>
+                )}
+              </div>
+
+              {/* Optional Gift Video Reel Upload */}
+              <div className="p-4 rounded-xl bg-brand-soft-lavender/30 border border-brand-purple/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block uppercase font-semibold text-brand-plum/80 flex items-center gap-1.5">
+                    <Video className="w-3.5 h-3.5 text-brand-purple" />
+                    <span>Gift Video Reel (Optional)</span>
+                  </label>
+                  <span className="text-[10px] text-brand-purple font-medium">MP4 / WebM / Link</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={giftEditVideoRef}
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleVideoFileConversion(file, (dataUrl) => {
+                          setEditingGift((prev) => (prev ? { ...prev, videoUrl: dataUrl } : null));
+                        });
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => giftEditVideoRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Upload New Video</span>
+                  </button>
+                  <span className="text-[11px] text-brand-plum/50">or edit video URL below</span>
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Paste direct video URL (e.g. /videos/eru-iyawo.mp4 or https://...)"
+                  value={editingGift.videoUrl || ""}
+                  onChange={(e) =>
+                    setEditingGift({ ...editingGift, videoUrl: e.target.value })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
+                />
+
+                {editingGift.videoUrl && (
+                  <div className="relative rounded-lg overflow-hidden border border-brand-purple/30 bg-black mt-2">
+                    <video
+                      src={editingGift.videoUrl}
+                      controls
+                      className="w-full max-h-40 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditingGift({ ...editingGift, videoUrl: "" })}
+                      className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-red-600/90 hover:bg-red-700 text-white text-[10px] font-semibold cursor-pointer shadow-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove Video</span>
+                    </button>
                   </div>
                 )}
               </div>
