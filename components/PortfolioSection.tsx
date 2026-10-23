@@ -30,16 +30,16 @@ export default function PortfolioSection() {
       : items.filter((item) => item.category === activeCategory);
 
   return (
-    <section className="py-20 md:py-28 bg-white border-b border-brand-warm-border/50">
+    <section className="py-14 md:py-20 bg-white border-b border-brand-warm-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header & Filter Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-8">
           <div>
-            <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-3">
+            <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2">
               Selected Portfolio
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight">
-              Stories We Have <br />
+              Stories We Have{" "}
               <span className="italic font-normal font-serif text-brand-purple">
                 Brought to Life.
               </span>

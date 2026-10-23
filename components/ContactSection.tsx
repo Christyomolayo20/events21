@@ -6,17 +6,17 @@ import { Sparkles, MessageCircle, Mail, Instagram, MapPin } from "lucide-react";
 
 export default function ContactSection() {
   return (
-    <section id="contact-enquiry" className="py-20 md:py-28 bg-brand-warm-white relative overflow-hidden">
+    <section id="contact-enquiry" className="py-14 md:py-20 bg-brand-warm-white relative overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Heading */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Begin Your Royal Journey</span>
           </div>
 
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight mb-4">
-            Let's Create <br />
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight mb-3">
+            Let's Create{" "}
             <span className="italic font-normal font-serif text-brand-purple">
               Something Regal.
             </span>
@@ -29,7 +29,7 @@ export default function ContactSection() {
         </div>
 
         {/* Embedded Interactive Blank Form */}
-        <div className="mb-12">
+        <div className="mb-10">
           <EnquiryForm />
         </div>
 

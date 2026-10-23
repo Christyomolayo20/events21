@@ -97,7 +97,7 @@ export default function Footer() {
                 </li>
                 <li>
                   <Link href="/gifts-by-adeola" className="hover:text-brand-pink transition-colors">
-                    Wrapping of EruIyawo
+                    Wrapping of Eru Iyawo
                   </Link>
                 </li>
                 <li>
@@ -220,7 +220,7 @@ export default function Footer() {
                     agree to our service terms.
                   </p>
                   <p>
-                    <strong>Gifts by Adeola Orders:</strong> Wrapping of EruIyawo, corporate gifts,
+                    <strong>Gifts by Adeola Orders:</strong> Wrapping of Eru Iyawo, corporate gifts,
                     hampers, and souvenirs require advance booking for optimal artisan preparation.
                   </p>
                 </>

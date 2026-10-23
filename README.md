@@ -23,7 +23,7 @@ A premium, minimalist, photography-led website and management system for **Event
   - **The Ballroom Symphony:** Grand ballroom pyrotechnics, dry-ice low fog clouds, cascading crystal icicle lighting, tiered wedding cake.
 - **Integrated Sub-Brand (Gifts by Adeola):**
   - Official Instagram: [https://www.instagram.com/giftsbyadeola/](https://www.instagram.com/giftsbyadeola/)
-  - Exact brand promise: *"We help you curate thoughtful gifts on a budget. Corporate Gifts, Hampers, Souvenirs & Wrapping of EruIyawo."*
+  - Exact brand promise: *"We help you curate thoughtful gifts on a budget. Corporate Gifts, Hampers, Souvenirs & Wrapping of Eru Iyawo."*
   - One-click **WhatsApp Direct Ordering** (`08060549596`) carrying product details and pricing into the chat.
 
 ---

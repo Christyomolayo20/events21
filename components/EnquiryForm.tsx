@@ -294,7 +294,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
         </label>
         <textarea
           rows={4}
-          placeholder="Describe your desired vibe, theme, colour palette, special requests (e.g. low fog & sparklers, traditional coordination, Gifts by Adeola souvenirs or EruIyawo wrapping)..."
+          placeholder="Describe your desired vibe, theme, colour palette, special requests (e.g. low fog & sparklers, traditional coordination, Gifts by Adeola souvenirs or Eru Iyawo wrapping)..."
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"

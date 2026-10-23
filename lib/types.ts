@@ -31,7 +31,7 @@ export interface EventEnquiry {
 export interface GiftItem {
   id: string;
   name: string;
-  category: "Corporate Gifts" | "Hampers" | "Souvenirs" | "Wrapping of EruIyawo" | "Celebration" | "Bespoke";
+  category: "Corporate Gifts" | "Hampers" | "Souvenirs" | "Wrapping of Eru Iyawo" | "Wrapping of EruIyawo" | "Celebration" | "Bespoke";
   price: number; // in NGN
   description: string;
   details: string[];

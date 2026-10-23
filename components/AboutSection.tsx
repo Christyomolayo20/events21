@@ -6,17 +6,18 @@ import { ArrowRight, Check } from "lucide-react";
 
 export default function AboutSection() {
   return (
-    <section className="py-20 md:py-28 bg-white border-y border-brand-warm-border/50">
+    <section className="py-14 md:py-20 bg-white border-y border-brand-warm-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Complementary Editorial Photo (5 cols) */}
           <div className="lg:col-span-5 order-2 lg:order-1">
-            <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border aspect-[5/4] sm:aspect-[4/3] lg:aspect-[5/4] bg-brand-plum">
+            <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border h-[340px] sm:h-[420px] w-full bg-brand-plum">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/about-team-portrait.jpg"
                 alt="The Event 21 Team and Crew"
                 className="w-full h-full object-cover object-center"
+                style={{ objectPosition: "center center" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
@@ -31,13 +32,13 @@ export default function AboutSection() {
           </div>
 
           {/* Editorial Content (7 cols) */}
-          <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
+          <div className="lg:col-span-7 order-1 lg:order-2 space-y-5">
             <div className="inline-block text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans">
               About Event 21
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-[1.2]">
-              Every Celebration <br />
+              Every Celebration{" "}
               <span className="italic font-normal font-serif text-brand-purple">
                 Has a Story.
               </span>

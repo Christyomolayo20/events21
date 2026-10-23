@@ -106,7 +106,7 @@ export default function AdminPage() {
   const [editingGift, setEditingGift] = useState<GiftItem | null>(null);
   const [newGift, setNewGift] = useState({
     name: "",
-    category: "Wrapping of EruIyawo" as GiftItem["category"],
+    category: "Wrapping of Eru Iyawo" as GiftItem["category"],
     price: 35000,
     description: "",
     image: "",
@@ -355,7 +355,7 @@ export default function AdminPage() {
       setIsAddGiftOpen(false);
       setNewGift({
         name: "",
-        category: "Wrapping of EruIyawo",
+        category: "Wrapping of Eru Iyawo",
         price: 35000,
         description: "",
         image: "",
@@ -2020,7 +2020,7 @@ export default function AdminPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Royal EruIyawo Velvet & Acrylic Wrapping"
+                  placeholder="e.g. Royal Eru Iyawo Velvet & Acrylic Wrapping"
                   value={newGift.name}
                   onChange={(e) => setNewGift({ ...newGift, name: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
@@ -2042,7 +2042,7 @@ export default function AdminPage() {
                     }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
                   >
-                    <option value="Wrapping of EruIyawo">Wrapping of EruIyawo</option>
+                    <option value="Wrapping of Eru Iyawo">Wrapping of Eru Iyawo</option>
                     <option value="Corporate Gifts">Corporate Gifts</option>
                     <option value="Hampers">Hampers</option>
                     <option value="Souvenirs">Souvenirs</option>
@@ -2232,7 +2232,7 @@ export default function AdminPage() {
                     }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-pink"
                   >
-                    <option value="Wrapping of EruIyawo">Wrapping of EruIyawo</option>
+                    <option value="Wrapping of Eru Iyawo">Wrapping of Eru Iyawo</option>
                     <option value="Corporate Gifts">Corporate Gifts</option>
                     <option value="Hampers">Hampers</option>
                     <option value="Souvenirs">Souvenirs</option>

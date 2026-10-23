@@ -30,16 +30,16 @@ export default function GalleryPage() {
       : items.filter((item) => item.category === activeCategory);
 
   return (
-    <div className="pt-28 pb-20 md:pt-36 md:pb-28">
+    <div className="pt-24 pb-16 md:pt-32 md:pb-20">
       {/* Header */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
-        <div className="text-center max-w-3xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Visual Portfolio</span>
           </div>
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-6">
-            The Gallery: Real Moments, <br />
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
+            The Gallery: Real Moments,{" "}
             <span className="italic font-normal font-serif text-brand-purple">
               Exquisite Details.
             </span>

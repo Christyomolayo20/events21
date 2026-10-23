@@ -25,7 +25,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     tagline: "Timeless Grandeur, Cultured Sophistication",
     description:
       "Specialized curation for contemporary and traditional Nigerian weddings fit for royalty. We harmoniously merge cultural heritage with high-fashion aesthetics, bespoke floral architecture, and dramatic ambient lighting.",
-    image: "/images/the-kayodes-white-wedding.jpg",
+    image: "/images/the-kayodes-traditional-couple.jpg",
     inclusions: [
       "Custom mood boards, colour palettes & royal design decks",
       "Stage, altar, and head-table floral architecture",
@@ -59,7 +59,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     tagline: "Honoring a Lifetime of Excellence & Legacy",
     description:
       "A distinguished career calls for an honorable, elegant send-off. We orchestrate stately retirement receptions, tribute dinners, and celebratory galas designed to commemorate decades of dedication with prestige.",
-    image: "/images/the-kayodes-traditional.jpg",
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
     inclusions: [
       "Legacy tribute production, photo retrospectives & video staging",
       "VIP dignitary protocol, seating logistics & guest greeting",
@@ -107,19 +107,19 @@ export const SERVICES_DATA: ServiceItem[] = [
   {
     id: "gifting-concierge",
     title: "Gifts by Adeola Concierge",
-    tagline: "Corporate Gifts, Hampers, Souvenirs & Wrapping of EruIyawo",
+    tagline: "Corporate Gifts, Hampers, Souvenirs & Wrapping of Eru Iyawo",
     description:
-      "We help you curate thoughtful gifts on a budget. From bespoke wrapping of traditional Yoruba EruIyawo engagement boxes to branded corporate hampers, VIP souvenirs, and celebratory gift packages.",
-    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=1200&q=80",
+      "We help you curate thoughtful gifts on a budget. From bespoke wrapping of traditional Yoruba Eru Iyawo engagement boxes to branded corporate hampers, VIP souvenirs, and celebratory gift packages.",
+    image: "/images/eru-iyawo-traditional-green.jpg",
     inclusions: [
-      "Artisanal wrapping and presentation of traditional EruIyawo packages",
+      "Artisanal wrapping and presentation of traditional Eru Iyawo packages",
       "Thoughtfully curated gift hampers designed for every budget tier",
       "Branded executive corporate gifting and staff appreciation packages",
       "High-end event souvenirs and guest return gift boxes",
       "Personalized handwritten calligraphy cards & wax seal packaging",
       "Doorstep delivery across Lagos and nationwide courier service",
     ],
-    suitableFor: "Grooms and families preparing EruIyawo, corporate teams, and event hosts.",
+    suitableFor: "Grooms and families preparing Eru Iyawo, corporate teams, and event hosts.",
   },
 ];
 
@@ -250,18 +250,53 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
 export const GIFTS_CATALOGUE: GiftItem[] = [
   {
     id: "eruiyawo-wrapping-suite",
-    name: "Wrapping of EruIyawo (Traditional Bridal Trunks)",
-    category: "Wrapping of EruIyawo",
+    name: "Wrapping of Eru Iyawo (Traditional Bridal Trunks)",
+    category: "Wrapping of Eru Iyawo",
     price: 75000,
     description:
-      "Expert traditional wrapping and aesthetic presentation of the bride's EruIyawo engagement gifts. Styled with royal fabrics, lace accents, custom calligraphed tags, satin ribbons, and transparent acrylic display boxes.",
+      "Expert traditional wrapping and aesthetic presentation of the bride's Eru Iyawo engagement gifts. Styled with royal fabrics, lace accents, custom calligraphed tags, satin ribbons, and transparent acrylic display boxes.",
     details: [
       "Complete aesthetic wrapping of 5 to 20+ engagement gift luggage/boxes",
       "Royal colour matching with couple's aso-oke palette",
       "Bespoke ribbon styling, wax seals, and personalized Yoruba tags",
       "Display arrangement and coordination for traditional Alaga presentation",
     ],
-    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80",
+    image: "/images/eru-iyawo-traditional-green.jpg",
+    popular: true,
+    inStock: true,
+  },
+  {
+    id: "eruiyawo-ladder-display",
+    name: "Artisanal Eru Iyawo Tiered Ladder Presentation",
+    category: "Wrapping of Eru Iyawo",
+    price: 95000,
+    description:
+      "An awe-inspiring tiered ladder presentation for the bride's Eru Iyawo engagement gifts. Styled with olive green velvet draping, magenta floral accents, illuminated signage, and woven luxury hampers.",
+    details: [
+      "Architectural multi-tier wooden A-frame display staging",
+      "Olive green royal velvet fabric draping & custom illumination",
+      "Magenta ribbon flower styling and artisanal gift wrapping",
+      "Woven fruit & delicacy hamper baskets with sheer organza accents",
+    ],
+    image: "/images/eru-iyawo-ladder-display.jpg",
+    popular: true,
+    inStock: true,
+  },
+  {
+    id: "executive-corporate-gifts",
+    name: "Corporate Executive Appreciation Box",
+    category: "Corporate Gifts",
+    price: 45000,
+    description:
+      "Elevate client relations and staff milestones on a budget. Features a personalized thermal flask, gold keepsake mug, fine executive journal, branded pen, and luxury gift presentation.",
+    details: [
+      "Insulated gold/rose gold thermal drinkware flask",
+      "Gold ceramic coffee & tea keepsake mug",
+      "Executive hardcover notebook & weighted metal pen",
+      "Luxury rigid keepsake box with crinkle shredding",
+      "Custom branding & company logo options available",
+    ],
+    image: "/images/executive-gift-box-set.jpg",
     popular: true,
     inStock: true,
   },
@@ -281,24 +316,6 @@ export const GIFTS_CATALOGUE: GiftItem[] = [
     ],
     image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80",
     popular: true,
-    inStock: true,
-  },
-  {
-    id: "executive-corporate-gifts",
-    name: "Corporate Executive Appreciation Box",
-    category: "Corporate Gifts",
-    price: 45000,
-    description:
-      "Elevate client relations and staff milestones on a budget. Features a fine leather journal, branded metal executive pen, single-origin coffee or tea blend, and gourmet dark chocolate.",
-    details: [
-      "A5 embossed leather executive notebook",
-      "Matte black weighted metal rollerball pen",
-      "Artisanal craft coffee roast or specialty tea infusion",
-      "Single-origin chocolate tablet",
-      "Branded ribbon with company logo option",
-    ],
-    image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=800&q=80",
-    popular: false,
     inStock: true,
   },
   {

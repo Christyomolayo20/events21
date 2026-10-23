@@ -12,16 +12,16 @@ export const metadata = {
 
 export default function ServicesPage() {
   return (
-    <div className="pt-28 pb-20 md:pt-36 md:pb-28">
+    <div className="pt-24 pb-16 md:pt-32 md:pb-20">
       {/* Page Header */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-12">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Tailored Offerings</span>
           </div>
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-6">
-            Bespoke Planning & <br />
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
+            Bespoke Planning &amp;{" "}
             <span className="italic font-normal font-serif text-brand-purple">
               Production Services.
             </span>
@@ -35,7 +35,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services List */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 md:space-y-24">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 md:space-y-14">
         {SERVICES_DATA.map((service, index) => {
           const isEven = index % 2 === 1;
 
@@ -43,20 +43,20 @@ export default function ServicesPage() {
             <div
               key={service.id}
               id={service.id}
-              className={`scroll-mt-32 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-warm-border shadow-xs hover:shadow-subtle transition-all`}
+              className={`scroll-mt-32 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-brand-warm-border shadow-xs hover:shadow-subtle transition-all`}
             >
-              {/* Image Column */}
+              {/* Image Column with Fixed Height & Centered Focus */}
               <div
-                className={`lg:col-span-6 relative rounded-2xl overflow-hidden aspect-[4/3] bg-brand-plum shadow-md ${
+                className={`lg:col-span-6 relative rounded-2xl overflow-hidden h-[280px] sm:h-[340px] lg:h-[380px] w-full bg-brand-plum shadow-md ${
                   isEven ? "lg:order-2" : "lg:order-1"
                 }`}
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={service.image}
                   alt={service.title}
-                  fill
-                  className="object-cover object-center"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="w-full h-full object-cover object-center"
+                  style={{ objectPosition: "center center" }}
                 />
               </div>
 
