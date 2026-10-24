@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // Supabase Project Ref: kmkvhypdcsabnvwytvug
 const SUPABASE_PROJECT_ID = "kmkvhypdcsabnvwytvug";
@@ -7,30 +7,64 @@ const DEFAULT_SUPABASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co`;
 export const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
 
-export const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  "";
+export function getSupabaseAnonKey(): string {
+  if (
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim()
+  ) {
+    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim();
+  }
+  if (
+    process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY.trim()
+  ) {
+    return process.env.SUPABASE_SERVICE_ROLE_KEY.trim();
+  }
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("events21_supabase_key");
+      if (stored && stored.trim()) return stored.trim();
+    } catch {
+      // Ignore storage errors
+    }
+  }
+  return "";
+}
 
-// Initialize Supabase Client
-export const supabase = supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+export const supabaseAnonKey = getSupabaseAnonKey();
+
+let cachedClient: SupabaseClient | null = null;
+let lastKeyUsed: string = "";
+
+export function getSupabase(): SupabaseClient | null {
+  const currentKey = getSupabaseAnonKey();
+  if (!currentKey) return null;
+  if (cachedClient && lastKeyUsed === currentKey) {
+    return cachedClient;
+  }
+  cachedClient = createClient(supabaseUrl, currentKey);
+  lastKeyUsed = currentKey;
+  return cachedClient;
+}
+
+// Fallback exported singleton client
+export const supabase = getSupabase();
 
 /**
  * Check if active connection to Supabase is configured
  */
 export function isSupabaseConfigured(): boolean {
-  return Boolean(supabase && supabaseAnonKey);
+  return Boolean(getSupabaseAnonKey());
 }
 
 /**
  * Safe Supabase push for Consultation Bookings
  */
 export async function pushConsultationToSupabase(booking: Record<string, any>) {
-  if (!supabase) return { success: false, reason: "Supabase key not set in environment" };
+  const client = getSupabase();
+  if (!client) return { success: false, reason: "Supabase key not set in environment" };
   try {
-    const { data, error } = await supabase.from("consultations").insert([
+    const { data, error } = await client.from("consultations").insert([
       {
         id: booking.id,
         full_name: booking.fullName,
@@ -59,9 +93,10 @@ export async function pushConsultationToSupabase(booking: Record<string, any>) {
  * Safe Supabase push for Event Enquiries
  */
 export async function pushEnquiryToSupabase(enquiry: Record<string, any>) {
-  if (!supabase) return { success: false, reason: "Supabase key not set in environment" };
+  const client = getSupabase();
+  if (!client) return { success: false, reason: "Supabase key not set in environment" };
   try {
-    const { data, error } = await supabase.from("enquiries").insert([
+    const { data, error } = await client.from("enquiries").insert([
       {
         id: enquiry.id,
         full_name: enquiry.fullName,

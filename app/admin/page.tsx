@@ -68,6 +68,10 @@ import {
   CalendarCheck,
   Quote,
   Database,
+  Key,
+  RefreshCw,
+  Copy,
+  Code,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -133,6 +137,23 @@ export default function AdminPage() {
   // Settings form
   const [settingsSaved, setSettingsSaved] = useState(false);
 
+  // Supabase Live Connection State
+  const [supabaseStatus, setSupabaseStatus] = useState<{
+    serverReachable: boolean;
+    authenticated: boolean;
+    isKeyConfigured: boolean;
+    httpStatus: number | null;
+    details?: string;
+  } | null>(null);
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState("");
+  const [isTestingSupabase, setIsTestingSupabase] = useState(false);
+  const [supabaseFeedback, setSupabaseFeedback] = useState<{
+    type: "success" | "error" | "info";
+    message: string;
+  } | null>(null);
+  const [showSqlSchema, setShowSqlSchema] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
+
   // Photos processing & feedback toast
   const [isProcessingPhotos, setIsProcessingPhotos] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -189,6 +210,7 @@ export default function AdminPage() {
     setConfig(getBrandConfig());
     setConsultationsCount(getConsultations().length);
     setTestimonialsCount(getTestimonials().length);
+    checkSupabaseStatus();
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -467,6 +489,72 @@ export default function AdminPage() {
     updateBrandConfig(config);
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 3000);
+  };
+
+  // --- Supabase Cloud Connection Handlers ---
+  const checkSupabaseStatus = async () => {
+    try {
+      const res = await fetch("/api/supabase-status", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setSupabaseStatus(data);
+      }
+    } catch (err) {
+      console.warn("Check supabase status failed:", err);
+    }
+  };
+
+  const handleConnectSupabase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const key = supabaseKeyInput.trim();
+    if (!key) {
+      setSupabaseFeedback({
+        type: "error",
+        message: "Please enter or paste your Supabase anon public API key.",
+      });
+      return;
+    }
+
+    setIsTestingSupabase(true);
+    setSupabaseFeedback(null);
+
+    try {
+      const res = await fetch("/api/supabase-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: key }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("events21_supabase_key", key);
+        }
+        setSupabaseFeedback({
+          type: "success",
+          message:
+            "Connected to Supabase project kmkvhypdcsabnvwytvug successfully! All event bookings & enquiries now sync live.",
+        });
+        showToast("Supabase connected & authenticated!");
+        setSupabaseKeyInput("");
+        checkSupabaseStatus();
+      } else {
+        setSupabaseFeedback({
+          type: "error",
+          message:
+            data.message ||
+            "Authentication failed. Please verify your anon key in the Supabase Dashboard.",
+        });
+      }
+    } catch (err: any) {
+      setSupabaseFeedback({
+        type: "error",
+        message: err?.message || "Failed to contact local API server.",
+      });
+    } finally {
+      setIsTestingSupabase(false);
+    }
   };
 
   const exportEnquiriesCSV = () => {
@@ -1431,7 +1519,7 @@ export default function AdminPage() {
               </form>
             </div>
 
-            {/* Supabase Cloud Database Status Card */}
+            {/* Supabase Cloud Database Status & Connection Card */}
             <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
@@ -1440,13 +1528,33 @@ export default function AdminPage() {
                     <span>Supabase Cloud Database</span>
                   </div>
                   <h3 className="font-serif text-2xl font-bold text-brand-plum">
-                    Connection Status
+                    Connection Manager
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-emerald-700 font-sans">
-                    Gateway Online
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      supabaseStatus?.authenticated
+                        ? "bg-emerald-500 animate-pulse"
+                        : supabaseStatus?.serverReachable
+                        ? "bg-amber-500 animate-pulse"
+                        : "bg-red-500"
+                    }`}
+                  />
+                  <span
+                    className={`text-xs font-semibold font-sans ${
+                      supabaseStatus?.authenticated
+                        ? "text-emerald-700"
+                        : supabaseStatus?.serverReachable
+                        ? "text-amber-700"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {supabaseStatus?.authenticated
+                      ? "Connected & Live"
+                      : supabaseStatus?.serverReachable
+                      ? "Gateway Online (Key Needed)"
+                      : "Connecting..."}
                   </span>
                 </div>
               </div>
@@ -1465,9 +1573,15 @@ export default function AdminPage() {
                   <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
                     Project URL
                   </span>
-                  <span className="font-mono text-brand-purple truncate max-w-[280px]">
-                    https://kmkvhypdcsabnvwytvug.supabase.co
-                  </span>
+                  <a
+                    href="https://kmkvhypdcsabnvwytvug.supabase.co"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-brand-purple hover:underline truncate max-w-[280px] flex items-center gap-1"
+                  >
+                    <span>https://kmkvhypdcsabnvwytvug.supabase.co</span>
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
@@ -1482,12 +1596,19 @@ export default function AdminPage() {
 
                 <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
                   <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
-                    API Anon Key
+                    API Anon Key Status
                   </span>
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-amber-600">
-                    <Clock className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Pending in .env.local / Vercel</span>
-                  </span>
+                  {supabaseStatus?.authenticated ? (
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Authenticated &amp; Synced</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-amber-600">
+                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Key Required to Enable Live Sync</span>
+                    </span>
+                  )}
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-between">
@@ -1495,20 +1616,222 @@ export default function AdminPage() {
                     Active Resilient Storage
                   </span>
                   <span className="font-medium text-emerald-800">
-                    LocalStorage + IndexedDB (Zero data loss)
+                    LocalStorage + IndexedDB (Zero data loss guarantee)
                   </span>
                 </div>
               </div>
 
-              <div className="mt-5 p-4 rounded-xl bg-brand-soft-lavender/40 border border-brand-purple/20 text-xs text-brand-plum/80 leading-relaxed font-sans">
-                <p className="font-semibold text-brand-purple mb-1">
-                  How to complete live table syncing:
+              {/* CONNECT FORM */}
+              <div className="mt-6 pt-6 border-t border-brand-warm-border">
+                <h4 className="font-serif text-lg font-bold text-brand-plum mb-1 flex items-center gap-2">
+                  <Key className="w-4 h-4 text-brand-purple" />
+                  <span>Connect Supabase Anon Key</span>
+                </h4>
+                <p className="text-xs text-brand-plum/70 mb-4 leading-relaxed font-sans">
+                  Paste your <strong>anon public</strong> API key from your Supabase Dashboard (under <em>Project Settings &rarr; API</em>) to link this studio live to project <code>kmkvhypdcsabnvwytvug</code>.
                 </p>
-                <ol className="list-decimal list-inside space-y-1 text-[11px] text-brand-plum/75">
-                  <li>Log into your Supabase Dashboard for project <strong>kmkvhypdcsabnvwytvug</strong>.</li>
-                  <li>Navigate to <strong>Project Settings &rarr; API</strong>.</li>
-                  <li>Copy the <strong>anon public</strong> key and add it as <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in your <code>.env.local</code> file or Vercel Environment Variables.</li>
-                </ol>
+
+                <form onSubmit={handleConnectSupabase} className="space-y-3 font-sans">
+                  <div>
+                    <input
+                      type="password"
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={supabaseKeyInput}
+                      onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-white text-xs font-mono text-brand-plum focus:outline-brand-purple placeholder:font-sans placeholder:text-brand-plum/40"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={isTestingSupabase}
+                      className="px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    >
+                      {isTestingSupabase ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Testing &amp; Connecting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Connect &amp; Save Key</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={checkSupabaseStatus}
+                      className="px-4 py-2.5 rounded-full border border-brand-warm-border hover:bg-brand-warm-gray text-brand-plum text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Refresh Status</span>
+                    </button>
+                  </div>
+                </form>
+
+                {supabaseFeedback && (
+                  <div
+                    className={`mt-4 p-3.5 rounded-xl text-xs flex items-start gap-2.5 border ${
+                      supabaseFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-red-50 text-red-800 border-red-200"
+                    }`}
+                  >
+                    {supabaseFeedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <X className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    )}
+                    <span>{supabaseFeedback.message}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* SQL Schema helper toggle */}
+              <div className="mt-5 pt-4 border-t border-brand-warm-border/60">
+                <button
+                  type="button"
+                  onClick={() => setShowSqlSchema(!showSqlSchema)}
+                  className="inline-flex items-center gap-1.5 text-xs text-brand-purple hover:text-brand-purple-hover font-semibold cursor-pointer"
+                >
+                  <Code className="w-3.5 h-3.5" />
+                  <span>{showSqlSchema ? "Hide Database Setup SQL Schema" : "View Database Setup SQL Schema"}</span>
+                </button>
+
+                {showSqlSchema && (
+                  <div className="mt-3 p-4 rounded-2xl bg-brand-plum-dark text-white text-xs font-mono relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] text-white/70">Run in Supabase &rarr; SQL Editor</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const sqlCode = `-- Events 21 Supabase Database Schema
+CREATE TABLE IF NOT EXISTS public.consultations (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    consultation_date TEXT NOT NULL,
+    time_slot TEXT NOT NULL,
+    message TEXT DEFAULT '',
+    status TEXT DEFAULT 'Pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.enquiries (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    event_date TEXT DEFAULT '',
+    event_location TEXT DEFAULT '',
+    guest_count TEXT DEFAULT '',
+    budget_range TEXT DEFAULT '',
+    message TEXT DEFAULT '',
+    status TEXT DEFAULT 'New',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.gift_requests (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    recipient_name TEXT DEFAULT '',
+    occasion TEXT DEFAULT '',
+    budget TEXT DEFAULT '',
+    items_requested TEXT DEFAULT '',
+    delivery_date TEXT DEFAULT '',
+    delivery_address TEXT DEFAULT '',
+    personal_message TEXT DEFAULT '',
+    status TEXT DEFAULT 'Pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gift_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert consultations" ON public.consultations FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public insert enquiries" ON public.enquiries FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public insert gift_requests" ON public.gift_requests FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow select consultations" ON public.consultations FOR SELECT TO public USING (true);
+CREATE POLICY "Allow select enquiries" ON public.enquiries FOR SELECT TO public USING (true);
+CREATE POLICY "Allow select gift_requests" ON public.gift_requests FOR SELECT TO public USING (true);`;
+                          navigator.clipboard.writeText(sqlCode);
+                          setCopiedSql(true);
+                          setTimeout(() => setCopiedSql(false), 2500);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-sans font-semibold transition-colors cursor-pointer"
+                      >
+                        {copiedSql ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-400" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Copy SQL</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <pre className="overflow-x-auto max-h-48 text-[11px] text-brand-soft-lavender/90 whitespace-pre">
+{`-- 1. Consultations Table
+CREATE TABLE IF NOT EXISTS public.consultations (
+  id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  consultation_date TEXT NOT NULL,
+  time_slot TEXT NOT NULL,
+  message TEXT DEFAULT '',
+  status TEXT DEFAULT 'Pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 2. Event Enquiries Table
+CREATE TABLE IF NOT EXISTS public.enquiries (
+  id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  event_date TEXT DEFAULT '',
+  event_location TEXT DEFAULT '',
+  guest_count TEXT DEFAULT '',
+  budget_range TEXT DEFAULT '',
+  message TEXT DEFAULT '',
+  status TEXT DEFAULT 'New',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 3. Custom Gift Requests Table
+CREATE TABLE IF NOT EXISTS public.gift_requests (
+  id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  recipient_name TEXT DEFAULT '',
+  occasion TEXT DEFAULT '',
+  budget TEXT DEFAULT '',
+  items_requested TEXT DEFAULT '',
+  delivery_date TEXT DEFAULT '',
+  delivery_address TEXT DEFAULT '',
+  personal_message TEXT DEFAULT '',
+  status TEXT DEFAULT 'Pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);`}
+                    </pre>
+                  </div>
+                )}
               </div>
             </div>
 
