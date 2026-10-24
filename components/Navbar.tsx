@@ -28,7 +28,6 @@ export default function Navbar() {
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
     { name: "Gallery", href: "/gallery" },
-    { name: "Testimonials", href: "/testimonials" },
     { name: "Gifting", href: "/gifts-by-adeola" },
     { name: "Contact", href: "/contact" },
   ];

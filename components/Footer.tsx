@@ -13,7 +13,6 @@ export default function Footer() {
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
     { name: "Gallery", href: "/gallery" },
-    { name: "Testimonials", href: "/testimonials" },
     { name: "Gifts by Adeola", href: "/gifts-by-adeola" },
     { name: "Contact", href: "/contact" },
   ];

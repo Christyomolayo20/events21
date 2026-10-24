@@ -97,6 +97,7 @@ export default function TestimonialsCarousel() {
 
   return (
     <section
+      id="testimonials"
       className="relative w-full min-h-[520px] sm:min-h-[580px] md:min-h-[640px] bg-[#18061B] text-white overflow-hidden flex flex-col justify-between"
       aria-label="Client Testimonials Carousel"
       onMouseEnter={() => setIsPaused(true)}
@@ -267,14 +268,11 @@ export default function TestimonialsCarousel() {
           </button>
         </div>
 
-        {/* View All Reviews Link */}
-        <Link
-          href="/testimonials"
-          className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-brand-soft-lavender hover:text-white uppercase tracking-wider transition-colors group"
-        >
-          <span>View All Client Reflections</span>
-          <ArrowUpRight className="w-3.5 h-3.5 text-brand-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-        </Link>
+        {/* Verified Client Badge */}
+        <div className="inline-flex items-center gap-2 text-xs font-sans font-semibold text-brand-soft-lavender uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
+          <span>Verified Host Experiences</span>
+        </div>
       </div>
     </section>
   );
