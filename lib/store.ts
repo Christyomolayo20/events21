@@ -1,7 +1,26 @@
 "use client";
 
-import { BRAND_CONFIG, GIFTS_CATALOGUE, INITIAL_ENQUIRIES, INITIAL_GIFT_REQUESTS, PORTFOLIO_DATA } from "./data";
-import { EventEnquiry, GiftItem, GiftRequest, PortfolioItem } from "./types";
+import {
+  BRAND_CONFIG,
+  GIFTS_CATALOGUE,
+  INITIAL_ENQUIRIES,
+  INITIAL_GIFT_REQUESTS,
+  PORTFOLIO_DATA,
+  DEFAULT_FOUNDER_INFO,
+  DEFAULT_TEAM_MEMBERS,
+  INITIAL_TESTIMONIALS,
+  INITIAL_CONSULTATIONS,
+} from "./data";
+import {
+  EventEnquiry,
+  GiftItem,
+  GiftRequest,
+  PortfolioItem,
+  Testimonial,
+  ConsultationBooking,
+  TeamMember,
+  FounderInfo,
+} from "./types";
 
 const ENQUIRIES_KEY = "events21_enquiries";
 const GIFT_REQUESTS_KEY = "events21_gift_requests";
@@ -9,6 +28,11 @@ const GIFT_CATALOGUE_KEY = "events21_gift_catalogue";
 const PORTFOLIO_KEY = "events21_portfolio";
 const SETTINGS_KEY = "events21_settings";
 const ADMIN_AUTH_KEY = "events21_admin_auth";
+const TESTIMONIALS_KEY = "events21_testimonials";
+const CONSULTATIONS_KEY = "events21_consultations";
+const FOUNDER_KEY = "events21_founder";
+const TEAM_KEY = "events21_team";
+
 
 // --- CLIENT-SIDE IMAGE COMPRESSION (Prevents QuotaExceededError & Speeds Up Browsing) ---
 export function compressImageFile(
@@ -154,6 +178,10 @@ let cacheGifts: GiftItem[] | null = null;
 let cacheEnquiries: EventEnquiry[] | null = null;
 let cacheGiftRequests: GiftRequest[] | null = null;
 let cacheConfig: typeof BRAND_CONFIG | null = null;
+let cacheTestimonials: Testimonial[] | null = null;
+let cacheConsultations: ConsultationBooking[] | null = null;
+let cacheFounder: FounderInfo | null = null;
+let cacheTeam: TeamMember[] | null = null;
 
 // Background hydration from IndexedDB on startup
 if (typeof window !== "undefined") {
@@ -172,11 +200,26 @@ if (typeof window !== "undefined") {
         safeLocalStorageSet(GIFT_CATALOGUE_KEY, idbGifts);
         window.dispatchEvent(new Event("events21_gift_catalogue_updated"));
       }
+
+      const idbTestimonials = await idbGet<Testimonial[]>(TESTIMONIALS_KEY);
+      if (idbTestimonials && Array.isArray(idbTestimonials)) {
+        cacheTestimonials = idbTestimonials;
+        safeLocalStorageSet(TESTIMONIALS_KEY, idbTestimonials);
+        window.dispatchEvent(new Event("events21_testimonials_updated"));
+      }
+
+      const idbConsultations = await idbGet<ConsultationBooking[]>(CONSULTATIONS_KEY);
+      if (idbConsultations && Array.isArray(idbConsultations)) {
+        cacheConsultations = idbConsultations;
+        safeLocalStorageSet(CONSULTATIONS_KEY, idbConsultations);
+        window.dispatchEvent(new Event("events21_consultations_updated"));
+      }
     } catch {
       // Ignored
     }
   })();
 }
+
 
 // --- ENQUIRIES ---
 export function getEnquiries(): EventEnquiry[] {
@@ -464,3 +507,230 @@ export function logoutAdmin(): void {
     sessionStorage.removeItem(ADMIN_AUTH_KEY);
   }
 }
+
+// --- TESTIMONIALS (ADMIN MANAGED, 5-STAR RATING, OPTIONAL IMAGE, PUBLISH/UNPUBLISH) ---
+export function getTestimonials(): Testimonial[] {
+  if (typeof window === "undefined") return INITIAL_TESTIMONIALS;
+  if (cacheTestimonials) return cacheTestimonials;
+  const stored = safeLocalStorageGet<Testimonial[]>(TESTIMONIALS_KEY, INITIAL_TESTIMONIALS);
+  cacheTestimonials = stored;
+  return stored;
+}
+
+export function getPublishedTestimonials(): Testimonial[] {
+  const all = getTestimonials();
+  return all.filter((t) => t.isPublished);
+}
+
+export function addTestimonial(item: Omit<Testimonial, "id" | "createdAt">): Testimonial {
+  const newTestimonial: Testimonial = {
+    ...item,
+    id: `testi-${Date.now().toString(36)}`,
+    createdAt: new Date().toISOString(),
+  };
+  const existing = getTestimonials();
+  const updated = [newTestimonial, ...existing];
+  cacheTestimonials = updated;
+  safeLocalStorageSet(TESTIMONIALS_KEY, updated);
+  idbSet(TESTIMONIALS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_testimonials_updated"));
+  }
+  return newTestimonial;
+}
+
+export function updateTestimonial(id: string, updates: Partial<Testimonial>): void {
+  const existing = getTestimonials();
+  const updated = existing.map((item) => (item.id === id ? { ...item, ...updates } : item));
+  cacheTestimonials = updated;
+  safeLocalStorageSet(TESTIMONIALS_KEY, updated);
+  idbSet(TESTIMONIALS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_testimonials_updated"));
+  }
+}
+
+export function deleteTestimonial(id: string): void {
+  const existing = getTestimonials();
+  const updated = existing.filter((item) => item.id !== id);
+  cacheTestimonials = updated;
+  safeLocalStorageSet(TESTIMONIALS_KEY, updated);
+  idbSet(TESTIMONIALS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_testimonials_updated"));
+  }
+}
+
+// --- CONSULTATION BOOKINGS & CALENDAR SYSTEM ---
+export const STANDARD_CONSULTATION_SLOTS = [
+  "09:00 AM",
+  "10:30 AM",
+  "12:00 PM",
+  "02:00 PM",
+  "03:30 PM",
+  "05:00 PM",
+];
+
+export function getConsultations(): ConsultationBooking[] {
+  if (typeof window === "undefined") return INITIAL_CONSULTATIONS;
+  if (cacheConsultations) return cacheConsultations;
+  const stored = safeLocalStorageGet<ConsultationBooking[]>(CONSULTATIONS_KEY, INITIAL_CONSULTATIONS);
+  cacheConsultations = stored;
+  return stored;
+}
+
+export function getAvailableTimeSlots(dateString: string): { slot: string; available: boolean }[] {
+  const consultations = getConsultations();
+  const bookedOnDate = new Set(
+    consultations
+      .filter((c) => c.date === dateString && c.status !== "Cancelled")
+      .map((c) => c.timeSlot)
+  );
+
+  return STANDARD_CONSULTATION_SLOTS.map((slot) => ({
+    slot,
+    available: !bookedOnDate.has(slot),
+  }));
+}
+
+export function bookConsultation(
+  bookingData: Omit<ConsultationBooking, "id" | "status" | "createdAt">
+): { success: boolean; booking?: ConsultationBooking; error?: string } {
+  const existing = getConsultations();
+
+  // Check collision
+  const collision = existing.find(
+    (c) =>
+      c.date === bookingData.date &&
+      c.timeSlot === bookingData.timeSlot &&
+      c.status !== "Cancelled"
+  );
+
+  if (collision) {
+    return {
+      success: false,
+      error: `The ${bookingData.timeSlot} slot on ${bookingData.date} is already reserved. Please select another time slot.`,
+    };
+  }
+
+  const newBooking: ConsultationBooking = {
+    ...bookingData,
+    id: `cst-${Date.now().toString(36).toUpperCase()}`,
+    status: "Confirmed",
+    createdAt: new Date().toISOString(),
+  };
+
+  const updated = [newBooking, ...existing];
+  cacheConsultations = updated;
+  safeLocalStorageSet(CONSULTATIONS_KEY, updated);
+  idbSet(CONSULTATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_consultations_updated"));
+  }
+
+  return { success: true, booking: newBooking };
+}
+
+export function updateConsultationStatus(
+  id: string,
+  status: ConsultationBooking["status"]
+): void {
+  const existing = getConsultations();
+  const updated = existing.map((item) => (item.id === id ? { ...item, status } : item));
+  cacheConsultations = updated;
+  safeLocalStorageSet(CONSULTATIONS_KEY, updated);
+  idbSet(CONSULTATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_consultations_updated"));
+  }
+}
+
+export function deleteConsultation(id: string): void {
+  const existing = getConsultations();
+  const updated = existing.filter((item) => item.id !== id);
+  cacheConsultations = updated;
+  safeLocalStorageSet(CONSULTATIONS_KEY, updated);
+  idbSet(CONSULTATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_consultations_updated"));
+  }
+}
+
+// --- FOUNDER INFO ---
+export function getFounderInfo(): FounderInfo {
+  if (typeof window === "undefined") return DEFAULT_FOUNDER_INFO;
+  if (cacheFounder) return cacheFounder;
+  const stored = safeLocalStorageGet<FounderInfo>(FOUNDER_KEY, DEFAULT_FOUNDER_INFO);
+  cacheFounder = { ...DEFAULT_FOUNDER_INFO, ...stored };
+  return cacheFounder;
+}
+
+export function updateFounderInfo(updates: Partial<FounderInfo>): FounderInfo {
+  const current = getFounderInfo();
+  const merged = { ...current, ...updates };
+  cacheFounder = merged;
+  safeLocalStorageSet(FOUNDER_KEY, merged);
+  idbSet(FOUNDER_KEY, merged);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_founder_updated"));
+  }
+  return merged;
+}
+
+// --- TEAM MEMBERS ---
+export function getTeamMembers(): TeamMember[] {
+  if (typeof window === "undefined") return DEFAULT_TEAM_MEMBERS;
+  if (cacheTeam) return cacheTeam;
+  const stored = safeLocalStorageGet<TeamMember[]>(TEAM_KEY, DEFAULT_TEAM_MEMBERS);
+  cacheTeam = stored;
+  return stored;
+}
+
+export function addTeamMember(member: Omit<TeamMember, "id">): TeamMember {
+  const newMember: TeamMember = {
+    ...member,
+    id: `team-${Date.now().toString(36)}`,
+  };
+  const existing = getTeamMembers();
+  const updated = [...existing, newMember];
+  cacheTeam = updated;
+  safeLocalStorageSet(TEAM_KEY, updated);
+  idbSet(TEAM_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_team_updated"));
+  }
+  return newMember;
+}
+
+export function updateTeamMember(id: string, updates: Partial<TeamMember>): void {
+  const existing = getTeamMembers();
+  const updated = existing.map((m) => (m.id === id ? { ...m, ...updates } : m));
+  cacheTeam = updated;
+  safeLocalStorageSet(TEAM_KEY, updated);
+  idbSet(TEAM_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_team_updated"));
+  }
+}
+
+export function deleteTeamMember(id: string): void {
+  const existing = getTeamMembers();
+  const updated = existing.filter((m) => m.id !== id);
+  cacheTeam = updated;
+  safeLocalStorageSet(TEAM_KEY, updated);
+  idbSet(TEAM_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_team_updated"));
+  }
+}
+

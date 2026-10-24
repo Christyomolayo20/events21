@@ -24,8 +24,13 @@ import {
   getBrandConfig,
   updateBrandConfig,
   compressImageFile,
+  getConsultations,
+  getTestimonials,
 } from "@/lib/store";
 import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem } from "@/lib/types";
+import ConsultationsManager from "@/components/admin/ConsultationsManager";
+import TestimonialsManager from "@/components/admin/TestimonialsManager";
+import BrandAndTeamManager from "@/components/admin/BrandAndTeamManager";
 import {
   Lock,
   LogOut,
@@ -60,13 +65,17 @@ import {
   Images,
   Video,
   Loader2,
+  CalendarCheck,
+  Quote,
 } from "lucide-react";
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [activeTab, setActiveTab] = useState<"enquiries" | "gifts" | "portfolio" | "settings">("enquiries");
+  const [activeTab, setActiveTab] = useState<
+    "enquiries" | "consultations" | "portfolio" | "gifts" | "testimonials" | "settings"
+  >("enquiries");
 
   // State data
   const [enquiries, setEnquiries] = useState<EventEnquiry[]>([]);
@@ -74,6 +83,8 @@ export default function AdminPage() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [giftCatalogue, setGiftCatalogue] = useState<GiftItem[]>([]);
   const [config, setConfig] = useState(getBrandConfig());
+  const [consultationsCount, setConsultationsCount] = useState(0);
+  const [testimonialsCount, setTestimonialsCount] = useState(0);
 
   // Filter & Search
   const [enquirySearch, setEnquirySearch] = useState("");
@@ -154,6 +165,8 @@ export default function AdminPage() {
     window.addEventListener("events21_portfolio_updated", handleUpdate);
     window.addEventListener("events21_gift_catalogue_updated", handleUpdate);
     window.addEventListener("events21_settings_updated", handleUpdate);
+    window.addEventListener("events21_consultations_updated", handleUpdate);
+    window.addEventListener("events21_testimonials_updated", handleUpdate);
 
     return () => {
       window.removeEventListener("events21_enquiries_updated", handleUpdate);
@@ -161,6 +174,8 @@ export default function AdminPage() {
       window.removeEventListener("events21_portfolio_updated", handleUpdate);
       window.removeEventListener("events21_gift_catalogue_updated", handleUpdate);
       window.removeEventListener("events21_settings_updated", handleUpdate);
+      window.removeEventListener("events21_consultations_updated", handleUpdate);
+      window.removeEventListener("events21_testimonials_updated", handleUpdate);
     };
   }, []);
 
@@ -170,6 +185,8 @@ export default function AdminPage() {
     setPortfolio(getPortfolio());
     setGiftCatalogue(getGiftCatalogue());
     setConfig(getBrandConfig());
+    setConsultationsCount(getConsultations().length);
+    setTestimonialsCount(getTestimonials().length);
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -629,6 +646,22 @@ export default function AdminPage() {
 
           <button
             type="button"
+            onClick={() => setActiveTab("consultations")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "consultations"
+                ? "bg-brand-purple text-white shadow-xs"
+                : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
+            }`}
+          >
+            <CalendarCheck className="w-4 h-4" />
+            <span>Consultations</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
+              {consultationsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("portfolio")}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "portfolio"
@@ -661,6 +694,22 @@ export default function AdminPage() {
 
           <button
             type="button"
+            onClick={() => setActiveTab("testimonials")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "testimonials"
+                ? "bg-brand-plum text-white shadow-xs"
+                : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
+            }`}
+          >
+            <Star className="w-4 h-4" />
+            <span>Client Testimonials</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
+              {testimonialsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("settings")}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "settings"
@@ -669,7 +718,7 @@ export default function AdminPage() {
             }`}
           >
             <Settings className="w-4 h-4" />
-            <span>Studio Settings</span>
+            <span>Studio & Founder Settings</span>
           </button>
         </div>
 
@@ -1215,93 +1264,108 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* TAB: CONSULTATIONS */}
+        {activeTab === "consultations" && (
+          <ConsultationsManager onNotify={showToast} />
+        )}
+
+        {/* TAB: TESTIMONIALS */}
+        {activeTab === "testimonials" && (
+          <TestimonialsManager onNotify={showToast} />
+        )}
+
         {/* TAB 4: SETTINGS */}
         {activeTab === "settings" && (
-          <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
-            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-2">
-              Studio Contact & Social Information
-            </h3>
-            <p className="text-xs text-brand-plum/70 font-sans mb-6">
-              Update the official phone, email, address, and Instagram links shown across the website.
-            </p>
+          <div className="space-y-10">
+            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+              <h3 className="font-serif text-2xl font-bold text-brand-plum mb-2">
+                Studio Contact & Social Information
+              </h3>
+              <p className="text-xs text-brand-plum/70 font-sans mb-6">
+                Update the official phone, email, address, and Instagram links shown across the website.
+              </p>
 
-            <form onSubmit={handleSaveSettings} className="space-y-4 text-xs font-sans">
-              <div>
-                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Studio Phone / Hotline
-                </label>
-                <input
-                  type="text"
-                  value={config.phone}
-                  onChange={(e) => setConfig({ ...config, phone: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
-                />
-              </div>
-
-              <div>
-                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  WhatsApp Number (with country code, digits only)
-                </label>
-                <input
-                  type="text"
-                  value={config.whatsappNumber}
-                  onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
-                />
-              </div>
-
-              <div>
-                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Official Email Address
-                </label>
-                <input
-                  type="email"
-                  value={config.email}
-                  onChange={(e) => setConfig({ ...config, email: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
-                />
-              </div>
-
-              <div>
-                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Official Instagram URL (Event 21)
-                </label>
-                <input
-                  type="url"
-                  value={config.instagramUrl}
-                  onChange={(e) => setConfig({ ...config, instagramUrl: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
-                />
-              </div>
-
-              <div>
-                <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
-                  Physical Studio Address
-                </label>
-                <input
-                  type="text"
-                  value={config.address}
-                  onChange={(e) => setConfig({ ...config, address: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
-                />
-              </div>
-
-              {settingsSaved && (
-                <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs flex items-center gap-2 border border-emerald-200">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Settings updated successfully!</span>
+              <form onSubmit={handleSaveSettings} className="space-y-4 text-xs font-sans">
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Studio Phone / Hotline
+                  </label>
+                  <input
+                    type="text"
+                    value={config.phone}
+                    onChange={(e) => setConfig({ ...config, phone: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
                 </div>
-              )}
 
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="px-8 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold uppercase tracking-widest text-xs transition-colors shadow-sm cursor-pointer"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    WhatsApp Number (with country code, digits only)
+                  </label>
+                  <input
+                    type="text"
+                    value={config.whatsappNumber}
+                    onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
+                </div>
+
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Official Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={config.email}
+                    onChange={(e) => setConfig({ ...config, email: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
+                </div>
+
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Official Instagram URL (Event 21)
+                  </label>
+                  <input
+                    type="url"
+                    value={config.instagramUrl}
+                    onChange={(e) => setConfig({ ...config, instagramUrl: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
+                </div>
+
+                <div>
+                  <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
+                    Physical Studio Address
+                  </label>
+                  <input
+                    type="text"
+                    value={config.address}
+                    onChange={(e) => setConfig({ ...config, address: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border text-sm text-brand-plum focus:outline-brand-purple"
+                  />
+                </div>
+
+                {settingsSaved && (
+                  <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs flex items-center gap-2 border border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Settings updated successfully!</span>
+                  </div>
+                )}
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    className="px-8 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white font-semibold uppercase tracking-widest text-xs transition-colors shadow-sm cursor-pointer"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Hero Video, Founder Profile, and Team Profiles Management */}
+            <BrandAndTeamManager onNotify={showToast} />
           </div>
         )}
       </div>

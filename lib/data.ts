@@ -1,11 +1,14 @@
-import { EventEnquiry, GiftItem, GiftRequest, PortfolioItem, ServiceItem } from "./types";
+import { EventEnquiry, GiftItem, GiftRequest, PortfolioItem, ServiceItem, Testimonial, ConsultationBooking, TeamMember, FounderInfo } from "./types";
 
 export const BRAND_CONFIG = {
-  name: "Event 21",
+  name: "Events 21",
+  legalName: "Royalty Twenty One Events",
   subBrand: "Gifts by Adeola",
   tagline: "Curating Regal Experiences. Orchestrating Royalty.",
   description:
-    "A premier royal event planning, styling, and management studio based in Lagos, Nigeria. Crafting regal celebrations, timeless weddings, and bespoke gifting with unmatched sophistication.",
+    "Events 21 creates thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories.",
+  longDescription:
+    "A premier royal event planning and styling brand specialising in weddings, birthdays, celebrations, and memorable gatherings across Ibadan, Lagos, and nationwide.",
   instagramUrl: "https://www.instagram.com/events_21/",
   instagramHandle: "@events_21",
   giftsInstagramUrl: "https://www.instagram.com/giftsbyadeola/",
@@ -14,9 +17,13 @@ export const BRAND_CONFIG = {
   phoneFormatted: "+234 806 054 9596",
   whatsappNumber: "2348060549596", // International format for wa.me
   email: "Royaltyeventservice@gmail.com",
-  address: "No 12, Johnson Estate, Ojodu Berger, Lagos, Lagos, Nigeria",
+  address: "No 12, Johnson Estate, Ojodu Berger, Lagos, Nigeria",
+  serviceAreas: "Serving Ibadan, Lagos, and destinations nationwide",
   openingHours: "Mon – Sat: 9:00 AM – 6:00 PM (By Appointment)",
+  heroVideoUrl: "/images/hero-video.mp4",
+  heroPosterUrl: "/images/hero-poster.jpg",
 };
+
 
 export const SERVICES_DATA: ServiceItem[] = [
   {
@@ -125,48 +132,88 @@ export const SERVICES_DATA: ServiceItem[] = [
 
 export const PORTFOLIO_DATA: PortfolioItem[] = [
   {
-    id: "the-kayodes-traditional",
-    title: "The Kayodes: A Regal Yoruba Wedding",
-    subtitle: "A royal celebration of Yoruba culture, rich royal wine aso-oke, and timeless heritage.",
+    id: "regal-yoruba-engagement",
+    title: "A Regal Yoruba Wedding Celebration",
+    subtitle: "Traditional Yoruba engagement with rich wine aso-oke, heirloom coral beads, and cultural protocol.",
     category: "Traditional",
     year: "2024",
-    location: "Lagos, Nigeria",
-    image: "/images/the-kayodes-traditional.jpg",
+    location: "Ibadan & Lagos",
+    image: "/images/landing-couple-traditional.jpg",
     featured: true,
     description:
-      "A breathtaking traditional engagement celebrating the union of The Kayodes. Featuring intricately embroidered wine and gold aso-oke, regal ceremonial staffs, coordinated family attire, and traditional Yoruba wedding customs seamlessly coordinated by Event 21.",
+      "A culturally majestic traditional engagement celebrating sacred union. Featuring intricately tailored royal burgundy and wine aso-oke, layered coral beadwork, family protocol, and bespoke ceremonial coordination by Events 21.",
     highlights: [
-      "Full cultural protocol coordination",
-      "Custom burgundy and gold royal aesthetic",
-      "Regal couple styling & heirloom beadwork",
-      "Traditional live percussion and Alaga coordination",
+      "Traditional Yoruba engagement coordination",
+      "Authentic burgundy and wine royal styling",
+      "Heirloom coral beads and Gele / Fila curation",
+      "Alaga protocol and live percussion direction",
     ],
     gallery: [
-      "/images/the-kayodes-traditional.jpg",
-      "/images/the-kayodes-portrait.jpg",
+      "/images/landing-couple-traditional.jpg",
+      "/images/the-kayodes-traditional-couple.jpg",
     ],
   },
   {
-    id: "the-kayodes-white-wedding",
-    title: "The Kayodes: An Enchanting White Wedding",
-    subtitle: "Classic monochrome sophistication, delicate bridal lace, and profound romance.",
+    id: "monochrome-editorial-wedding",
+    title: "Monochrome Editorial Romance",
+    subtitle: "High-fashion black-tie pre-wedding styling with understated modern elegance.",
     category: "Weddings",
     year: "2024",
     location: "Lagos, Nigeria",
-    image: "/images/the-kayodes-white-wedding.jpg",
+    image: "/images/landing-couple-black.jpg",
     featured: true,
     description:
-      "An ethereal white wedding characterized by timeless romance and royal poise. The groom's tailored white tuxedo paired harmoniously with the bride's exquisite high-neck beaded lace gown. Event 21 ensured every movement flowed effortlessly from the morning preparations to the vows.",
+      "A cinematic, high-fashion portrait session defined by textured black couture, intimate connection, and timeless fine-art styling crafted for the contemporary couple.",
     highlights: [
-      "Comprehensive bridal concierge & timeline",
-      "Contemporary luxury editorial photography styling",
-      "Seamless transition from ceremony to reception",
-      "Curated bridal suite gifting by Gifts by Adeola",
+      "Fine-art photography art direction",
+      "Contemporary black-tie bridal couture styling",
+      "Editorial lighting and intimate pacing",
     ],
     gallery: [
+      "/images/landing-couple-black.jpg",
+      "/images/landing-couple-white.jpg",
+    ],
+  },
+  {
+    id: "white-wedding-intimacy",
+    title: "Timeless White Wedding & Bridal Elegance",
+    subtitle: "Classic crisp white styling, tender romance, and refined simplicity.",
+    category: "Weddings",
+    year: "2024",
+    location: "Lagos, Nigeria",
+    image: "/images/landing-couple-white.jpg",
+    featured: true,
+    description:
+      "Understated luxury and genuine romance. Styled with clean tailoring, elegant white shirts, and an intimate aesthetic celebrating natural connection.",
+    highlights: [
+      "Minimalist, pure editorial concept",
+      "Natural warmth and couple choreography",
+      "Pre-wedding styling direction",
+    ],
+    gallery: [
+      "/images/landing-couple-white.jpg",
       "/images/the-kayodes-white-wedding.jpg",
-      "/images/the-kayodes-portrait.jpg",
-      "/images/ballroom-first-dance.jpg",
+    ],
+  },
+  {
+    id: "golden-80th-milestone",
+    title: "The Golden 80th Milestone Celebration",
+    subtitle: "Bespoke tablescape artistry, gold scalloped charger plates, and lush botanical centerpieces.",
+    category: "Celebrations",
+    year: "2024",
+    location: "Ibadan, Nigeria",
+    image: "/images/decor-tablescape-celebration.jpg",
+    featured: true,
+    description:
+      "An opulent 80th birthday dinner celebration. Featuring chocolate table linens, gold scalloped charger plates, crisp green folded napkins, and bespoke multi-hued rose centerpieces designed to honour an extraordinary milestone.",
+    highlights: [
+      "Custom gold and green tablescape architecture",
+      "Artisanal fresh floral centerpieces",
+      "Milestone birthday tribute and dignitary hospitality",
+    ],
+    gallery: [
+      "/images/decor-tablescape-celebration.jpg",
+      "/images/milestone-matriarch-celebration.jpg",
     ],
   },
   {
@@ -177,8 +224,6 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
     year: "2024",
     location: "Lagos, Nigeria",
     image: "/images/ballroom-first-dance.jpg",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-wedding-couple-dancing-under-the-lights-42998-large.mp4",
-    mediaType: "video",
     featured: true,
     description:
       "The pinnacle reception moment: a dramatic first dance in heavy low fog, illuminated by cascading crystal icicles, burgundy ceiling drapery, and indoor cold pyrotechnics that created an awe-inspiring royal spectacle for guests.",
@@ -186,67 +231,10 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
       "Precision low-fog dry ice machine synchronization",
       "Indoor safe cold-spark fountain effects",
       "Architectural ceiling drapery in rich wine velveteen",
-      "Bespoke tiered cake staging & floral riser",
     ],
     gallery: [
       "/images/ballroom-first-dance.jpg",
-      "/images/the-kayodes-white-wedding.jpg",
     ],
-  },
-  {
-    id: "the-kayodes-editorial-portrait",
-    title: "The Kayodes: Modern Fine Art Portraiture",
-    subtitle: "Minimalist, high-fashion pre-wedding styling highlighting subtle elegance and timeless grace.",
-    category: "Weddings",
-    year: "2024",
-    location: "Lagos, Nigeria",
-    image: "/images/the-kayodes-portrait.jpg",
-    featured: false,
-    description:
-      "An editorial studio session capturing genuine intimacy, pearl embellishments, and classic styling. Styled to reflect the couple's personal aesthetic ahead of their grand celebrations.",
-    highlights: [
-      "Studio art direction and mood board",
-      "Pearl detail styling & jewelry curation",
-      "Editorial lighting guidance",
-    ],
-    gallery: ["/images/the-kayodes-portrait.jpg"],
-  },
-  {
-    id: "candlelit-gala-tablescape",
-    title: "The Golden Hour Gala: Tablescape Artistry",
-    subtitle: "Warm amber candlelight, delicate crystal stemware, and lush botanical centerpieces.",
-    category: "Ballrooms & Decor",
-    year: "2024",
-    location: "Victoria Island, Lagos",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
-    featured: false,
-    description:
-      "A grand celebratory dinner featuring continuous banquet tables adorned with tapered candles in brass holders, seasonal floral blooms, and gold-rimmed glassware designed to foster connection.",
-    highlights: [
-      "Custom tapered candle lighting architecture",
-      "Textured linen runners & bespoke chargers",
-      "Menu card calligraphy & wax seals",
-    ],
-    gallery: ["https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80"],
-  },
-  {
-    id: "milestone-anniversary-soiree",
-    title: "The Golden Jubilee: Milestone Birthday & Retirement Gala",
-    subtitle: "A regal Nigerian celebration of longevity, grace, and matriarchal excellence in bespoke aso-oke.",
-    category: "Celebrations",
-    year: "2024",
-    location: "Ikoyi, Lagos",
-    image: "/images/milestone-matriarch-celebration.jpg",
-    featured: true,
-    description:
-      "A distinguished milestone celebration honoring decades of grace and family legacy. Styled in traditional emerald green and royal navy aso-oke with hand-selected coral beads and coordinating gold accessories. Coordinated with VIP dignitary protocol and musical tribute staging.",
-    highlights: [
-      "Custom royal green & navy aso-oke styling",
-      "Traditional coral heirloom jewelry curation",
-      "VIP dignitary greeting and seating protocol",
-      "Milestone retrospective and musical tributes",
-    ],
-    gallery: ["/images/milestone-matriarch-celebration.jpg"],
   },
 ];
 
@@ -429,3 +417,35 @@ export const INITIAL_GIFT_REQUESTS: GiftRequest[] = [
     createdAt: "2026-10-21T16:20:00Z",
   },
 ];
+
+export const DEFAULT_FOUNDER_INFO: FounderInfo = {
+  name: "Adeola Oyeyode",
+  title: "CEO & Creative Director",
+  image: "/images/founder-events21.jpg",
+  bio: "Adeola Oyeyode is the founder and visionary leader of Events 21 (Royalty Twenty One Events) and Gifts by Adeola. Guided by a profound passion for design, African culture, and logistical precision, she has orchestrated weddings, milestone jubilees, and VIP galas across Ibadan, Lagos, and Nigeria.",
+  vision: "To create thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories, allowing every host to be a relaxed guest at their own event.",
+};
+
+export const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
+  {
+    id: "team-1",
+    name: "The Production Crew",
+    role: "On-Site Staging & Logistics Coordinators",
+    image: "/images/about-team-portrait.jpg",
+    bio: "Our lead production unit manages vendor coordination, minute-by-minute run-of-show cues, stagecraft, and guest protocol with effortless poise.",
+  },
+  {
+    id: "team-2",
+    name: "The Coordination Squad",
+    role: "Bridal Concierge & Guest Hospitality",
+    image: "/images/about-team-seated.jpg",
+    bio: "Attentive stylists and coordinators ensuring seamless bridal party transitions, VIP welcoming, and immaculate table arrangements.",
+  },
+];
+
+// Public testimonials: Genuine testimonials only. Empty state by default as instructed!
+export const INITIAL_TESTIMONIALS: Testimonial[] = [];
+
+// Consultation Bookings
+export const INITIAL_CONSULTATIONS: ConsultationBooking[] = [];
+

@@ -83,3 +83,49 @@ export interface ServiceItem {
   inclusions: string[];
   suitableFor: string;
 }
+
+export interface Testimonial {
+  id: string;
+  clientName: string;
+  roleOrEvent?: string; // e.g. "Bride & Groom", "Milestone 80th Celebrant", "Corporate Gala"
+  clientRole?: string;
+  eventName?: string;
+  text: string;
+  quote?: string;
+  rating: number; // 1 to 5
+  image?: string;
+  isPublished: boolean;
+  createdAt: string;
+}
+
+export type ConsultationStatus = "Pending Confirmation" | "Confirmed" | "Completed" | "Cancelled";
+
+export interface ConsultationBooking {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  eventType: EventType;
+  date: string; // YYYY-MM-DD
+  timeSlot: string; // e.g. "10:00 AM", "02:00 PM"
+  message?: string;
+  status: ConsultationStatus;
+  createdAt: string;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  bio?: string;
+}
+
+export interface FounderInfo {
+  name: string;
+  title: string;
+  image: string;
+  bio: string;
+  vision: string;
+}
+
