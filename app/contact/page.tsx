@@ -156,7 +156,7 @@ function ContactContent() {
                       No 12, Johnson Estate, Ojodu Berger, Lagos, Nigeria
                     </span>
                     <span className="block text-xs text-brand-purple font-medium mt-1">
-                      Serving Ibadan, Lagos, and destinations nationwide
+                      Serving clients nationwide &amp; available to travel
                     </span>
                   </div>
                 </div>

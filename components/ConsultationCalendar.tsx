@@ -169,7 +169,7 @@ export default function ConsultationCalendar({
 
     const title = encodeURIComponent(`Events 21 Consultation - ${confirmedBooking.fullName}`);
     const details = encodeURIComponent(
-      `Consultation with Events 21 for ${confirmedBooking.eventType}.\nReference: ${confirmedBooking.id}\nPhone: ${confirmedBooking.phone}\nStudio: Ojodu Berger, Lagos (Serving Lagos, Ibadan & Nationwide).`
+      `Consultation with Events 21 for ${confirmedBooking.eventType}.\nReference: ${confirmedBooking.id}\nPhone: ${confirmedBooking.phone}\nStudio: Ojodu Berger, Lagos (Serving Clients Nationwide & Available to Travel).`
     );
     const location = encodeURIComponent("Events 21 Studio / Virtual WhatsApp Call");
 
@@ -494,7 +494,7 @@ export default function ConsultationCalendar({
           </label>
           <textarea
             rows={3}
-            placeholder="Tell us about your celebration city (Ibadan, Lagos, etc.), estimated guest count, or special vision..."
+            placeholder="Tell us about your celebration city or destination, estimated guest count, or special vision..."
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"

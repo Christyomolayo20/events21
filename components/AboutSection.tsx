@@ -25,7 +25,7 @@ export default function AboutSection() {
                   "All Your Event Needs"
                 </p>
                 <p className="text-xs font-sans uppercase tracking-widest text-brand-gold mt-1">
-                  The Event 21 Team • Lagos, Nigeria
+                  The Events 21 Team • Serving Nationwide & Available to Travel
                 </p>
               </div>
             </div>
@@ -34,7 +34,7 @@ export default function AboutSection() {
           {/* Editorial Content (7 cols) */}
           <div className="lg:col-span-7 order-1 lg:order-2 space-y-5">
             <div className="inline-block text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans">
-              About Event 21
+              About Events 21
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-[1.2]">
@@ -46,7 +46,7 @@ export default function AboutSection() {
 
             <div className="space-y-4 text-base sm:text-lg text-brand-plum/80 font-sans leading-relaxed font-light">
               <p>
-                Based in Lagos, Nigeria, <strong>Event 21</strong> is a bespoke event planning and
+                Serving clients nationwide and available to travel, <strong>Events 21</strong> is a bespoke event planning and
                 styling boutique founded on a singular conviction: that extraordinary events are
                 born from thoughtful curation, authentic storytelling, and meticulous attention to
                 every detail.

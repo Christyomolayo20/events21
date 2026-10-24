@@ -7,14 +7,14 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 export const metadata: Metadata = {
   metadataBase: new URL("https://events21.ng"),
   title: {
-    default: "Events 21 | Event Planning, Styling & Celebrations | Ibadan & Lagos",
+    default: "Events 21 | Luxury Event Planning, Styling & Celebrations | Serving Nationwide & Travel",
     template: "%s | Events 21",
   },
   description:
-    "Events 21 (Royalty Twenty One Events) creates thoughtfully planned, beautifully styled celebrations. Professional wedding planning, milestone birthdays, and event styling in Ibadan, Lagos, and nationwide.",
+    "Events 21 (Royalty Twenty One Events) creates thoughtfully planned, beautifully styled celebrations. Professional wedding planning, milestone birthdays, and event styling—serving clients nationwide and available to travel.",
   keywords: [
-    "Event planners in Ibadan",
-    "Wedding planners in Ibadan",
+    "Luxury event planner Nigeria",
+    "Wedding planner Nigeria",
     "Events 21",
     "Royalty Twenty One Events",
     "Event planning and styling",
@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     "Wedding decoration and event styling",
     "Nigerian luxury wedding planner",
     "Yoruba traditional engagement planner",
+    "Nationwide destination event planner",
     "Gifts by Adeola",
   ],
   alternates: {

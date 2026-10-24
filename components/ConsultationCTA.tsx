@@ -11,7 +11,7 @@ interface ConsultationCTAProps {
 
 export default function ConsultationCTA({
   title = "Ready to Bring Your Vision to Life?",
-  subtitle = "Whether planning a regal wedding, an intimate milestone birthday, or a grand gala across Ibadan, Lagos, or nationwide, we are here to guide every step with poise.",
+  subtitle = "Whether planning a regal wedding, an intimate milestone birthday, or a grand gala nationwide, we are here to guide every step with poise—available to travel wherever your milestone calls.",
 }: ConsultationCTAProps) {
   return (
     <section className="py-16 md:py-24 bg-brand-warm-white relative overflow-hidden">

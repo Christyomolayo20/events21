@@ -102,15 +102,15 @@ export default function Hero() {
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-brand-gold/15 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Hero Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40 text-center flex flex-col items-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 sm:py-36 md:py-40 text-center flex flex-col items-center">
         {/* Brand Crest / Distinction Badge */}
-        <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-brand-gold/40 text-brand-gold-light text-xs font-sans tracking-[0.25em] uppercase font-semibold mb-6 sm:mb-8 animate-fade-in shadow-lg">
-          <Crown className="w-4 h-4 text-brand-gold animate-bounce-subtle" />
-          <span>The Royal Standard in Event Planning & Styling</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full bg-white/10 backdrop-blur-md border border-brand-gold/40 text-brand-gold-light text-[10px] sm:text-xs font-sans tracking-[0.16em] sm:tracking-[0.25em] uppercase font-semibold mb-5 sm:mb-8 animate-fade-in shadow-lg">
+          <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold animate-bounce-subtle shrink-0" />
+          <span>The Royal Standard in Event Planning &amp; Styling</span>
         </div>
 
         {/* Cinematic Headline */}
-        <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.08] mb-6 text-white text-balance drop-shadow-md">
+        <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.12] sm:leading-[1.08] mb-5 sm:mb-6 text-white text-balance drop-shadow-md">
           Curating Regal Experiences. <br />
           <span className="italic font-normal font-serif text-transparent bg-clip-text bg-gradient-to-r from-[#F7E7CE] via-[#E5CF92] to-[#C5A059]">
             Orchestrating Royalty.
@@ -118,9 +118,9 @@ export default function Hero() {
         </h1>
 
         {/* Clear, Concise Brand Statement */}
-        <p className="text-base sm:text-lg md:text-xl text-white/90 font-sans leading-relaxed max-w-2xl mx-auto font-light mb-10 text-balance drop-shadow-sm">
+        <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-sans leading-relaxed max-w-2xl mx-auto font-light mb-8 sm:mb-10 text-balance drop-shadow-sm px-2">
           Where thoughtful design meets flawless execution. Specialising in luxury weddings,
-          milestone celebrations, and cultural gatherings across Ibadan, Lagos, and destinations nationwide.
+          milestone celebrations, and cultural gatherings—serving clients nationwide and available to travel.
         </p>
 
         {/* Primary and Secondary Calls to Action */}

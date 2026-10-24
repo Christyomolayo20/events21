@@ -8,7 +8,7 @@ export const BRAND_CONFIG = {
   description:
     "Events 21 creates thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories.",
   longDescription:
-    "A premier royal event planning and styling brand specialising in weddings, birthdays, celebrations, and memorable gatherings across Ibadan, Lagos, and nationwide.",
+    "A premier royal event planning and styling brand specialising in weddings, birthdays, celebrations, and memorable gatherings—serving clients nationwide and available to travel.",
   instagramUrl: "https://www.instagram.com/events_21/",
   instagramHandle: "@events_21",
   giftsInstagramUrl: "https://www.instagram.com/giftsbyadeola/",
@@ -18,7 +18,7 @@ export const BRAND_CONFIG = {
   whatsappNumber: "2348060549596", // International format for wa.me
   email: "Royaltyeventservice@gmail.com",
   address: "No 12, Johnson Estate, Ojodu Berger, Lagos, Nigeria",
-  serviceAreas: "Serving Ibadan, Lagos, and destinations nationwide",
+  serviceAreas: "Serving clients nationwide and available to travel",
   openingHours: "Mon – Sat: 9:00 AM – 6:00 PM (By Appointment)",
   heroVideoUrl: "/images/hero-video.mp4",
   heroPosterUrl: "/images/hero-poster.jpg",
@@ -33,7 +33,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     snippet:
       "Comprehensive curation for contemporary white weddings and traditional engagements, merging cultural heritage with royal aesthetics, floral architecture, and seamless coordination.",
     description:
-      "Specialized curation for contemporary and traditional Nigerian weddings fit for royalty. We harmoniously merge cultural heritage with high-fashion aesthetics, bespoke floral architecture, ceremonial Alaga protocols, low-fog dry ice, and dramatic ambient lighting across Ibadan, Lagos, and destinations nationwide.",
+      "Specialized curation for contemporary and traditional Nigerian weddings fit for royalty. We harmoniously merge cultural heritage with high-fashion aesthetics, bespoke floral architecture, ceremonial Alaga protocols, low-fog dry ice, and dramatic ambient lighting—serving clients nationwide and available to travel.",
     image: "/images/service-wedding-reception.jpg",
     inclusions: [
       "Custom mood boards, colour palettes & royal design decks",
@@ -436,7 +436,7 @@ export const DEFAULT_FOUNDER_INFO: FounderInfo = {
   name: "Adeola Oyeyode",
   title: "CEO & Creative Director",
   image: "/images/founder-events21.jpg",
-  bio: "Adeola Oyeyode is the founder and visionary leader of Events 21 (Royalty Twenty One Events) and Gifts by Adeola. Guided by a profound passion for design, African culture, and logistical precision, she has orchestrated weddings, milestone jubilees, and VIP galas across Ibadan, Lagos, and Nigeria.",
+  bio: "Adeola Oyeyode is the founder and visionary leader of Events 21 (Royalty Twenty One Events) and Gifts by Adeola. Guided by a profound passion for design, African culture, and logistical precision, she has orchestrated weddings, milestone jubilees, and VIP galas nationwide and is available to travel.",
   vision: "To create thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories, allowing every host to be a relaxed guest at their own event.",
 };
 

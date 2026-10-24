@@ -7,7 +7,7 @@ import ConsultationCTA from "@/components/ConsultationCTA";
 export const metadata = {
   title: "Services & Scope | Events 21 • Event Planning, Styling & Coordination",
   description:
-    "Explore the complete scope of Events 21's luxury wedding planning, romantic proposal concepts, milestone celebrations, and royal event coordination across Ibadan, Lagos, and nationwide.",
+    "Explore the complete scope of Events 21's luxury wedding planning, romantic proposal concepts, milestone celebrations, and royal event coordination—serving clients nationwide and available to travel.",
 };
 
 export default function ServicesPage() {

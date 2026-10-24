@@ -57,7 +57,7 @@ export default function AboutPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/images/about-team-portrait.jpg"
-                  alt="Events 21 Team in Ibadan and Lagos"
+                  alt="Events 21 Event Planning Team"
                   className="w-full h-full object-cover"
                   style={{ objectPosition: "center center" }}
                 />
@@ -67,7 +67,7 @@ export default function AboutPage() {
                     "Thoughtfully Planned. Beautifully Styled."
                   </p>
                   <p className="text-xs font-sans uppercase tracking-widest text-brand-gold mt-1">
-                    Events 21 • Ibadan &amp; Lagos, Nigeria
+                    Events 21 • Serving Nationwide &amp; Available to Travel
                   </p>
                 </div>
               </div>
@@ -115,7 +115,7 @@ export default function AboutPage() {
               <p className="text-sm sm:text-base text-brand-plum/80 font-sans leading-relaxed">
                 To be the benchmark event planning and styling brand recognized for elevating African celebrations
                 into timeless works of art—delivering an unmatched standard of beauty, cultural respect, and
-                peace of mind for families and hosts across Ibadan, Lagos, and beyond.
+                peace of mind for families and hosts nationwide, and available to travel.
               </p>
             </div>
             <div className="pt-6 mt-6 border-t border-brand-warm-border/60">

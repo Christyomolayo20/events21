@@ -77,7 +77,7 @@ export default function Footer() {
 
           {/* Copyright & Location Information */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-white/50">
-            <span>Serving Ibadan, Lagos &amp; Nationwide</span>
+            <span>Serving Clients Nationwide • Available to Travel</span>
             <span className="hidden sm:inline">•</span>
             <span>&copy; {currentYear} Events 21 (Royalty Twenty One Events).</span>
           </div>

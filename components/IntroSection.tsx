@@ -15,7 +15,7 @@ export default function IntroSection() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/about-team-portrait.jpg"
-                alt="Events 21 Team in Ibadan and Lagos"
+                alt="Events 21 Event Planning Team"
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 style={{ objectPosition: "center center" }}
               />
@@ -52,9 +52,7 @@ export default function IntroSection() {
                 that reflect who you are without the stress of managing the moving parts.
               </p>
               <p className="text-sm sm:text-base text-brand-plum/70">
-                From vibrant traditional Yoruba engagements and contemporary white weddings to milestone birthdays and private dinners
-                across Ibadan, Lagos, and destinations nationwide, our team orchestrates every timeline, vendor, and floral
-                installation with genuine care and unwavering professionalism.
+                From vibrant traditional Yoruba engagements and contemporary white weddings to milestone birthdays and private dinners—serving clients nationwide and available to travel, our team orchestrates every timeline, vendor, and floral installation with genuine care and unwavering professionalism.
               </p>
             </div>
 
