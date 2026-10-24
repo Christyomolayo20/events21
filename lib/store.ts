@@ -525,8 +525,20 @@ export function getTestimonials(): Testimonial[] {
   if (typeof window === "undefined") return INITIAL_TESTIMONIALS;
   if (cacheTestimonials) return cacheTestimonials;
   const stored = safeLocalStorageGet<Testimonial[]>(TESTIMONIALS_KEY, INITIAL_TESTIMONIALS);
-  cacheTestimonials = stored;
-  return stored;
+  if (!stored || stored.length === 0) {
+    cacheTestimonials = INITIAL_TESTIMONIALS;
+    safeLocalStorageSet(TESTIMONIALS_KEY, INITIAL_TESTIMONIALS);
+    return INITIAL_TESTIMONIALS;
+  }
+  // Merge any default testimonials that are not already present
+  const merged = [...stored];
+  INITIAL_TESTIMONIALS.forEach((item) => {
+    if (!merged.some((m) => m.id === item.id)) {
+      merged.push(item);
+    }
+  });
+  cacheTestimonials = merged;
+  return merged;
 }
 
 export function getPublishedTestimonials(): Testimonial[] {

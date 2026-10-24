@@ -233,13 +233,24 @@ export default function TestimonialsManager({ onNotify }: TestimonialsManagerPro
             {testimonials.map((item) => (
               <div
                 key={item.id}
-                className="p-5 rounded-2xl border border-brand-warm-border bg-brand-warm-white/40 flex flex-col justify-between transition-all hover:border-brand-purple/30"
+                className="relative rounded-2xl overflow-hidden border border-brand-warm-border p-5 flex flex-col justify-between transition-all hover:border-brand-purple/30 bg-white shadow-2xs"
               >
-                <div>
+                {item.image && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-15">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.image}
+                      alt={item.clientName}
+                      className="w-full h-full object-cover object-center filter brightness-90"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-white/90" />
+                  </div>
+                )}
+                <div className="relative z-10">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
                       {item.image ? (
-                        <div className="w-12 h-12 rounded-full overflow-hidden border border-brand-warm-border bg-brand-warm-gray shrink-0">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-purple/30 bg-brand-warm-gray shrink-0 shadow-xs">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={item.image}
