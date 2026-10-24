@@ -346,15 +346,18 @@ export function getGiftCatalogue(): GiftItem[] {
   if (typeof window === "undefined") return GIFTS_CATALOGUE;
   if (cacheGifts) return cacheGifts;
   const stored = safeLocalStorageGet<GiftItem[]>(GIFT_CATALOGUE_KEY, GIFTS_CATALOGUE);
+  const missingDefaults = GIFTS_CATALOGUE.filter((d) => !stored.some((s) => s.id === d.id));
+  const combined = [...stored, ...missingDefaults];
   // Merge any new default videoUrl or updated images
-  const merged = stored.map((item) => {
+  const merged = combined.map((item) => {
     const defaultMatch = GIFTS_CATALOGUE.find((d) => d.id === item.id);
     if (defaultMatch) {
       return {
         ...item,
+        price: item.price !== undefined ? item.price : defaultMatch.price,
         image: item.image?.startsWith("data:") ? item.image : defaultMatch.image,
-        description: defaultMatch.description,
-        details: defaultMatch.details,
+        description: item.description || defaultMatch.description,
+        details: item.details || defaultMatch.details,
         videoUrl: item.videoUrl || defaultMatch.videoUrl,
         mediaType: item.mediaType || defaultMatch.mediaType,
       };

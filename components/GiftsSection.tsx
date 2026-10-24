@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles, MessageSquare, CheckCircle2, Instagram, Gift, Crown, Sparkle } from "lucide-react";
+import { ArrowUpRight, Sparkles, MessageSquare, CheckCircle2, Instagram, Gift, Crown, Sparkle, ShoppingBag } from "lucide-react";
 import { getGiftCatalogue } from "@/lib/store";
 import { GiftItem } from "@/lib/types";
 
@@ -22,9 +22,10 @@ export default function GiftsSection() {
   const featuredGifts = gifts.slice(0, 3);
 
   const getWhatsAppOrderLink = (gift: GiftItem) => {
-    const text = `Hello Gifts by Adeola! I would like to enquire about / order the *${encodeURIComponent(
+    const priceText = gift.price && gift.price > 0 ? ` (₦${gift.price.toLocaleString()})` : "";
+    const text = `Hello Adeola! I would like to order the *${encodeURIComponent(
       gift.name
-    )}* from your curated collection.%0A%0ACould you provide budget tier options, delivery timelines, and customization details?`;
+    )}*${encodeURIComponent(priceText)} from Gifts by Adeola.%0A%0ACould you please confirm availability, payment instructions, and delivery timelines?`;
     return `https://wa.me/2348060549596?text=${text}`;
   };
 
@@ -117,9 +118,20 @@ export default function GiftsSection() {
 
                 {/* Details */}
                 <div className="p-6 sm:p-7">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-[11px] text-brand-purple font-sans font-medium mb-2.5">
-                    <Sparkles className="w-3 h-3 text-brand-gold" />
-                    <span>Curated to Your Budget</span>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-[11px] text-brand-purple font-sans font-medium">
+                      <Sparkles className="w-3 h-3 text-brand-gold" />
+                      <span>Curated to Your Budget</span>
+                    </div>
+                    {gift.price && gift.price > 0 ? (
+                      <span className="font-serif font-bold text-base text-brand-plum">
+                        ₦{gift.price.toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-sans font-medium text-brand-purple">
+                        Budget Tier
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="font-serif text-xl font-bold text-brand-plum group-hover:text-brand-purple transition-colors mb-2 line-clamp-1">
@@ -149,8 +161,8 @@ export default function GiftsSection() {
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs group/btn"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
-                  <span>Enquire / Order on WhatsApp</span>
+                  <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
+                  <span>Order on WhatsApp</span>
                 </a>
               </div>
             </div>

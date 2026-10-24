@@ -97,208 +97,184 @@ export default function TestimonialsCarousel() {
 
   return (
     <section
-      className="py-14 sm:py-18 md:py-24 bg-gradient-to-b from-[#FAF8F5] via-white to-brand-warm-white border-b border-brand-warm-border/60 overflow-hidden"
-      aria-label="Client Testimonials"
+      className="relative w-full min-h-[520px] sm:min-h-[580px] md:min-h-[640px] bg-[#18061B] text-white overflow-hidden flex flex-col justify-between"
+      aria-label="Client Testimonials Carousel"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* Section Header */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-          <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
-          <span>Client Kind Words</span>
+      {/* BACKGROUND LAYER 1: Ambient blur fill to seamlessly match section tones */}
+      {hasImage && (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={current.image}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover blur-3xl opacity-25 scale-110 transition-all duration-1000 ease-out"
+          />
         </div>
+      )}
 
-        <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-brand-plum leading-tight mb-6 sm:mb-8">
-          Words from Our{" "}
-          <span className="italic font-normal font-serif text-brand-purple">
-            Cherished Hosts.
-          </span>
-        </h2>
+      {/* BACKGROUND LAYER 2: Uncropped image fitting automatically with NO cutting or cropping */}
+      {hasImage && (
+        <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center p-4 sm:p-8 md:p-12 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={current.image}
+            alt={current.clientName}
+            className="max-w-full max-h-full w-auto h-auto object-contain object-center opacity-70 filter brightness-[0.55] contrast-105 transition-all duration-1000 ease-out"
+          />
+        </div>
+      )}
 
-        {/* Testimonial Card Frame with Uploaded Image Background */}
-        <div className="relative">
-          <div
-            className={`relative rounded-3xl p-6 sm:p-10 md:p-14 overflow-hidden border shadow-elevated transition-all duration-500 min-h-[300px] sm:min-h-[340px] flex flex-col justify-between ${
-              hasImage
-                ? "border-brand-purple/30 bg-brand-plum text-white"
-                : "bg-white text-brand-plum border-brand-warm-border"
-            }`}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          >
-            {/* Uploaded Image as Card Background */}
-            {hasImage && (
-              <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={current.image}
-                  alt={current.clientName}
-                  className="w-full h-full object-cover object-center filter brightness-[0.32] contrast-105 scale-105 transition-all duration-1000 ease-out"
-                />
-                {/* Luxury royal gradient overlay to guarantee perfect text legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-plum via-brand-plum/88 to-brand-plum/72 backdrop-blur-[1px]" />
-                <div className="absolute inset-0 bg-radial-at-c from-transparent via-brand-plum/40 to-brand-plum/80" />
-              </div>
-            )}
+      {/* BACKGROUND LAYER 3: Luxury Royal Plum Vignette Scrim for Crystal-Clear Text Contrast */}
+      <div className="absolute inset-0 z-1 pointer-events-none bg-gradient-to-t from-[#18061B] via-[#18061B]/65 to-[#18061B]/80" />
+      <div className="absolute inset-0 z-1 pointer-events-none bg-radial from-transparent via-[#18061B]/50 to-[#18061B]/90" />
 
-            {/* Testimonial Content Layer */}
-            <div className="relative z-10 flex flex-col items-center justify-between flex-1">
-              <div>
-                {/* Quote Icon */}
-                <div
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5 ${
-                    hasImage
-                      ? "bg-white/10 text-brand-gold border border-white/15 backdrop-blur-md"
-                      : "bg-brand-soft-lavender/50 text-brand-purple"
-                  }`}
-                >
-                  <Quote className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
-                </div>
-
-                {/* Star Rating */}
-                <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-4 sm:mb-5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 ${
-                        i < (current.rating || 5)
-                          ? "fill-brand-gold text-brand-gold drop-shadow-xs"
-                          : hasImage
-                          ? "text-white/20"
-                          : "text-brand-warm-border"
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Testimonial Quote */}
-                <blockquote
-                  className={`font-serif text-sm sm:text-base md:text-xl leading-relaxed font-normal mb-6 sm:mb-8 max-w-2xl mx-auto ${
-                    hasImage ? "text-white/95 drop-shadow-xs" : "text-brand-plum"
-                  }`}
-                >
-                  &ldquo;{current.quote || current.text}&rdquo;
-                </blockquote>
-              </div>
-
-              {/* Client Bio */}
-              <div className="flex items-center justify-center gap-3 pt-2">
-                {current.image && (
-                  <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-full overflow-hidden border-2 border-brand-gold/60 shrink-0 shadow-md">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={current.image}
-                      alt={current.clientName}
-                      className="w-full h-full object-cover object-center"
-                    />
-                  </div>
-                )}
-                <div className="text-left">
-                  <cite
-                    className={`not-italic font-serif font-bold text-sm sm:text-base block truncate max-w-[220px] sm:max-w-none ${
-                      hasImage ? "text-white" : "text-brand-plum"
-                    }`}
-                  >
-                    {current.clientName}
-                  </cite>
-                  {(current.roleOrEvent || current.clientRole || current.eventName) && (
-                    <span
-                      className={`text-[11px] sm:text-xs font-sans font-medium block truncate max-w-[220px] sm:max-w-none mt-0.5 ${
-                        hasImage ? "text-brand-gold" : "text-brand-purple"
-                      }`}
-                    >
-                      {current.roleOrEvent ||
-                        [current.clientRole, current.eventName].filter(Boolean).join(" • ")}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+      {/* FOREGROUND CONTENT LAYER: Expands and Fills the Section */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-12 md:px-16 pt-16 sm:pt-20 md:pt-24 pb-12 flex-1 flex flex-col justify-between text-center">
+        {/* Top Header Badge */}
+        <div>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-brand-soft-lavender text-xs font-sans tracking-widest uppercase font-semibold mb-4 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-brand-gold animate-pulse" />
+            <span>Client Kind Words • Cherished Hosts</span>
           </div>
 
-          {/* Desktop Floating Navigation Arrows (Side controls on sm+ screens) */}
-          {activeList.length > 1 && (
-            <div className="hidden sm:flex items-center justify-between absolute inset-x-2 md:-inset-x-6 top-1/2 -translate-y-1/2 pointer-events-none z-20">
-              <button
-                type="button"
-                onClick={handlePrev}
-                aria-label="Previous testimonial"
-                className={`w-11 h-11 rounded-full shadow-md flex items-center justify-center pointer-events-auto transition-all active:scale-95 cursor-pointer ${
-                  hasImage
-                    ? "bg-white/15 hover:bg-white text-white hover:text-brand-plum backdrop-blur-md border border-white/20"
-                    : "bg-white/90 border border-brand-warm-border text-brand-plum hover:bg-brand-purple hover:text-white hover:border-brand-purple"
+          {/* Star Rating */}
+          <div className="flex items-center justify-center gap-1.5 mb-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  i < (current.rating || 5)
+                    ? "fill-brand-gold text-brand-gold drop-shadow-md"
+                    : "text-white/20"
                 }`}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
+              />
+            ))}
+          </div>
+        </div>
 
-              <button
-                type="button"
-                onClick={handleNext}
-                aria-label="Next testimonial"
-                className={`w-11 h-11 rounded-full shadow-md flex items-center justify-center pointer-events-auto transition-all active:scale-95 cursor-pointer ${
-                  hasImage
-                    ? "bg-white/15 hover:bg-white text-white hover:text-brand-plum backdrop-blur-md border border-white/20"
-                    : "bg-white/90 border border-brand-warm-border text-brand-plum hover:bg-brand-purple hover:text-white hover:border-brand-purple"
-                }`}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+        {/* Grand Testimonial Quote */}
+        <div className="my-auto py-4 sm:py-6 max-w-4xl mx-auto">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-gold flex items-center justify-center mx-auto mb-6 shadow-inner">
+            <Quote className="w-6 h-6 sm:w-7 sm:h-7 fill-current" />
+          </div>
+
+          <blockquote className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-relaxed sm:leading-snug md:leading-tight text-white font-normal drop-shadow-lg tracking-wide">
+            &ldquo;{current.quote || current.text}&rdquo;
+          </blockquote>
+
+          {current.quote && current.text && current.text !== current.quote && (
+            <p className="mt-4 text-xs sm:text-sm text-white/75 font-sans leading-relaxed max-w-2xl mx-auto font-light line-clamp-2 sm:line-clamp-3">
+              {current.text}
+            </p>
           )}
         </div>
 
-        {/* Mobile Navigation Controls & Pagination Bar */}
-        {activeList.length > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous testimonial"
-              className="sm:hidden w-9 h-9 rounded-full bg-white border border-brand-warm-border text-brand-plum flex items-center justify-center shadow-xs active:scale-95 cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-center gap-2">
-              {activeList.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setCurrentIndex(idx)}
-                  aria-label={`Go to testimonial ${idx + 1}`}
-                  className={`h-2 rounded-full transition-all cursor-pointer ${
-                    currentIndex % activeList.length === idx
-                      ? "w-7 bg-brand-purple"
-                      : "w-2 bg-brand-warm-border hover:bg-brand-plum/40"
-                  }`}
-                />
-              ))}
+        {/* Client Identity & Event Role */}
+        <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
+          {current.image && (
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-brand-gold shrink-0 shadow-lg ring-2 ring-white/10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={current.image}
+                alt={current.clientName}
+                className="w-full h-full object-cover object-center"
+              />
             </div>
-
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next testimonial"
-              className="sm:hidden w-9 h-9 rounded-full bg-white border border-brand-warm-border text-brand-plum flex items-center justify-center shadow-xs active:scale-95 cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+          )}
+          <div className="text-center sm:text-left">
+            <cite className="not-italic font-serif font-bold text-lg sm:text-xl text-white block drop-shadow-xs">
+              {current.clientName}
+            </cite>
+            {(current.roleOrEvent || current.clientRole || current.eventName) && (
+              <span className="text-xs sm:text-sm font-sans font-medium text-brand-gold tracking-wider uppercase block mt-0.5">
+                {current.roleOrEvent ||
+                  [current.clientRole, current.eventName].filter(Boolean).join(" • ")}
+              </span>
+            )}
           </div>
-        )}
-
-        {/* Explore All Testimonials Page Link */}
-        <div className="mt-8 text-center">
-          <Link
-            href="/testimonials"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs font-sans uppercase tracking-widest font-semibold transition-colors bg-white shadow-xs"
-          >
-            <span>Read All Client Reviews &amp; Stories</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
+      </div>
+
+      {/* SECTION CAROUSEL CONTROLS: Floating Left / Right Arrows Across Section Edges */}
+      {activeList.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label="Previous testimonial"
+            className="absolute left-3 sm:left-6 md:left-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-105 active:scale-95 group"
+          >
+            <ChevronLeft className="w-6 h-6 text-brand-gold group-hover:-translate-x-0.5 transition-transform" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label="Next testimonial"
+            className="absolute right-3 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-105 active:scale-95 group"
+          >
+            <ChevronRight className="w-6 h-6 text-brand-gold group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </>
+      )}
+
+      {/* BOTTOM CONTROL & PAGINATION BAR */}
+      <div className="relative z-10 w-full bg-[#18061B]/80 backdrop-blur-md border-t border-white/10 py-4 px-6 sm:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Pagination Dots */}
+        <div className="flex items-center gap-2">
+          {activeList.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setCurrentIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`transition-all rounded-full cursor-pointer ${
+                currentIndex % activeList.length === idx
+                  ? "w-8 h-2 bg-brand-gold shadow-sm"
+                  : "w-2 h-2 bg-white/30 hover:bg-white/60"
+              }`}
+            />
+          ))}
+          <span className="text-[11px] font-sans font-medium text-white/60 ml-2 tracking-widest">
+            {String((currentIndex % activeList.length) + 1).padStart(2, "0")} /{" "}
+            {String(activeList.length).padStart(2, "0")}
+          </span>
+        </div>
+
+        {/* Mobile quick navigation arrows */}
+        <div className="flex sm:hidden items-center gap-3">
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label="Previous testimonial"
+            className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white"
+          >
+            <ChevronLeft className="w-4 h-4 text-brand-gold" />
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label="Next testimonial"
+            className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white"
+          >
+            <ChevronRight className="w-4 h-4 text-brand-gold" />
+          </button>
+        </div>
+
+        {/* View All Reviews Link */}
+        <Link
+          href="/testimonials"
+          className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-brand-soft-lavender hover:text-white uppercase tracking-wider transition-colors group"
+        >
+          <span>View All Client Reflections</span>
+          <ArrowUpRight className="w-3.5 h-3.5 text-brand-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+        </Link>
       </div>
     </section>
   );

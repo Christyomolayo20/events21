@@ -257,7 +257,7 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
 export const GIFTS_CATALOGUE: GiftItem[] = [
   {
     id: "eruiyawo-wrapping-suite",
-    name: "Wrapping of Eru Iyawo (Traditional Bridal Trunks)",
+    name: "Eru Iyawo (Traditional Bridal Presentation)",
     category: "Wrapping of Eru Iyawo",
     price: 75000,
     description:
@@ -273,19 +273,19 @@ export const GIFTS_CATALOGUE: GiftItem[] = [
     inStock: true,
   },
   {
-    id: "eruiyawo-ladder-display",
-    name: "Artisanal Eru Iyawo Tiered Ladder Presentation",
-    category: "Wrapping of Eru Iyawo",
-    price: 95000,
+    id: "celebration-rose-bouquet",
+    name: "Luxury Celebration Rose Bouquet",
+    category: "Hampers",
+    price: 35000,
     description:
-      "An awe-inspiring tiered ladder presentation for the bride's Eru Iyawo engagement gifts. Styled with olive green velvet draping, magenta floral accents, illuminated signage, and woven luxury hampers.",
+      "Hand-tied fresh crimson red velvet roses accented with fresh botanical greens and celebratory wrapping. Perfect for matriculation dances, milestone birthdays, and romantic gestures on a budget.",
     details: [
-      "Architectural multi-tier wooden A-frame display staging",
-      "Olive green royal velvet fabric draping & custom illumination",
-      "Magenta ribbon flower styling and artisanal gift wrapping",
-      "Woven fruit & delicacy hamper baskets with sheer organza accents",
+      "Imported fresh crimson red velvet roses",
+      "Fresh green botanical accents & eucalyptus",
+      "Crystal clear water-resistant presentation wrapping",
+      "Personalized satin ribbon & luxury calligraphy tag",
     ],
-    image: "/images/eru-iyawo-ladder-display.jpg",
+    image: "/images/celebration-rose-bouquet.jpg",
     popular: true,
     inStock: true,
   },

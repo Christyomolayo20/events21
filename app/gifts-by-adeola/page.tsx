@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Clock,
   Sparkle,
+  ShoppingBag,
 } from "lucide-react";
 import { getGiftCatalogue, saveGiftRequest } from "@/lib/store";
 import { GiftItem } from "@/lib/types";
@@ -65,9 +66,10 @@ export default function GiftsByAdeolaPage() {
       : catalogue.filter((item) => item.category === activeCategory);
 
   const getWhatsAppOrderLink = (gift: GiftItem) => {
-    const text = `Hello Gifts by Adeola! I would like to order / enquire about the *${encodeURIComponent(
+    const priceText = gift.price && gift.price > 0 ? ` (Price: ₦${gift.price.toLocaleString()})` : " (Custom Budget Tier)";
+    const text = `Hello Adeola! I would like to place an order for the *${encodeURIComponent(
       gift.name
-    )}* from your curated collection.%0A%0ACould you confirm availability, custom budget tier options, delivery timelines, and personalization?`;
+    )}*${encodeURIComponent(priceText)} from Gifts by Adeola.%0A%0APlease confirm availability, share payment instructions, and confirm delivery schedule.`;
     return `https://wa.me/2348060549596?text=${text}`;
   };
 
@@ -297,14 +299,14 @@ export default function GiftsByAdeolaPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            {/* Olive Green Traditional Platform Presentation */}
+            {/* Eru Iyawo Traditional Bridal Presentation */}
             <div className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
               <div>
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/images/eru-iyawo-traditional-green.jpg"
-                    alt="Authentic Traditional Yoruba Eru Iyawo Presentation on Olive Velvet Riser by Gifts by Adeola"
+                    alt="Authentic Traditional Yoruba Eru Iyawo Presentation by Gifts by Adeola"
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ objectPosition: "center center" }}
                   />
@@ -317,12 +319,17 @@ export default function GiftsByAdeolaPage() {
                 </div>
 
                 <div className="p-6 sm:p-7">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-xs text-brand-purple font-sans font-medium mb-3">
-                    <Sparkle className="w-3 h-3 text-brand-gold" />
-                    <span>Curated to Your Budget Tier</span>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-xs text-brand-purple font-sans font-medium">
+                      <Sparkle className="w-3 h-3 text-brand-gold" />
+                      <span>Curated to Your Budget Tier</span>
+                    </div>
+                    <span className="font-serif font-bold text-lg text-brand-plum">
+                      From ₦75,000
+                    </span>
                   </div>
                   <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-plum mb-2">
-                    Olive Velvet &amp; Ceremonial Alaga Presentation
+                    Eru Iyawo
                   </h3>
                   <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed mb-4">
                     Full aesthetic styling of traditional bridal luggage, tubers of yam, ceremonial calabashes,
@@ -350,82 +357,115 @@ export default function GiftsByAdeolaPage() {
                 </div>
               </div>
 
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-0 space-y-2">
                 <a
-                  href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20enquire%20about%20the%20Traditional%20Olive%20Velvet%20Eru%20Iyawo%20Presentation."
+                  href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20order%20the%20Traditional%20Eru%20Iyawo%20Wrapping%20(Starting%20from%20%E2%82%A675,000).%20Please%20provide%20ordering%20and%20delivery%20instructions."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
-                  <span>Enquire for Eru Iyawo Wrapping</span>
+                  <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
+                  <span>Order Eru Iyawo Wrapping</span>
                 </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomForm((prev) => ({
+                      ...prev,
+                      itemsRequested: "Eru Iyawo wrapping custom order",
+                    }));
+                    setIsCustomModalOpen(true);
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-brand-warm-white hover:bg-brand-soft-lavender/40 border border-brand-warm-border text-brand-plum text-[11px] font-sans font-semibold tracking-wide transition-all cursor-pointer"
+                >
+                  <span>Order According to Your Budget</span>
+                </button>
               </div>
             </div>
 
-            {/* Architectural Tiered Ladder Display */}
+            {/* Eru Iyawo Presentation & Staging */}
             <div className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
               <div>
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/images/eru-iyawo-ladder-display.jpg"
-                    alt="Tiered A-Frame Ladder Eru Iyawo Display with Magenta Florals & Acrylic Signage by Gifts by Adeola"
+                    src="/images/eru-iyawo-traditional-green.jpg"
+                    alt="Traditional Yoruba Eru Iyawo Staging & Presentation by Gifts by Adeola"
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ objectPosition: "center center" }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
                   <div className="absolute top-4 left-4 z-10">
                     <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-plum shadow-xs">
-                      Architectural Staging
+                      Ceremonial Presentation
                     </span>
                   </div>
                 </div>
 
                 <div className="p-6 sm:p-7">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-xs text-brand-purple font-sans font-medium mb-3">
-                    <Sparkle className="w-3 h-3 text-brand-gold" />
-                    <span>Curated to Your Budget Tier</span>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-xs text-brand-purple font-sans font-medium">
+                      <Sparkle className="w-3 h-3 text-brand-gold" />
+                      <span>Curated to Your Budget Tier</span>
+                    </div>
+                    <span className="font-serif font-bold text-lg text-brand-plum">
+                      Custom Staging
+                    </span>
                   </div>
                   <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-plum mb-2">
-                    Tiered Ladder Display &amp; Illuminated Signage
+                    Eru Iyawo Presentation &amp; Staging
                   </h3>
                   <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed mb-4">
-                    A dramatic multi-tier wooden A-frame display with magenta rose ribbons, emerald green velvet
-                    draped pedestals, woven wicker hampers, and custom warm illuminated acrylic couple plaque.
+                    On-site ceremonial staging of trunks, acrylic keepsake boxes, calligraphed luggage identifiers,
+                    fruit baskets, and coordinated fabrics for seamless handover during your traditional engagement.
                   </p>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px] text-brand-plum/75 font-sans pt-3 border-t border-brand-warm-border/60">
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0" />
-                      <span>Multi-tier ladder riser</span>
+                      <span>On-site stage layout</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0" />
-                      <span>Illuminated acrylic sign</span>
+                      <span>Acrylic display pedestals</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0" />
-                      <span>Artisanal floral styling</span>
+                      <span>Artisanal ribbon accents</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0" />
-                      <span>Pedestal velvet drape</span>
+                      <span>Alaga engagement handover</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-0 space-y-2">
                 <a
-                  href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20enquire%20about%20the%20Tiered%20Ladder%20Eru%20Iyawo%20Staging."
+                  href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20order%20the%20Traditional%20Eru%20Iyawo%20Presentation%20%26%20Staging.%20Please%20share%20booking%20and%20pricing%20details."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
-                  <span>Book Tiered Ladder Staging</span>
+                  <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
+                  <span>Order Eru Iyawo Staging</span>
                 </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomForm((prev) => ({
+                      ...prev,
+                      itemsRequested: "Eru Iyawo presentation custom staging",
+                    }));
+                    setIsCustomModalOpen(true);
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-brand-warm-white hover:bg-brand-soft-lavender/40 border border-brand-warm-border text-brand-plum text-[11px] font-sans font-semibold tracking-wide transition-all cursor-pointer"
+                >
+                  <span>Order According to Your Budget</span>
+                </button>
               </div>
             </div>
           </div>
@@ -508,11 +548,25 @@ export default function GiftsByAdeolaPage() {
                   )}
                 </div>
 
-                {/* Details without price display */}
+                {/* Details with price display */}
                 <div className="p-6 sm:p-7">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-xs text-brand-purple font-sans font-medium mb-3">
-                    <Sparkle className="w-3 h-3 text-brand-gold" />
-                    <span>Curated to Your Budget</span>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-soft-lavender/60 border border-brand-purple/15 text-[11px] text-brand-purple font-sans font-medium">
+                      <Sparkle className="w-3 h-3 text-brand-gold" />
+                      <span>Curated on a Budget</span>
+                    </div>
+                    {gift.price && gift.price > 0 ? (
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase tracking-wider text-brand-purple/70 font-sans font-semibold block">From</span>
+                        <span className="font-serif font-bold text-lg sm:text-xl text-brand-plum">
+                          ₦{gift.price.toLocaleString()}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs font-semibold font-sans text-brand-purple">
+                        Budget Tier
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-plum mb-2 group-hover:text-brand-purple transition-colors line-clamp-1">
@@ -539,17 +593,31 @@ export default function GiftsByAdeolaPage() {
                 </div>
               </div>
 
-              {/* Order via WhatsApp */}
-              <div className="p-6 pt-0">
+              {/* Order via WhatsApp & Custom Budget Option */}
+              <div className="p-6 pt-0 space-y-2">
                 <a
                   href={getWhatsAppOrderLink(gift)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs group/btn"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
-                  <span>Enquire / Order on WhatsApp</span>
+                  <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
+                  <span>Order on WhatsApp</span>
                 </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomForm((prev) => ({
+                      ...prev,
+                      itemsRequested: `Custom order based on: ${gift.name}`,
+                    }));
+                    setIsCustomModalOpen(true);
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-brand-warm-white hover:bg-brand-soft-lavender/40 border border-brand-warm-border text-brand-plum text-[11px] font-sans font-semibold tracking-wide transition-all cursor-pointer"
+                >
+                  <span>Order According to Your Budget</span>
+                </button>
               </div>
             </div>
           ))}

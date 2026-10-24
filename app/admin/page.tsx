@@ -433,6 +433,7 @@ export default function AdminPage() {
     try {
       updateGiftItem(editingGift.id, {
         ...editingGift,
+        price: Number(editingGift.price) || 0,
         name: editingGift.name.trim(),
         videoUrl: editingGift.videoUrl?.trim() || undefined,
         mediaType: editingGift.videoUrl?.trim() ? "video" : "image",
