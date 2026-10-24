@@ -58,7 +58,7 @@ export default function ServicesSection() {
                     {service.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed line-clamp-3">
-                    {service.description}
+                    {service.snippet || service.description}
                   </p>
                 </div>
               </div>

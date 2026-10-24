@@ -1,56 +1,24 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
-import { SERVICES_DATA } from "@/lib/data";
+import { ArrowUpRight, Sparkles, CheckCircle2, Crown, Calendar, MessageSquare } from "lucide-react";
+import { SERVICES_DATA, BRAND_CONFIG } from "@/lib/data";
 import ConsultationCTA from "@/components/ConsultationCTA";
 
 export const metadata = {
-  title: "Services | Events 21 • Event Planning, Styling & Coordination",
+  title: "Services & Scope | Events 21 • Event Planning, Styling & Coordination",
   description:
-    "Explore Events 21's event planning, luxury wedding styling, milestone birthday celebrations, and coordination services in Ibadan, Lagos, and nationwide.",
+    "Explore the complete scope of Events 21's luxury wedding planning, romantic proposal concepts, milestone celebrations, and royal event coordination across Ibadan, Lagos, and nationwide.",
 };
 
 export default function ServicesPage() {
-  // Enhanced service items with authentic imagery treatment
-  const servicesList = SERVICES_DATA.map((service) => {
-    if (service.id === "social-celebrations") {
-      return {
-        ...service,
-        image: "/images/decor-tablescape-celebration.jpg",
-        title: "Milestone Birthdays & Celebrations",
-        description:
-          "From intimate milestone birthday dinners and anniversaries to grand jubilee galas. We create bespoke tablescapes, ambient lighting, and bespoke celebration experiences tailored to the celebrant.",
-      };
-    }
-    if (service.id === "royal-wedding-design") {
-      return {
-        ...service,
-        image: "/images/landing-couple-traditional.jpg",
-        title: "Wedding Planning & Royal Styling",
-        description:
-          "Comprehensive design and execution for traditional Nigerian engagements and contemporary white weddings. We harmoniously merge cultural heritage with high-fashion aesthetics and exquisite floral architecture.",
-      };
-    }
-    if (service.id === "proposal-planning") {
-      return {
-        ...service,
-        image: "/images/landing-couple-white.jpg",
-        title: "Surprise Proposal Concepts",
-        description:
-          "Intimate and cinematic proposal experiences. From private candlelit rooftop setups to custom floral backdrops, we orchestrate unforgettable surprise moments with discreet precision.",
-      };
-    }
-    return service;
-  });
-
   return (
-    <div className="pt-24 pb-16 md:pt-32 md:pb-20">
+    <div className="pt-24 pb-16 md:pt-32 md:pb-20 bg-brand-warm-white">
       {/* Page Header */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-14">
         <div className="text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Our Offerings</span>
+            <span>Comprehensive Service Scope</span>
           </div>
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
             Curated Planning &amp;{" "}
@@ -59,64 +27,150 @@ export default function ServicesPage() {
             </span>
           </h1>
           <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed">
-            Straightforward, visually driven event management. Every service is built around
-            intentional design, cultural respect, and seamless day-of execution across Ibadan, Lagos, and nationwide.
+            Every celebration orchestrated by Events 21 is anchored in intentional spatial design, cultural reverence,
+            and flawless day-of logistics. Below is the detailed breakdown of what we offer and what is included in each service.
           </p>
         </div>
-      </section>
 
-      {/* Services Grid (Visually Driven, Consistent Sizing, Zero Repetition) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {servicesList.map((service) => (
-            <div
+        {/* Quick Navigation Jump Anchors */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-8 max-w-4xl mx-auto">
+          {SERVICES_DATA.map((service) => (
+            <a
               key={service.id}
-              id={service.id}
-              className="group bg-white rounded-3xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all duration-300 flex flex-col justify-between"
+              href={`#${service.id}`}
+              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-white border border-brand-warm-border text-brand-plum/80 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-soft-lavender/30 transition-all shadow-2xs"
             >
-              <div>
-                {/* Photo Container with Fixed Height & Centered Framing to Prevent Cropping */}
-                <div className="relative w-full h-[320px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={service.image}
-                    alt={service.title}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    style={{ objectPosition: "top center" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity" />
-                </div>
-
-                {/* Content: Service Name & Meaningful Description */}
-                <div className="p-6 sm:p-7">
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-brand-plum mb-3 group-hover:text-brand-purple transition-colors">
-                    {service.title}
-                  </h2>
-                  <p className="text-sm text-brand-plum/75 font-sans leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* Purposeful Enquiry Link */}
-              <div className="px-6 pb-6 pt-2 border-t border-brand-warm-border/40 mt-auto flex items-center justify-between">
-                <Link
-                  href={`/contact?service=${encodeURIComponent(service.title)}`}
-                  className="text-xs font-semibold uppercase tracking-wider text-brand-purple hover:text-brand-purple-hover font-sans inline-flex items-center gap-1.5 transition-colors group/link"
-                >
-                  <span>Enquire About This Service</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
-                </Link>
-              </div>
-            </div>
+              {service.title.split("&")[0].trim()}
+            </a>
           ))}
         </div>
       </section>
 
-      {/* Single Purposeful Consultation CTA Section */}
+      {/* Expanded "Reading More" Editorial Service Sections */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 md:space-y-16 mb-16 md:mb-24">
+        {SERVICES_DATA.map((service, index) => {
+          const isEven = index % 2 === 1;
+
+          return (
+            <article
+              key={service.id}
+              id={service.id}
+              className="scroll-mt-28 md:scroll-mt-36 bg-white rounded-3xl overflow-hidden border border-brand-warm-border/80 shadow-xs hover:shadow-subtle transition-all duration-300"
+            >
+              <div
+                className={`flex flex-col ${
+                  isEven ? "lg:flex-row-reverse" : "lg:flex-row"
+                } items-stretch`}
+              >
+                {/* Visual Media Column */}
+                <div className="lg:w-5/12 relative min-h-[340px] sm:min-h-[420px] lg:min-h-full bg-brand-plum overflow-hidden shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    style={{ objectPosition: "top center" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+
+                  {/* Service Number Badge */}
+                  <div className="absolute top-5 left-5 z-10">
+                    <span className="px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-xs text-[11px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-md">
+                      Service 0{index + 1}
+                    </span>
+                  </div>
+
+                  {/* Direct WhatsApp Prompt on Image */}
+                  <div className="absolute bottom-5 left-5 right-5 z-10 hidden sm:block">
+                    <a
+                      href={`https://wa.me/${BRAND_CONFIG.whatsappNumber}?text=Hello%20Events%2021!%20I%20am%20reading%20about%20*${encodeURIComponent(
+                        service.title
+                      )}*%20and%20would%20love%20to%20discuss%20pricing%20and%20dates.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-plum/90 backdrop-blur-md text-white text-xs font-sans font-medium hover:bg-brand-purple transition-colors shadow-lg border border-white/10"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
+                      <span>Chat on WhatsApp regarding this service</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Content Details Column */}
+                <div className="lg:w-7/12 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
+                  <div>
+                    {/* Tagline */}
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender text-brand-purple text-[11px] font-sans font-semibold uppercase tracking-wider mb-3">
+                      <Crown className="w-3.5 h-3.5 text-brand-gold" />
+                      <span>{service.tagline}</span>
+                    </div>
+
+                    {/* Title */}
+                    <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-plum leading-snug mb-4">
+                      {service.title}
+                    </h2>
+
+                    {/* Narrative Description */}
+                    <p className="text-sm sm:text-base text-brand-plum/80 font-sans leading-relaxed mb-6">
+                      {service.description}
+                    </p>
+
+                    {/* What This Service Includes (Bullet Points) */}
+                    <div className="mb-6 pt-5 border-t border-brand-warm-border/60">
+                      <h3 className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans mb-3.5">
+                        What This Service Includes:
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {service.inclusions.map((inclusion, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2.5 text-xs text-brand-plum/80 font-sans leading-relaxed"
+                          >
+                            <CheckCircle2 className="w-4 h-4 text-brand-purple shrink-0 mt-0.5" />
+                            <span>{inclusion}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Suitable For Banner */}
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-brand-soft-lavender/40 border border-brand-purple/15 text-xs text-brand-plum/85 font-sans leading-relaxed mb-6">
+                      <span className="font-semibold text-brand-purple block mb-0.5">
+                        Suitable For:
+                      </span>
+                      {service.suitableFor}
+                    </div>
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-brand-warm-border/60">
+                    <Link
+                      href={`/contact?service=${encodeURIComponent(service.title)}`}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-xs"
+                    >
+                      <span>Enquire for this Service</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+
+                    <Link
+                      href="/consultation"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs font-semibold uppercase tracking-widest transition-colors bg-white"
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Book Consultation</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
+      {/* Purposeful Consultation CTA Section */}
       <ConsultationCTA
-        title="Discuss Your Upcoming Event"
-        subtitle="Tell us about your celebration date and vision. Let us explore how Events 21 can orchestrate your event with effortless grace."
+        title="Ready to Orchestrate Your Event?"
+        subtitle="Schedule a consultation with Adeola and the Events 21 royal planning team. Let us tailor our services to your vision, guest count, and milestone celebration."
       />
     </div>
   );

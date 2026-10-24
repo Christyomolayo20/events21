@@ -62,7 +62,7 @@ export interface PortfolioItem {
   id: string;
   title: string;
   subtitle: string;
-  category: "Weddings" | "Traditional" | "Ballrooms & Decor" | "Celebrations" | "Proposals";
+  category: "Weddings" | "Traditional" | "Decor" | "Celebrations" | "Corporate Events" | "Proposals" | "Ballrooms & Decor";
   year: string;
   location: string;
   image: string;
@@ -78,6 +78,7 @@ export interface ServiceItem {
   id: string;
   title: string;
   tagline: string;
+  snippet?: string;
   description: string;
   image: string;
   inclusions: string[];

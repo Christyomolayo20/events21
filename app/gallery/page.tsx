@@ -22,12 +22,17 @@ export default function GalleryPage() {
     return () => window.removeEventListener("events21_portfolio_updated", handleUpdate);
   }, []);
 
-  const categories = ["All", "Weddings", "Traditional", "Ballrooms & Decor", "Celebrations", "Proposals"];
+  const categories = ["All", "Weddings", "Traditional", "Decor", "Celebrations", "Corporate Events", "Proposals"];
 
   const filteredItems =
     activeCategory === "All"
       ? items
-      : items.filter((item) => item.category === activeCategory);
+      : items.filter((item) => {
+          if (activeCategory === "Decor") {
+            return item.category === "Decor" || (item.category as string) === "Ballrooms & Decor";
+          }
+          return item.category === activeCategory;
+        });
 
   return (
     <div className="pt-24 pb-16 md:pt-32 md:pb-20">

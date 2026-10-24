@@ -43,12 +43,12 @@ export default function Hero() {
         <img
           src={posterSrc}
           alt="Events 21 Grand Royal Celebration"
-          className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.72] contrast-[1.08] transition-opacity duration-1000 ${
+          className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.05] transition-opacity duration-700 ${
             isVideoLoaded && !prefersReducedMotion ? "opacity-0" : "opacity-100"
           }`}
         />
 
-        {/* Cinematic Background Video (45s trimmed, muted, looping, playsinline) */}
+        {/* Cinematic Background Video (16:9 widescreen, vivid, clearly visible) */}
         {!prefersReducedMotion && (
           <video
             ref={videoRef}
@@ -57,10 +57,10 @@ export default function Hero() {
             loop
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             poster={posterSrc}
             onLoadedData={() => setIsVideoLoaded(true)}
-            className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.70] contrast-[1.10] transition-opacity duration-1000 ${
+            className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ${
               isVideoLoaded ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -68,10 +68,9 @@ export default function Hero() {
           </video>
         )}
 
-        {/* Refined Multi-layer Royal Gradients for Guaranteed Readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark via-brand-plum/50 to-brand-plum-dark/75 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-brand-plum/40 to-brand-plum-dark/90" />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-plum-dark/85 via-transparent to-brand-plum-dark/85" />
+        {/* Balanced Minimal Scrim: Clear video view in center with contrast for text */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/85 via-black/30 to-brand-plum-dark/45" />
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-brand-plum-dark/60 pointer-events-none" />
       </div>
 
       {/* Subtle Ambient Lighting Effects */}

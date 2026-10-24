@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Sparkles,
   MessageSquare,
@@ -15,9 +14,11 @@ import {
   Instagram,
   ArrowUpRight,
   Crown,
-  Eye,
-  Award,
   Play,
+  ChevronDown,
+  ShieldCheck,
+  Clock,
+  Sparkle,
 } from "lucide-react";
 import { getGiftCatalogue, saveGiftRequest } from "@/lib/store";
 import { GiftItem } from "@/lib/types";
@@ -28,6 +29,7 @@ export default function GiftsByAdeolaPage() {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customSubmitted, setCustomSubmitted] = useState(false);
   const [activeGiftVideo, setActiveGiftVideo] = useState<{ title: string; url: string } | null>(null);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
   const [customForm, setCustomForm] = useState({
     fullName: "",
@@ -106,33 +108,38 @@ export default function GiftsByAdeolaPage() {
       q: "Do you handle corporate appreciation gifts & bulk souvenirs?",
       a: "Yes, we handle orders from 10 to 500+ units for corporate retreats, end-of-year banquets, and wedding guest favor boxes with custom company branding.",
     },
+    {
+      q: "How early should I book Eru Iyawo wrapping?",
+      a: "We recommend booking at least 2 to 4 weeks prior to the traditional wedding ceremony so our atelier can formulate the color theme, procure matching luxury ribbons and trunks, and arrange seamless logistics.",
+    },
   ];
 
   return (
-    <div className="pt-24 pb-16 md:pt-32 md:pb-20 bg-[#FFFBFD]">
+    <div className="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-b from-[#FFF5F8] via-[#FFFBFD] to-brand-warm-white">
       {/* Sub-brand Hero */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-blush-pink border border-brand-pink/25 text-brand-pink text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Gifts by Adeola</span>
+          {/* Sub-brand Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-blush-pink border border-brand-pink/25 text-brand-pink text-xs font-sans tracking-widest uppercase font-semibold mb-4 shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-brand-pink animate-pulse" />
+            <span>Gifts by Adeola • By Events 21</span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-3">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
             Thoughtful Gifts.{" "}
             <span className="italic font-normal font-serif text-brand-pink">
               Curated on a Budget.
             </span>
           </h1>
 
-          {/* Exact Brand Copy from User */}
-          <p className="text-base sm:text-lg text-brand-plum/85 font-sans leading-relaxed max-w-2xl mx-auto mb-5 font-medium">
+          {/* Exact Brand Copy */}
+          <p className="text-base sm:text-lg text-brand-plum/85 font-sans leading-relaxed max-w-2xl mx-auto mb-6 font-medium">
             We help you curate thoughtful gifts on a budget. Corporate Gifts, Hampers, Souvenirs &amp;
             Wrapping of Eru Iyawo.
           </p>
 
           {/* Official Instagram Page Link */}
-          <div className="mb-6">
+          <div className="mb-8">
             <a
               href="https://www.instagram.com/giftsbyadeola/"
               target="_blank"
@@ -141,15 +148,16 @@ export default function GiftsByAdeolaPage() {
             >
               <Instagram className="w-4 h-4 text-brand-pink group-hover:text-white transition-colors" />
               <span>Visit Official Instagram: @giftsbyadeola</span>
-              <ArrowUpRight className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
+              <ArrowUpRight className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
             </a>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto">
             <button
               type="button"
               onClick={() => setIsCustomModalOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm hover:shadow-md cursor-pointer"
             >
               <Gift className="w-4 h-4" />
               <span>Request Custom Curation</span>
@@ -159,69 +167,121 @@ export default function GiftsByAdeolaPage() {
               href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20am%20interested%20in%20wrapping%20of%20Eru%20Iyawo%20or%20curated%20gifting%20on%20a%20budget."
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border border-brand-pink/30 hover:border-brand-pink text-brand-pink bg-white/80 text-xs font-semibold uppercase tracking-widest transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full border border-brand-pink/30 hover:border-brand-pink text-brand-pink bg-white text-xs font-semibold uppercase tracking-widest transition-colors shadow-2xs"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Chat on WhatsApp (08060549596)</span>
+              <span>Chat on WhatsApp</span>
             </a>
           </div>
         </div>
 
-        {/* 4 Core Pillars Highlights */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto mt-10">
-          <div className="p-5 rounded-2xl bg-white border border-brand-pink/15 text-center shadow-xs">
-            <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
+        {/* Trust Badges Strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto mt-10 pt-8 border-t border-brand-pink/20">
+          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/70 border border-brand-pink/15 text-xs text-brand-plum/80 font-sans">
+            <ShieldCheck className="w-4 h-4 text-brand-pink shrink-0" />
+            <span>Budget Friendly Tiering</span>
+          </div>
+          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/70 border border-brand-pink/15 text-xs text-brand-plum/80 font-sans">
+            <Truck className="w-4 h-4 text-brand-pink shrink-0" />
+            <span>Lagos &amp; Nationwide Delivery</span>
+          </div>
+          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/70 border border-brand-pink/15 text-xs text-brand-plum/80 font-sans">
+            <Sparkle className="w-4 h-4 text-brand-gold shrink-0" />
+            <span>Bespoke Hand Finishing</span>
+          </div>
+          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/70 border border-brand-pink/15 text-xs text-brand-plum/80 font-sans">
+            <Clock className="w-4 h-4 text-brand-pink shrink-0" />
+            <span>Reliable Event Timelines</span>
+          </div>
+        </div>
+
+        {/* 4 Core Pillars Highlights (Interactive Filter Triggers) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto mt-8">
+          <button
+            type="button"
+            onClick={() => setActiveCategory("Wrapping of Eru Iyawo")}
+            className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
+              activeCategory === "Wrapping of Eru Iyawo"
+                ? "border-brand-pink shadow-md bg-brand-blush-pink/20"
+                : "border-brand-pink/20 hover:border-brand-pink/60 shadow-2xs hover:shadow-xs"
+            }`}
+          >
+            <div className="w-11 h-11 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
               <Package className="w-5 h-5" />
             </div>
             <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
               Wrapping of Eru Iyawo
             </h4>
-            <p className="text-xs text-brand-plum/65 font-sans leading-relaxed">
-              Royal presentation of traditional Yoruba engagement gifts &amp; bridal trunks.
+            <p className="text-xs text-brand-plum/70 font-sans leading-relaxed">
+              Traditional Yoruba bridal trunks, luggage, and ceremonial tubers of yam.
             </p>
-          </div>
+          </button>
 
-          <div className="p-5 rounded-2xl bg-white border border-brand-pink/15 text-center shadow-xs">
-            <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
+          <button
+            type="button"
+            onClick={() => setActiveCategory("Corporate Gifts")}
+            className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
+              activeCategory === "Corporate Gifts"
+                ? "border-brand-pink shadow-md bg-brand-blush-pink/20"
+                : "border-brand-pink/20 hover:border-brand-pink/60 shadow-2xs hover:shadow-xs"
+            }`}
+          >
+            <div className="w-11 h-11 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
               <Gift className="w-5 h-5" />
             </div>
             <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
               Corporate Gifts
             </h4>
-            <p className="text-xs text-brand-plum/65 font-sans leading-relaxed">
+            <p className="text-xs text-brand-plum/70 font-sans leading-relaxed">
               Branded executive packages, retreats, and year-end client appreciation.
             </p>
-          </div>
+          </button>
 
-          <div className="p-5 rounded-2xl bg-white border border-brand-pink/15 text-center shadow-xs">
-            <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
+          <button
+            type="button"
+            onClick={() => setActiveCategory("Hampers")}
+            className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
+              activeCategory === "Hampers"
+                ? "border-brand-pink shadow-md bg-brand-blush-pink/20"
+                : "border-brand-pink/20 hover:border-brand-pink/60 shadow-2xs hover:shadow-xs"
+            }`}
+          >
+            <div className="w-11 h-11 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
               <Heart className="w-5 h-5" />
             </div>
             <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
               Thoughtful Hampers
             </h4>
-            <p className="text-xs text-brand-plum/65 font-sans leading-relaxed">
+            <p className="text-xs text-brand-plum/70 font-sans leading-relaxed">
               Celebration gift baskets, wine duos, and milestone hampers on a budget.
             </p>
-          </div>
+          </button>
 
-          <div className="p-5 rounded-2xl bg-white border border-brand-pink/15 text-center shadow-xs">
-            <div className="w-10 h-10 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
+          <button
+            type="button"
+            onClick={() => setActiveCategory("Souvenirs")}
+            className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
+              activeCategory === "Souvenirs"
+                ? "border-brand-pink shadow-md bg-brand-blush-pink/20"
+                : "border-brand-pink/20 hover:border-brand-pink/60 shadow-2xs hover:shadow-xs"
+            }`}
+          >
+            <div className="w-11 h-11 rounded-full bg-brand-blush-pink text-brand-pink flex items-center justify-center mx-auto mb-2.5">
               <Truck className="w-5 h-5" />
             </div>
             <h4 className="font-serif font-bold text-base text-brand-plum mb-1">
               Event Souvenirs
             </h4>
-            <p className="text-xs text-brand-plum/65 font-sans leading-relaxed">
+            <p className="text-xs text-brand-plum/70 font-sans leading-relaxed">
               Custom VIP guest favors, scented diffusers, and keepsake tokens.
             </p>
-          </div>
+          </button>
         </div>
       </section>
 
-      {/* CREATIVE FEATURE SPOTLIGHT: The Artisanal Eru Iyawo Atelier (Using 3rd & 5th Images) */}
+      {/* CREATIVE FEATURE SPOTLIGHT: The Artisanal Eru Iyawo Atelier */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-14 md:mb-20">
-        <div className="bg-gradient-to-br from-white via-[#FFF8FA] to-brand-blush-pink/30 rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-pink/25 shadow-subtle">
+        <div className="bg-gradient-to-br from-white via-[#FFF8FA] to-brand-blush-pink/40 rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-pink/25 shadow-subtle">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-pink/10 text-brand-pink text-[11px] font-sans font-semibold uppercase tracking-wider mb-2">
               <Crown className="w-3.5 h-3.5 text-brand-gold" />
@@ -230,15 +290,15 @@ export default function GiftsByAdeolaPage() {
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-brand-plum">
               The Eru Iyawo Wrapping Atelier
             </h2>
-            <p className="text-xs sm:text-sm text-brand-plum/70 font-sans mt-2">
+            <p className="text-xs sm:text-sm text-brand-plum/75 font-sans mt-2">
               Honoring Yoruba traditional marriage customs with breathtaking presentation, royal color coordination,
               and meticulous display architecture.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            {/* 3rd Image: Olive Green Traditional Platform Presentation */}
-            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-pink/20 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
+            {/* Olive Green Traditional Platform Presentation */}
+            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-pink/25 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
               <div>
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -308,7 +368,7 @@ export default function GiftsByAdeolaPage() {
                   href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20enquire%20about%20the%20Traditional%20Olive%20Velvet%20Eru%20Iyawo%20Presentation."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-blush-pink hover:bg-brand-pink text-brand-pink hover:text-white border border-brand-pink/30 text-xs font-semibold uppercase tracking-wider transition-all duration-200"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Book This Eru Iyawo Concept</span>
@@ -316,8 +376,8 @@ export default function GiftsByAdeolaPage() {
               </div>
             </div>
 
-            {/* 5th Image: Architectural Tiered Ladder Display */}
-            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-pink/20 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
+            {/* Architectural Tiered Ladder Display */}
+            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-pink/25 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
               <div>
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -372,7 +432,7 @@ export default function GiftsByAdeolaPage() {
                   href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20enquire%20about%20the%20Tiered%20Ladder%20Eru%20Iyawo%20Staging."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-blush-pink hover:bg-brand-pink text-brand-pink hover:text-white border border-brand-pink/30 text-xs font-semibold uppercase tracking-wider transition-all duration-200"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Book Tiered Ladder Staging</span>
@@ -388,10 +448,10 @@ export default function GiftsByAdeolaPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <div>
             <span className="text-xs uppercase tracking-widest text-brand-pink font-semibold font-sans block mb-2">
-              The Collection
+              The Curated Collection
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-brand-plum">
-              Curated Gift Sets &amp; Services
+              Gift Sets &amp; Bespoke Packages
             </h2>
           </div>
 
@@ -402,10 +462,10 @@ export default function GiftsByAdeolaPage() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-sans tracking-wide transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-sans tracking-wide transition-all cursor-pointer ${
                   activeCategory === cat
                     ? "bg-brand-pink text-white font-semibold shadow-xs"
-                    : "bg-white text-brand-plum/70 border border-brand-pink/20 hover:border-brand-pink hover:text-brand-pink"
+                    : "bg-white text-brand-plum/75 border border-brand-pink/20 hover:border-brand-pink hover:text-brand-pink"
                 }`}
               >
                 {cat}
@@ -419,7 +479,7 @@ export default function GiftsByAdeolaPage() {
           {filteredItems.map((gift) => (
             <div
               key={gift.id}
-              className="group bg-white rounded-2xl overflow-hidden border border-brand-pink/20 hover:border-brand-pink/50 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
+              className="group bg-white rounded-3xl overflow-hidden border border-brand-pink/20 hover:border-brand-pink/50 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
             >
               <div>
                 {/* Photo with fixed height & centered */}
@@ -504,38 +564,82 @@ export default function GiftsByAdeolaPage() {
         </div>
       </section>
 
-      {/* FAQs */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 border-t border-brand-pink/20">
+      {/* Interactive Bespoke Curation Banner */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-20">
+        <div className="relative rounded-3xl overflow-hidden bg-brand-plum text-white p-8 sm:p-12 shadow-xl border border-white/10">
+          <div className="relative z-10 max-w-2xl">
+            <span className="text-[11px] uppercase tracking-widest text-brand-gold font-semibold font-sans block mb-2">
+              Bespoke Gifting Concierge
+            </span>
+            <h3 className="font-serif text-3xl sm:text-4xl font-bold mb-3">
+              Need Something One-of-a-Kind?
+            </h3>
+            <p className="text-sm text-white/80 font-sans leading-relaxed mb-6">
+              Whether you are preparing traditional bridal trunks, end-of-year corporate client gifts,
+              or milestone anniversary souvenirs, Adeola curates thoughtful packages tailored strictly to your target budget.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsCustomModalOpen(true)}
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-md cursor-pointer"
+              >
+                <Gift className="w-4 h-4" />
+                <span>Submit Custom Brief</span>
+              </button>
+              <a
+                href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20discuss%20a%20custom%20gift%20curation."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold uppercase tracking-widest transition-colors border border-white/20"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
+                <span>Chat on WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Accordion FAQs */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="text-center mb-8">
           <span className="text-xs uppercase tracking-widest text-brand-pink font-semibold font-sans block mb-2">
-            Information
+            Helpful Information
           </span>
-          <h3 className="font-serif text-3xl font-bold text-brand-plum">
+          <h3 className="font-serif text-3xl sm:text-4xl font-bold text-brand-plum">
             Frequently Asked Questions
           </h3>
         </div>
 
-        <div className="space-y-4">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="p-6 rounded-2xl bg-white border border-brand-pink/15 shadow-xs">
-              <h4 className="font-serif font-bold text-base text-brand-plum mb-2">{faq.q}</h4>
-              <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed">{faq.a}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 text-center">
-          <p className="text-xs sm:text-sm text-brand-plum/70 font-sans mb-4">
-            Have a unique requirement or want to create something one-of-a-kind?
-          </p>
-          <button
-            type="button"
-            onClick={() => setIsCustomModalOpen(true)}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm"
-          >
-            <Gift className="w-4 h-4" />
-            <span>Submit a Custom Curation Brief</span>
-          </button>
+        <div className="space-y-3">
+          {faqs.map((faq, idx) => {
+            const isOpen = expandedFaq === idx;
+            return (
+              <div
+                key={idx}
+                className="rounded-2xl bg-white border border-brand-pink/20 overflow-hidden shadow-2xs transition-all"
+              >
+                <button
+                  type="button"
+                  onClick={() => setExpandedFaq(isOpen ? null : idx)}
+                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-brand-blush-pink/15 transition-colors"
+                >
+                  <h4 className="font-serif font-bold text-base text-brand-plum">{faq.q}</h4>
+                  <ChevronDown
+                    className={`w-5 h-5 text-brand-pink transition-transform duration-200 shrink-0 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 sm:px-6 sm:pb-6 text-xs sm:text-sm text-brand-plum/75 font-sans leading-relaxed border-t border-brand-pink/10 pt-3 animate-fade-in">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -737,6 +841,7 @@ export default function GiftsByAdeolaPage() {
           </div>
         </div>
       )}
+
       {/* Video Player Modal */}
       {activeGiftVideo && (
         <div

@@ -21,6 +21,7 @@ import {
   TeamMember,
   FounderInfo,
 } from "./types";
+import { pushConsultationToSupabase, pushEnquiryToSupabase } from "./supabase";
 
 const ENQUIRIES_KEY = "events21_enquiries";
 const GIFT_REQUESTS_KEY = "events21_gift_requests";
@@ -247,6 +248,10 @@ export function saveEnquiry(enquiry: Omit<EventEnquiry, "id" | "status" | "creat
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_enquiries_updated"));
   }
+
+  // Sync to Supabase in background
+  pushEnquiryToSupabase(newEnquiry).catch(() => {});
+
   return newEnquiry;
 }
 
@@ -403,11 +408,15 @@ export function getPortfolio(): PortfolioItem[] {
   if (typeof window === "undefined") return PORTFOLIO_DATA;
   if (cachePortfolio) return cachePortfolio;
   const stored = safeLocalStorageGet<PortfolioItem[]>(PORTFOLIO_KEY, PORTFOLIO_DATA);
-  const merged = stored.map((item) => {
+  const missingDefaults = PORTFOLIO_DATA.filter((d) => !stored.some((s) => s.id === d.id));
+  const combined = [...stored, ...missingDefaults];
+  const merged = combined.map((item) => {
     const defaultMatch = PORTFOLIO_DATA.find((d) => d.id === item.id);
+    const category = (item.category as string) === "Ballrooms & Decor" ? "Decor" : item.category;
     if (defaultMatch) {
       return {
         ...item,
+        category: defaultMatch.category || category,
         videoUrl: item.videoUrl || defaultMatch.videoUrl,
         mediaType: item.mediaType || defaultMatch.mediaType,
         image: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.image : item.image,
@@ -415,7 +424,7 @@ export function getPortfolio(): PortfolioItem[] {
         subtitle: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.subtitle : item.subtitle,
       };
     }
-    return item;
+    return { ...item, category };
   });
   cachePortfolio = merged;
   return merged;
@@ -631,6 +640,9 @@ export function bookConsultation(
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_consultations_updated"));
   }
+
+  // Sync to Supabase in background
+  pushConsultationToSupabase(newBooking).catch(() => {});
 
   return { success: true, booking: newBooking };
 }

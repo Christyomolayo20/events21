@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.10.0",
+    "@supabase/supabase-js": "^2.109.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
     "next": "^14.2.23",

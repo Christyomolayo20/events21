@@ -30,26 +30,30 @@ export const SERVICES_DATA: ServiceItem[] = [
     id: "royal-wedding-design",
     title: "Luxury Wedding Planning & Royal Styling",
     tagline: "Timeless Grandeur, Cultured Sophistication",
+    snippet:
+      "Comprehensive curation for contemporary white weddings and traditional engagements, merging cultural heritage with royal aesthetics, floral architecture, and seamless coordination.",
     description:
-      "Specialized curation for contemporary and traditional Nigerian weddings fit for royalty. We harmoniously merge cultural heritage with high-fashion aesthetics, bespoke floral architecture, and dramatic ambient lighting.",
-    image: "/images/the-kayodes-traditional-couple.jpg",
+      "Specialized curation for contemporary and traditional Nigerian weddings fit for royalty. We harmoniously merge cultural heritage with high-fashion aesthetics, bespoke floral architecture, ceremonial Alaga protocols, low-fog dry ice, and dramatic ambient lighting across Ibadan, Lagos, and destinations nationwide.",
+    image: "/images/service-wedding-reception.jpg",
     inclusions: [
       "Custom mood boards, colour palettes & royal design decks",
       "Stage, altar, and head-table floral architecture",
-      "Traditional Yoruba engagement protocols & coordination",
+      "Traditional Yoruba engagement protocols & Alaga coordination",
       "First dance special effects (low-lying dry ice fog, cold fireworks & pyrotechnics)",
       "Bridal party timeline & backstage royal concierge",
       "Rehearsal supervision and VIP attendant management",
     ],
-    suitableFor: "Couples desiring a deeply memorable, regal, and visually breathtaking wedding.",
+    suitableFor: "Couples desiring a deeply memorable, regal, and visually breathtaking wedding celebration.",
   },
   {
     id: "proposal-planning",
     title: "Romantic Proposal Planning & Concepts",
     tagline: "Unforgettable Beginnings, Crafted With Romance",
+    snippet:
+      "Intimate and cinematic proposal experiences, from private rooftop setups and candlelight to hidden photography and custom florals.",
     description:
-      "A surprise proposal deserves theatrical precision and breathtaking romance. From private rooftop setups with cold pyrotechnics and rose petals to intimate candlelit private dining, we bring dream proposals to life.",
-    image: "/images/the-kayodes-portrait.jpg",
+      "A surprise proposal deserves theatrical precision and breathtaking romance. From private rooftop setups with cold pyrotechnics and rose petals to intimate candlelit private dining, we bring dream proposals to life with undercover planning, ambient staging, and seamless surprise choreography.",
+    image: "/images/service-proposal-black.jpg",
     inclusions: [
       "Discrete concept formulation & undercover location scouting",
       "Custom 'Marry Me' light-up marquee letters & ambient candlelight",
@@ -61,28 +65,33 @@ export const SERVICES_DATA: ServiceItem[] = [
     suitableFor: "Partners seeking a flawless, cinematic, and intimately royal marriage proposal.",
   },
   {
-    id: "retirement-party",
-    title: "Milestone Retirement Celebrations",
-    tagline: "Honoring a Lifetime of Excellence & Legacy",
+    id: "milestone-celebrations",
+    title: "Milestone Celebrations, Birthdays & Retirements",
+    tagline: "Honoring Lifetime Legacies & Joyful Jubilees",
+    snippet:
+      "Distinguished retirement tribute galas, jubilant milestone birthdays (40th, 50th, 80th), and bespoke private soirees with refined tablescapes and dignitary hospitality.",
     description:
-      "A distinguished career calls for an honorable, elegant send-off. We orchestrate stately retirement receptions, tribute dinners, and celebratory galas designed to commemorate decades of dedication with prestige.",
-    image: "/images/milestone-matriarch-celebration.jpg",
+      "Honoring a lifetime of excellence, career milestones, and generational celebrations. We orchestrate stately retirement receptions, tribute dinners, executive send-offs, and lavish milestone birthdays (30th, 40th, 50th, 70th, 80th). Every celebration features bespoke tablescape artistry, commemorative video reels, VIP dignitary protocol, live entertainment, and personalized hospitality.",
+    image: "/images/service-milestone-celebrations.jpg",
     inclusions: [
-      "Legacy tribute production, photo retrospectives & video staging",
+      "Bespoke thematic concept, tablescape artistry & lush floral centerpieces",
+      "Legacy tribute production, photo retrospectives & commemorative staging",
       "VIP dignitary protocol, seating logistics & guest greeting",
-      "Classy banquet spatial design, tailored linens & bespoke centerpieces",
-      "Live band, classical instrumentalists & seasoned MC coordination",
-      "Custom executive retirement hampers by Gifts by Adeola",
+      "Custom stationery, personalized place cards & commemorative menus",
+      "Live band, saxophonist, classical instrumentalists & seasoned MC coordination",
+      "Custom executive hampers & milestone souvenirs by Gifts by Adeola",
       "Full day-of program pacing and hospitality coordination",
     ],
-    suitableFor: "Executives, public servants, academics, and families celebrating retirement milestones.",
+    suitableFor: "Executives, retirees, milestone celebrants (40th, 50th, 70th, 80th), and families hosting landmark lifetime gatherings.",
   },
   {
     id: "full-planning",
     title: "Full-Service Royal Event Management",
     tagline: "From First Concept to Last Farewell",
+    snippet:
+      "End-to-end luxury management covering budget formulation, vetted vendor sourcing, master production timelines, spatial design, and flawless execution.",
     description:
-      "A complete, end-to-end luxury management experience designed for discerning hosts. We handle budget formulation, vetted vendor sourcing, contract negotiations, guest management, and total execution.",
+      "A complete, end-to-end luxury management experience designed for discerning hosts. We handle budget formulation, vetted vendor sourcing, contract negotiations, guest management, and total execution with zero host stress.",
     image: "/images/ballroom-first-dance.jpg",
     inclusions: [
       "Dedicated senior event planner & management team",
@@ -95,28 +104,13 @@ export const SERVICES_DATA: ServiceItem[] = [
     suitableFor: "Luxury weddings, multi-day celebrations, and large-scale galas.",
   },
   {
-    id: "social-celebrations",
-    title: "Milestone Birthdays & Private Soirées",
-    tagline: "Sophisticated Gatherings with Distinct Personality",
-    description:
-      "From intimate 30th, 40th, and 50th milestone dinners to opulent ballroom banquets and romantic anniversary celebrations. Every gathering is tailored to reflect the celebrant's unique taste.",
-    image: "/images/milestone-matriarch-celebration.jpg",
-    inclusions: [
-      "Thematic concept development and tablescape artistry",
-      "Custom stationery, place cards, and personalized menus",
-      "Specialty bar, mixology, and chef curation",
-      "Live acoustic, saxophone, or DJ entertainment curation",
-      "Ambient lighting and bespoke photo-moment backdrops",
-      "Seamless guest greeting and hospitality hostessing",
-    ],
-    suitableFor: "Milestone anniversaries, intimate birthday dinners, and private parties.",
-  },
-  {
     id: "gifting-concierge",
     title: "Gifts by Adeola Concierge",
     tagline: "Corporate Gifts, Hampers, Souvenirs & Wrapping of Eru Iyawo",
+    snippet:
+      "Thoughtful gifts curated on a budget—from artisanal wrapping of traditional Yoruba Eru Iyawo to branded corporate hampers and VIP souvenirs.",
     description:
-      "We help you curate thoughtful gifts on a budget. From bespoke wrapping of traditional Yoruba Eru Iyawo engagement boxes to branded corporate hampers, VIP souvenirs, and celebratory gift packages.",
+      "We help you curate thoughtful gifts on a budget. From bespoke wrapping of traditional Yoruba Eru Iyawo engagement boxes to branded corporate hampers, VIP souvenirs, and celebratory gift packages with doorstep delivery across Lagos and nationwide.",
     image: "/images/eru-iyawo-traditional-green.jpg",
     inclusions: [
       "Artisanal wrapping and presentation of traditional Eru Iyawo packages",
@@ -220,7 +214,7 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
     id: "ballroom-first-dance",
     title: "The Ballroom Symphony: Sparklers & Low Fog",
     subtitle: "An unforgettable first dance enveloped in dancing clouds, cold fireworks, and crystal chandeliers.",
-    category: "Ballrooms & Decor",
+    category: "Decor",
     year: "2024",
     location: "Lagos, Nigeria",
     image: "/images/ballroom-first-dance.jpg",
@@ -233,6 +227,28 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
       "Architectural ceiling drapery in rich wine velveteen",
     ],
     gallery: [
+      "/images/ballroom-first-dance.jpg",
+    ],
+  },
+  {
+    id: "executive-corporate-gala",
+    title: "Executive Annual Gala & Awards",
+    subtitle: "Prestigious corporate banquet with royal stage architecture, ambient mood lighting, and VIP protocols.",
+    category: "Corporate Events",
+    year: "2024",
+    location: "Lagos, Nigeria",
+    image: "/images/decor-tablescape-celebration.jpg",
+    featured: true,
+    description:
+      "A distinguished annual awards dinner and corporate celebration. Featuring elegant branded stage backdrops, formal banquet seating, dignitary hospitality, and bespoke executive gift boxes curated by Gifts by Adeola.",
+    highlights: [
+      "Corporate brand integration & stage architecture",
+      "Executive dignitary seating & protocol coordination",
+      "Curated awards presentation pacing & live instrumentalists",
+      "Bespoke branded corporate gifts by Gifts by Adeola",
+    ],
+    gallery: [
+      "/images/decor-tablescape-celebration.jpg",
       "/images/ballroom-first-dance.jpg",
     ],
   },
