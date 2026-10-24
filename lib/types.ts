@@ -58,11 +58,19 @@ export interface GiftRequest {
   createdAt: string;
 }
 
+export type PortfolioCategory =
+  | "Weddings"
+  | "Traditional"
+  | "Decor"
+  | "Celebrations"
+  | "Corporate Events"
+  | "Proposals";
+
 export interface PortfolioItem {
   id: string;
   title: string;
   subtitle: string;
-  category: "Weddings" | "Traditional" | "Decor" | "Celebrations" | "Corporate Events" | "Proposals" | "Ballrooms & Decor";
+  category: PortfolioCategory;
   year: string;
   location: string;
   image: string;

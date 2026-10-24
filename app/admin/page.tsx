@@ -114,6 +114,7 @@ export default function AdminPage() {
   // Portfolio Multi-Image Edit State
   const [editingProject, setEditingProject] = useState<PortfolioItem | null>(null);
   const [editProjectUrlInput, setEditProjectUrlInput] = useState("");
+  const [portfolioCategoryFilter, setPortfolioCategoryFilter] = useState<string>("All");
 
   // Gift Item Modals State
   const [isAddGiftOpen, setIsAddGiftOpen] = useState(false);
@@ -241,17 +242,15 @@ export default function AdminPage() {
     }
   };
 
-  // --- Helper: Read video file as Data URI ---
+  // --- Helper: Read video file as Data URI (No size limit) ---
   const handleVideoFileConversion = (file: File, callback: (videoData: string) => void) => {
-    if (file.size > 20 * 1024 * 1024) {
-      alert("This video file exceeds 20MB. For optimal web playback and storage, please choose a clip under 20MB or enter a direct video URL.");
-      return;
-    }
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    showToast(`Loading video "${file.name}" (${sizeMb} MB)...`);
     const reader = new FileReader();
     reader.onload = (e) => {
       if (typeof e.target?.result === "string") {
         callback(e.target.result);
-        showToast("Video reel uploaded and attached successfully!");
+        showToast(`Video "${file.name}" (${sizeMb} MB) uploaded successfully!`);
       }
     };
     reader.onerror = () => {
@@ -952,93 +951,159 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {portfolio.map((item) => {
-                const photoCount = item.gallery && item.gallery.length > 0 ? item.gallery.length : 1;
+            {/* Category Filter Pills (Identical to User Side Categories) */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-brand-plum/70 mr-1">Categories:</span>
+              {(["All", "Weddings", "Traditional", "Decor", "Celebrations", "Corporate Events", "Proposals"] as const).map((cat) => {
+                const count =
+                  cat === "All"
+                    ? portfolio.length
+                    : portfolio.filter((p) => {
+                        if (cat === "Decor") {
+                          return p.category === "Decor" || (p.category as string) === "Ballrooms & Decor";
+                        }
+                        return p.category === cat;
+                      }).length;
+                const isActive = portfolioCategoryFilter === cat;
 
                 return (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setPortfolioCategoryFilter(cat)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
+                    }`}
                   >
-                    <div>
-                      <div className="relative aspect-[16/10] bg-brand-plum overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-xs">
-                            {item.category}
-                          </span>
-                          {item.featured && (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
-                              Featured
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Multiple photos & video badge */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                          {item.videoUrl && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-xs flex items-center gap-1">
-                              <Video className="w-3 h-3 fill-brand-plum" />
-                              <span>Video</span>
-                            </span>
-                          )}
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-black/60 text-white backdrop-blur-xs shadow-xs flex items-center gap-1">
-                            <Images className="w-3 h-3 text-brand-gold" />
-                            <span>{photoCount} {photoCount === 1 ? "Photo" : "Photos"}</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-5 pt-3">
-                        <h4 className="font-serif text-lg font-bold text-brand-plum leading-snug">
-                          {item.title}
-                        </h4>
-                        <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
-                          {item.subtitle}
-                        </p>
-                        <div className="text-[11px] text-brand-gold font-sans font-medium mt-2">
-                          {item.location} • {item.year}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Edit and Delete Actions */}
-                    <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const gallery = item.gallery && item.gallery.length > 0 ? item.gallery : [item.image];
-                          setEditingProject({
-                            ...item,
-                            gallery: gallery,
-                          });
-                          setEditProjectUrlInput("");
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-soft-lavender hover:bg-brand-purple hover:text-white text-brand-purple text-xs font-semibold transition-colors cursor-pointer"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                        <span>Edit Photos ({photoCount})</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePortfolioProject(item.id, item.title)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-semibold transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </div>
+                    <span>{cat}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        isActive ? "bg-white/20 text-white" : "bg-brand-soft-lavender text-brand-purple"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
                 );
               })}
             </div>
+
+            {(() => {
+              const filteredPortfolio =
+                portfolioCategoryFilter === "All"
+                  ? portfolio
+                  : portfolio.filter((item) => {
+                      if (portfolioCategoryFilter === "Decor") {
+                        return item.category === "Decor" || (item.category as string) === "Ballrooms & Decor";
+                      }
+                      return item.category === portfolioCategoryFilter;
+                    });
+
+              if (filteredPortfolio.length === 0) {
+                return (
+                  <div className="bg-white rounded-2xl border border-brand-warm-border p-12 text-center text-brand-plum/60">
+                    <p className="font-serif text-lg font-semibold text-brand-plum">
+                      No projects found under &ldquo;{portfolioCategoryFilter}&rdquo;
+                    </p>
+                    <p className="text-xs mt-1">
+                      Click &ldquo;Add New Project (Multi-Upload)&rdquo; above to create a project in this category.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {filteredPortfolio.map((item) => {
+                    const photoCount = item.gallery && item.gallery.length > 0 ? item.gallery.length : 1;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
+                      >
+                        <div>
+                          <div className="relative aspect-[16/10] bg-brand-plum overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute top-3 left-3 flex items-center gap-2">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-xs">
+                                {item.category}
+                              </span>
+                              {item.featured && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
+                                  Featured
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Multiple photos & video badge */}
+                            <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                              {item.videoUrl && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-xs flex items-center gap-1">
+                                  <Video className="w-3 h-3 fill-brand-plum" />
+                                  <span>Video</span>
+                                </span>
+                              )}
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-black/60 text-white backdrop-blur-xs shadow-xs flex items-center gap-1">
+                                <Images className="w-3 h-3 text-brand-gold" />
+                                <span>{photoCount} {photoCount === 1 ? "Photo" : "Photos"}</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-5 pt-3">
+                            <h4 className="font-serif text-lg font-bold text-brand-plum leading-snug">
+                              {item.title}
+                            </h4>
+                            <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
+                              {item.subtitle}
+                            </p>
+                            <div className="text-[11px] text-brand-gold font-sans font-medium mt-2">
+                              {item.location} • {item.year}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Edit and Delete Actions */}
+                        <div className="p-4 pt-2 border-t border-brand-warm-border/60 flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const gallery = item.gallery && item.gallery.length > 0 ? item.gallery : [item.image];
+                              setEditingProject({
+                                ...item,
+                                gallery: gallery,
+                              });
+                              setEditProjectUrlInput("");
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-soft-lavender hover:bg-brand-purple hover:text-white text-brand-purple text-xs font-semibold transition-colors cursor-pointer"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                            <span>Edit Photos ({photoCount})</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePortfolioProject(item.id, item.title)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-600 text-xs font-semibold transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1648,8 +1713,9 @@ export default function AdminPage() {
                   >
                     <option value="Weddings">Weddings</option>
                     <option value="Traditional">Traditional</option>
-                    <option value="Ballrooms & Decor">Ballrooms & Decor</option>
+                    <option value="Decor">Decor</option>
                     <option value="Celebrations">Celebrations</option>
+                    <option value="Corporate Events">Corporate Events</option>
                     <option value="Proposals">Proposals</option>
                   </select>
                 </div>
@@ -1837,10 +1903,10 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <label className="block uppercase font-semibold text-brand-plum/90 flex items-center gap-2">
                     <Video className="w-4 h-4 text-brand-purple" />
-                    <span>Video Reel (Optional)</span>
+                    <span>Video Reel (No File Size Limit)</span>
                   </label>
                   <span className="text-[11px] text-brand-purple font-medium">
-                    Upload MP4 / WebM or paste video URL
+                    Upload MP4 / WebM / MOV (No size limit) or paste video URL
                   </span>
                 </div>
 
@@ -1867,7 +1933,7 @@ export default function AdminPage() {
                     className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
                     <Video className="w-3.5 h-3.5" />
-                    <span>Upload Video File</span>
+                    <span>Upload Video File (No Limit)</span>
                   </button>
                   <span className="text-[11px] text-brand-plum/50">or enter video link below</span>
                 </div>
@@ -2015,8 +2081,9 @@ export default function AdminPage() {
                   >
                     <option value="Weddings">Weddings</option>
                     <option value="Traditional">Traditional</option>
-                    <option value="Ballrooms & Decor">Ballrooms & Decor</option>
+                    <option value="Decor">Decor</option>
                     <option value="Celebrations">Celebrations</option>
+                    <option value="Corporate Events">Corporate Events</option>
                     <option value="Proposals">Proposals</option>
                   </select>
                 </div>
@@ -2215,10 +2282,10 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <label className="block uppercase font-semibold text-brand-plum/90 flex items-center gap-2">
                     <Video className="w-4 h-4 text-brand-purple" />
-                    <span>Video Reel (Optional)</span>
+                    <span>Video Reel (No File Size Limit)</span>
                   </label>
                   <span className="text-[11px] text-brand-purple font-medium">
-                    Upload MP4 / WebM or edit video URL
+                    Upload MP4 / WebM / MOV (No size limit) or edit video URL
                   </span>
                 </div>
 
@@ -2245,7 +2312,7 @@ export default function AdminPage() {
                     className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
                     <Video className="w-3.5 h-3.5" />
-                    <span>Upload New Video</span>
+                    <span>Upload New Video (No Limit)</span>
                   </button>
                   <span className="text-[11px] text-brand-plum/50">or edit video URL below</span>
                 </div>
