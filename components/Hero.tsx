@@ -34,6 +34,22 @@ export default function Hero() {
   const videoSrc = config.heroVideoUrl || "/images/hero-video.mp4";
   const posterSrc = config.heroPosterUrl || "/images/hero-poster.jpg";
 
+  // Force immediate autoplay on landing and seamless loop
+  useEffect(() => {
+    if (videoRef.current && !prefersReducedMotion) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsVideoLoaded(true))
+          .catch(() => {
+            // Autoplay policy fallback
+          });
+      }
+    }
+  }, [videoSrc, prefersReducedMotion]);
+
   return (
     <section className="relative min-h-[92vh] lg:min-h-screen flex items-center justify-center overflow-hidden bg-brand-plum text-white">
       {/* Background Video Container */}
@@ -43,12 +59,12 @@ export default function Hero() {
         <img
           src={posterSrc}
           alt="Events 21 Grand Royal Celebration"
-          className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.05] transition-opacity duration-700 ${
+          className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.05] transition-opacity duration-500 ${
             isVideoLoaded && !prefersReducedMotion ? "opacity-0" : "opacity-100"
           }`}
         />
 
-        {/* Cinematic Background Video (16:9 widescreen, vivid, clearly visible) */}
+        {/* Cinematic Background Video (1:40 - 1:59 wedding segment, 16:9 widescreen, vivid, clearly visible) */}
         {!prefersReducedMotion && (
           <video
             ref={videoRef}
@@ -59,8 +75,16 @@ export default function Hero() {
             playsInline
             preload="auto"
             poster={posterSrc}
-            onLoadedData={() => setIsVideoLoaded(true)}
-            className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ${
+            onCanPlay={() => {
+              setIsVideoLoaded(true);
+              videoRef.current?.play().catch(() => {});
+            }}
+            onPlaying={() => setIsVideoLoaded(true)}
+            onLoadedData={() => {
+              setIsVideoLoaded(true);
+              videoRef.current?.play().catch(() => {});
+            }}
+            className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] transition-opacity duration-500 ${
               isVideoLoaded ? "opacity-100" : "opacity-0"
             }`}
           >
