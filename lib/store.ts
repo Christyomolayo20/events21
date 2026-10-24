@@ -352,6 +352,9 @@ export function getGiftCatalogue(): GiftItem[] {
     if (defaultMatch) {
       return {
         ...item,
+        image: item.image?.startsWith("data:") ? item.image : defaultMatch.image,
+        description: defaultMatch.description,
+        details: defaultMatch.details,
         videoUrl: item.videoUrl || defaultMatch.videoUrl,
         mediaType: item.mediaType || defaultMatch.mediaType,
       };

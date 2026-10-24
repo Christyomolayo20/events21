@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles, CheckCircle2, Crown, Calendar, MessageSquare } from "lucide-react";
-import { SERVICES_DATA, BRAND_CONFIG } from "@/lib/data";
+import { ArrowUpRight, Sparkles, CheckCircle2, Crown, Calendar } from "lucide-react";
+import { SERVICES_DATA } from "@/lib/data";
 import ConsultationCTA from "@/components/ConsultationCTA";
 
 export const metadata = {
@@ -78,21 +78,6 @@ export default function ServicesPage() {
                     <span className="px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-xs text-[11px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-md">
                       Service 0{index + 1}
                     </span>
-                  </div>
-
-                  {/* Direct WhatsApp Prompt on Image */}
-                  <div className="absolute bottom-5 left-5 right-5 z-10 hidden sm:block">
-                    <a
-                      href={`https://wa.me/${BRAND_CONFIG.whatsappNumber}?text=Hello%20Events%2021!%20I%20am%20reading%20about%20*${encodeURIComponent(
-                        service.title
-                      )}*%20and%20would%20love%20to%20discuss%20pricing%20and%20dates.`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-plum/90 backdrop-blur-md text-white text-xs font-sans font-medium hover:bg-brand-purple transition-colors shadow-lg border border-white/10"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 text-brand-gold" />
-                      <span>Chat on WhatsApp regarding this service</span>
-                    </a>
                   </div>
                 </div>
 
