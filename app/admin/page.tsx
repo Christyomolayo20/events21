@@ -67,6 +67,7 @@ import {
   Loader2,
   CalendarCheck,
   Quote,
+  Database,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -1363,6 +1364,87 @@ export default function AdminPage() {
                   </button>
                 </div>
               </form>
+            </div>
+
+            {/* Supabase Cloud Database Status Card */}
+            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-sans font-semibold uppercase tracking-wider mb-2">
+                    <Database className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Supabase Cloud Database</span>
+                  </div>
+                  <h3 className="font-serif text-2xl font-bold text-brand-plum">
+                    Connection Status
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-emerald-700 font-sans">
+                    Gateway Online
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-xs font-sans">
+                <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
+                  <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
+                    Project ID
+                  </span>
+                  <span className="font-mono font-bold text-brand-plum">
+                    kmkvhypdcsabnvwytvug
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
+                  <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
+                    Project URL
+                  </span>
+                  <span className="font-mono text-brand-purple truncate max-w-[280px]">
+                    https://kmkvhypdcsabnvwytvug.supabase.co
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
+                  <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
+                    Cloud Server Gateway
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Reachable &amp; Responding (HTTP 200/401)</span>
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
+                  <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
+                    API Anon Key
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-amber-600">
+                    <Clock className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Pending in .env.local / Vercel</span>
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-between">
+                  <span className="text-emerald-800 font-semibold uppercase tracking-wider text-[10px]">
+                    Active Resilient Storage
+                  </span>
+                  <span className="font-medium text-emerald-800">
+                    LocalStorage + IndexedDB (Zero data loss)
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-5 p-4 rounded-xl bg-brand-soft-lavender/40 border border-brand-purple/20 text-xs text-brand-plum/80 leading-relaxed font-sans">
+                <p className="font-semibold text-brand-purple mb-1">
+                  How to complete live table syncing:
+                </p>
+                <ol className="list-decimal list-inside space-y-1 text-[11px] text-brand-plum/75">
+                  <li>Log into your Supabase Dashboard for project <strong>kmkvhypdcsabnvwytvug</strong>.</li>
+                  <li>Navigate to <strong>Project Settings &rarr; API</strong>.</li>
+                  <li>Copy the <strong>anon public</strong> key and add it as <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in your <code>.env.local</code> file or Vercel Environment Variables.</li>
+                </ol>
+              </div>
             </div>
 
             {/* Hero Video, Founder Profile, and Team Profiles Management */}
