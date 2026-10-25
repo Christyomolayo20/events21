@@ -82,14 +82,16 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-sm sm:text-base text-brand-plum/80 font-sans leading-relaxed font-light">
                 <p>
-                  Founded with a vision to deliver regal event experiences across Nigeria, Events 21
-                  specialises in high-touch weddings, milestone birthdays, cultural engagements, and bespoke
-                  gatherings. We believe every host deserves to be an unburdened guest at their own celebration.
+                  Founded with a vision to deliver regal celebration experiences across Nigeria and beyond, Events 21
+                  is a full-service event planning, luxury design, rental, and educational brand. We believe every
+                  host deserves to be an unburdened guest at their own celebration.
                 </p>
                 <p>
-                  Whether styling an authentic Yoruba engagement with rich aso-oke and traditional Alaga protocols,
-                  producing a modern ballroom white wedding with dramatic lighting and low fog, or curating bespoke
-                  tablescapes for an 80th jubilee, our work is defined by poise, warmth, and meticulous attention to every detail.
+                  From orchestrating grand white weddings, corporate galas, and milestone jubilees to styling authentic
+                  cultural engagements with bespoke Eru Iyawo packaging, our craft touches every layer of celebration.
+                  We pair end-to-end event planning with visionary floral design, an exclusive luxury rental collection, and
+                  practical industry training through the Royal Planners Academy. Across every celebration and masterclass,
+                  our work is defined by poise, cultural reverence, and meticulous attention to every detail.
                 </p>
               </div>
             </div>
