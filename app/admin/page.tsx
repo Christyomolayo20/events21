@@ -26,11 +26,13 @@ import {
   compressImageFile,
   getConsultations,
   getTestimonials,
+  getAcademyRegistrations,
 } from "@/lib/store";
 import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem } from "@/lib/types";
 import ConsultationsManager from "@/components/admin/ConsultationsManager";
 import TestimonialsManager from "@/components/admin/TestimonialsManager";
 import BrandAndTeamManager from "@/components/admin/BrandAndTeamManager";
+import AcademyManager from "@/components/admin/AcademyManager";
 import {
   Lock,
   LogOut,
@@ -72,6 +74,7 @@ import {
   RefreshCw,
   Copy,
   Code,
+  GraduationCap,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -79,7 +82,7 @@ export default function AdminPage() {
   const [passwordInput, setPasswordInput] = useState("");
   const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<
-    "enquiries" | "consultations" | "portfolio" | "gifts" | "testimonials" | "settings"
+    "enquiries" | "consultations" | "academy" | "portfolio" | "gifts" | "testimonials" | "settings"
   >("enquiries");
 
   // State data
@@ -90,6 +93,7 @@ export default function AdminPage() {
   const [config, setConfig] = useState(getBrandConfig());
   const [consultationsCount, setConsultationsCount] = useState(0);
   const [testimonialsCount, setTestimonialsCount] = useState(0);
+  const [academyCount, setAcademyCount] = useState(0);
 
   // Filter & Search
   const [enquirySearch, setEnquirySearch] = useState("");
@@ -190,6 +194,7 @@ export default function AdminPage() {
     window.addEventListener("events21_settings_updated", handleUpdate);
     window.addEventListener("events21_consultations_updated", handleUpdate);
     window.addEventListener("events21_testimonials_updated", handleUpdate);
+    window.addEventListener("events21_academy_updated", handleUpdate);
 
     return () => {
       window.removeEventListener("events21_enquiries_updated", handleUpdate);
@@ -199,6 +204,7 @@ export default function AdminPage() {
       window.removeEventListener("events21_settings_updated", handleUpdate);
       window.removeEventListener("events21_consultations_updated", handleUpdate);
       window.removeEventListener("events21_testimonials_updated", handleUpdate);
+      window.removeEventListener("events21_academy_updated", handleUpdate);
     };
   }, []);
 
@@ -210,6 +216,7 @@ export default function AdminPage() {
     setConfig(getBrandConfig());
     setConsultationsCount(getConsultations().length);
     setTestimonialsCount(getTestimonials().length);
+    setAcademyCount(getAcademyRegistrations().length);
     checkSupabaseStatus();
   };
 
@@ -746,6 +753,22 @@ export default function AdminPage() {
             <span>Consultations</span>
             <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
               {consultationsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("academy")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "academy"
+                ? "bg-brand-purple text-white shadow-xs"
+                : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
+            }`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span>Royal Planners Academy</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
+              {academyCount}
             </span>
           </button>
 
@@ -1422,6 +1445,11 @@ export default function AdminPage() {
         {/* TAB: CONSULTATIONS */}
         {activeTab === "consultations" && (
           <ConsultationsManager onNotify={showToast} />
+        )}
+
+        {/* TAB: ACADEMY REGISTRATIONS */}
+        {activeTab === "academy" && (
+          <AcademyManager onNotify={showToast} />
         )}
 
         {/* TAB: TESTIMONIALS */}
@@ -2893,7 +2921,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
                 <input
                   type="text"
-                  placeholder="Paste direct video URL (e.g. /videos/eru-iyawo.mp4 or https://...)"
+                  placeholder="Paste direct video URL (e.g. /videos/wedding-reel.mp4 or https://...)"
                   value={newGift.videoUrl || ""}
                   onChange={(e) => setNewGift({ ...newGift, videoUrl: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg border border-brand-warm-border text-xs text-brand-plum focus:outline-brand-purple"
@@ -3147,7 +3175,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
                 <input
                   type="text"
-                  placeholder="Paste direct video URL (e.g. /videos/eru-iyawo.mp4 or https://...)"
+                  placeholder="Paste direct video URL (e.g. /videos/wedding-reel.mp4 or https://...)"
                   value={editingGift.videoUrl || ""}
                   onChange={(e) =>
                     setEditingGift({ ...editingGift, videoUrl: e.target.value })

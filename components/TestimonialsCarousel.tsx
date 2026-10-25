@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
-import { Star, ChevronLeft, ChevronRight, Quote, Sparkles, ArrowUpRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, Quote, Sparkles } from "lucide-react";
 import { getPublishedTestimonials } from "@/lib/store";
 import { INITIAL_TESTIMONIALS } from "@/lib/data";
 import { Testimonial } from "@/lib/types";
 
 export default function TestimonialsCarousel() {
-  // Always initialize with genuine published defaults so SSR & initial mobile render is never empty
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
     return INITIAL_TESTIMONIALS.filter((t) => t.isPublished);
   });
@@ -20,11 +18,7 @@ export default function TestimonialsCarousel() {
 
   const loadData = useCallback(() => {
     const list = getPublishedTestimonials();
-    if (list && list.length > 0) {
-      setTestimonials(list);
-    } else {
-      setTestimonials(INITIAL_TESTIMONIALS.filter((t) => t.isPublished));
-    }
+    setTestimonials(list);
   }, []);
 
   useEffect(() => {
@@ -33,11 +27,7 @@ export default function TestimonialsCarousel() {
     return () => window.removeEventListener("events21_testimonials_updated", loadData);
   }, [loadData]);
 
-  // Active list always has fallback
-  const activeList =
-    testimonials && testimonials.length > 0
-      ? testimonials
-      : INITIAL_TESTIMONIALS.filter((t) => t.isPublished);
+  const activeList = testimonials;
 
   const handleNext = useCallback(() => {
     if (activeList.length <= 1) return;
@@ -88,17 +78,22 @@ export default function TestimonialsCarousel() {
     }
   };
 
-  if (activeList.length === 0) {
+  if (!activeList || activeList.length === 0) {
     return null;
   }
 
   const current = activeList[currentIndex % activeList.length];
-  const hasImage = Boolean(current.image);
+  const hasImage = Boolean(current.image && current.image.trim());
+  const reviewText = (current.text || current.quote || "").trim();
+  const roleOrEventText = (
+    current.roleOrEvent ||
+    [current.clientRole, current.eventName].filter(Boolean).join(" • ")
+  ).trim();
 
   return (
     <section
       id="testimonials"
-      className="relative w-full min-h-[520px] sm:min-h-[580px] md:min-h-[640px] bg-[#18061B] text-white overflow-hidden flex flex-col justify-between"
+      className="relative w-full min-h-[500px] sm:min-h-[560px] md:min-h-[620px] bg-[#18061B] text-white overflow-hidden flex flex-col justify-between"
       aria-label="Client Testimonials Carousel"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -114,28 +109,28 @@ export default function TestimonialsCarousel() {
             src={current.image}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover blur-3xl opacity-25 scale-110 transition-all duration-1000 ease-out"
+            className="w-full h-full object-cover blur-3xl opacity-20 scale-110 transition-all duration-1000 ease-out"
           />
         </div>
       )}
 
-      {/* BACKGROUND LAYER 2: Uncropped image fitting automatically with NO cutting or cropping */}
+      {/* BACKGROUND LAYER 2: Uncropped image fitting automatically */}
       {hasImage && (
         <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center p-4 sm:p-8 md:p-12 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={current.image}
             alt={current.clientName}
-            className="max-w-full max-h-full w-auto h-auto object-contain object-center opacity-70 filter brightness-[0.55] contrast-105 transition-all duration-1000 ease-out"
+            className="max-w-full max-h-full w-auto h-auto object-contain object-center opacity-60 filter brightness-[0.55] contrast-105 transition-all duration-1000 ease-out"
           />
         </div>
       )}
 
-      {/* BACKGROUND LAYER 3: Luxury Royal Plum Vignette Scrim for Crystal-Clear Text Contrast */}
+      {/* BACKGROUND LAYER 3: Luxury Royal Plum Vignette Scrim for Text Contrast */}
       <div className="absolute inset-0 z-1 pointer-events-none bg-gradient-to-t from-[#18061B] via-[#18061B]/65 to-[#18061B]/80" />
       <div className="absolute inset-0 z-1 pointer-events-none bg-radial from-transparent via-[#18061B]/50 to-[#18061B]/90" />
 
-      {/* FOREGROUND CONTENT LAYER: Expands and Fills the Section */}
+      {/* FOREGROUND CONTENT LAYER: Only Admin-Populated Fields */}
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-12 md:px-16 pt-16 sm:pt-20 md:pt-24 pb-12 flex-1 flex flex-col justify-between text-center">
         {/* Top Header Badge */}
         <div>
@@ -145,40 +140,36 @@ export default function TestimonialsCarousel() {
           </div>
 
           {/* Star Rating */}
-          <div className="flex items-center justify-center gap-1.5 mb-6">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                  i < (current.rating || 5)
-                    ? "fill-brand-gold text-brand-gold drop-shadow-md"
-                    : "text-white/20"
-                }`}
-              />
-            ))}
-          </div>
+          {Boolean(current.rating && current.rating > 0) && (
+            <div className="flex items-center justify-center gap-1.5 mb-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                    i < (current.rating || 5)
+                      ? "fill-brand-gold text-brand-gold drop-shadow-md"
+                      : "text-white/20"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Grand Testimonial Quote */}
+        {/* Testimonial Quote - Only the Single Admin Text */}
         <div className="my-auto py-4 sm:py-6 max-w-4xl mx-auto">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-gold flex items-center justify-center mx-auto mb-6 shadow-inner">
             <Quote className="w-6 h-6 sm:w-7 sm:h-7 fill-current" />
           </div>
 
           <blockquote className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-relaxed sm:leading-snug md:leading-tight text-white font-normal drop-shadow-lg tracking-wide">
-            &ldquo;{current.quote || current.text}&rdquo;
+            &ldquo;{reviewText}&rdquo;
           </blockquote>
-
-          {current.quote && current.text && current.text !== current.quote && (
-            <p className="mt-4 text-xs sm:text-sm text-white/75 font-sans leading-relaxed max-w-2xl mx-auto font-light line-clamp-2 sm:line-clamp-3">
-              {current.text}
-            </p>
-          )}
         </div>
 
-        {/* Client Identity & Event Role */}
+        {/* Client Identity & Event Role (No Empty Labels) */}
         <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
-          {current.image && (
+          {hasImage && (
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-brand-gold shrink-0 shadow-lg ring-2 ring-white/10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -192,10 +183,9 @@ export default function TestimonialsCarousel() {
             <cite className="not-italic font-serif font-bold text-lg sm:text-xl text-white block drop-shadow-xs">
               {current.clientName}
             </cite>
-            {(current.roleOrEvent || current.clientRole || current.eventName) && (
+            {roleOrEventText && (
               <span className="text-xs sm:text-sm font-sans font-medium text-brand-gold tracking-wider uppercase block mt-0.5">
-                {current.roleOrEvent ||
-                  [current.clientRole, current.eventName].filter(Boolean).join(" • ")}
+                {roleOrEventText}
               </span>
             )}
           </div>

@@ -20,8 +20,9 @@ import {
   ConsultationBooking,
   TeamMember,
   FounderInfo,
+  AcademyRegistration,
 } from "./types";
-import { pushConsultationToSupabase, pushEnquiryToSupabase } from "./supabase";
+import { pushConsultationToSupabase, pushEnquiryToSupabase, pushAcademyRegistrationToSupabase } from "./supabase";
 
 const ENQUIRIES_KEY = "events21_enquiries";
 const GIFT_REQUESTS_KEY = "events21_gift_requests";
@@ -33,6 +34,7 @@ const TESTIMONIALS_KEY = "events21_testimonials";
 const CONSULTATIONS_KEY = "events21_consultations";
 const FOUNDER_KEY = "events21_founder";
 const TEAM_KEY = "events21_team";
+const ACADEMY_REGISTRATIONS_KEY = "events21_academy_registrations";
 
 
 // --- CLIENT-SIDE IMAGE COMPRESSION (Prevents QuotaExceededError & Speeds Up Browsing) ---
@@ -183,6 +185,7 @@ let cacheTestimonials: Testimonial[] | null = null;
 let cacheConsultations: ConsultationBooking[] | null = null;
 let cacheFounder: FounderInfo | null = null;
 let cacheTeam: TeamMember[] | null = null;
+let cacheAcademy: AcademyRegistration[] | null = null;
 
 // Background hydration from IndexedDB on startup
 if (typeof window !== "undefined") {
@@ -214,6 +217,13 @@ if (typeof window !== "undefined") {
         cacheConsultations = idbConsultations;
         safeLocalStorageSet(CONSULTATIONS_KEY, idbConsultations);
         window.dispatchEvent(new Event("events21_consultations_updated"));
+      }
+
+      const idbAcademy = await idbGet<AcademyRegistration[]>(ACADEMY_REGISTRATIONS_KEY);
+      if (idbAcademy && Array.isArray(idbAcademy)) {
+        cacheAcademy = idbAcademy;
+        safeLocalStorageSet(ACADEMY_REGISTRATIONS_KEY, idbAcademy);
+        window.dispatchEvent(new Event("events21_academy_updated"));
       }
     } catch {
       // Ignored
@@ -352,10 +362,13 @@ export function getGiftCatalogue(): GiftItem[] {
   const merged = combined.map((item) => {
     const defaultMatch = GIFTS_CATALOGUE.find((d) => d.id === item.id);
     if (defaultMatch) {
+      const isEruIyawoImage = item.image && item.image.includes("eru-iyawo");
       return {
         ...item,
         price: item.price !== undefined ? item.price : defaultMatch.price,
-        image: item.image?.startsWith("data:") ? item.image : defaultMatch.image,
+        image: isEruIyawoImage
+          ? defaultMatch.image
+          : (item.image?.startsWith("data:") ? item.image : defaultMatch.image),
         description: item.description || defaultMatch.description,
         details: item.details || defaultMatch.details,
         videoUrl: item.videoUrl || defaultMatch.videoUrl,
@@ -527,21 +540,14 @@ export function logoutAdmin(): void {
 export function getTestimonials(): Testimonial[] {
   if (typeof window === "undefined") return INITIAL_TESTIMONIALS;
   if (cacheTestimonials) return cacheTestimonials;
-  const stored = safeLocalStorageGet<Testimonial[]>(TESTIMONIALS_KEY, INITIAL_TESTIMONIALS);
-  if (!stored || stored.length === 0) {
+  const stored = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
+  if (stored === null) {
     cacheTestimonials = INITIAL_TESTIMONIALS;
     safeLocalStorageSet(TESTIMONIALS_KEY, INITIAL_TESTIMONIALS);
     return INITIAL_TESTIMONIALS;
   }
-  // Merge any default testimonials that are not already present
-  const merged = [...stored];
-  INITIAL_TESTIMONIALS.forEach((item) => {
-    if (!merged.some((m) => m.id === item.id)) {
-      merged.push(item);
-    }
-  });
-  cacheTestimonials = merged;
-  return merged;
+  cacheTestimonials = stored;
+  return stored;
 }
 
 export function getPublishedTestimonials(): Testimonial[] {
@@ -763,4 +769,77 @@ export function deleteTeamMember(id: string): void {
     window.dispatchEvent(new Event("events21_team_updated"));
   }
 }
+
+// --- ROYAL PLANNERS ACADEMY REGISTRATIONS ---
+export function getAcademyRegistrations(): AcademyRegistration[] {
+  if (typeof window === "undefined") return [];
+  if (cacheAcademy) return cacheAcademy;
+  const stored = safeLocalStorageGet<AcademyRegistration[]>(ACADEMY_REGISTRATIONS_KEY, []);
+  cacheAcademy = stored;
+  return stored;
+}
+
+export function saveAcademyRegistration(
+  reg: Omit<AcademyRegistration, "id" | "status" | "createdAt">
+): AcademyRegistration {
+  const newReg: AcademyRegistration = {
+    ...reg,
+    id: `rpa-${Date.now().toString(36).toUpperCase()}`,
+    status: "New Enquiry",
+    createdAt: new Date().toISOString(),
+  };
+
+  const existing = getAcademyRegistrations();
+  const updated = [newReg, ...existing];
+  cacheAcademy = updated;
+  safeLocalStorageSet(ACADEMY_REGISTRATIONS_KEY, updated);
+  idbSet(ACADEMY_REGISTRATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_academy_updated"));
+  }
+
+  // Push to Supabase in background if configured
+  pushAcademyRegistrationToSupabase(newReg).catch(() => {});
+
+  return newReg;
+}
+
+export function updateAcademyRegistrationStatus(
+  id: string,
+  status: AcademyRegistration["status"],
+  notes?: string
+): void {
+  const existing = getAcademyRegistrations();
+  const updated = existing.map((item) => {
+    if (item.id === id) {
+      return {
+        ...item,
+        status,
+        ...(notes !== undefined ? { notes } : {}),
+      };
+    }
+    return item;
+  });
+  cacheAcademy = updated;
+  safeLocalStorageSet(ACADEMY_REGISTRATIONS_KEY, updated);
+  idbSet(ACADEMY_REGISTRATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_academy_updated"));
+  }
+}
+
+export function deleteAcademyRegistration(id: string): void {
+  const existing = getAcademyRegistrations();
+  const updated = existing.filter((item) => item.id !== id);
+  cacheAcademy = updated;
+  safeLocalStorageSet(ACADEMY_REGISTRATIONS_KEY, updated);
+  idbSet(ACADEMY_REGISTRATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_academy_updated"));
+  }
+}
+
 

@@ -138,3 +138,28 @@ export interface FounderInfo {
   vision: string;
 }
 
+export type AcademyExperienceLevel =
+  | "Aspiring Planner — Just Starting Out"
+  | "Emerging Planner — Already Have Some Experience"
+  | "Business Owner — Looking to Grow My Business"
+  | "Related Professional — Exploring Event Management";
+
+export type AcademyRegistrationStatus =
+  | "New Enquiry"
+  | "Contacted"
+  | "Enrolled"
+  | "Archived";
+
+export interface AcademyRegistration {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  experienceLevel: AcademyExperienceLevel;
+  businessName?: string;
+  reasonForJoining?: string;
+  status: AcademyRegistrationStatus;
+  createdAt: string;
+  notes?: string;
+}
+

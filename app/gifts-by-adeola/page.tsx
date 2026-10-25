@@ -305,8 +305,8 @@ export default function GiftsByAdeolaPage() {
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/images/eru-iyawo-traditional-green.jpg"
-                    alt="Authentic Traditional Yoruba Eru Iyawo Presentation by Gifts by Adeola"
+                    src="/images/bespoke-gift-curation.jpg"
+                    alt="Authentic Gifting Presentation by Gifts by Adeola"
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ objectPosition: "center center" }}
                   />
@@ -390,8 +390,8 @@ export default function GiftsByAdeolaPage() {
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/images/eru-iyawo-traditional-green.jpg"
-                    alt="Traditional Yoruba Eru Iyawo Staging & Presentation by Gifts by Adeola"
+                    src="/images/vip-event-souvenirs.jpg"
+                    alt="Ceremonial Gifting Staging & Presentation by Gifts by Adeola"
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ objectPosition: "center center" }}
                   />

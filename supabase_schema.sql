@@ -51,18 +51,35 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 4. Royal Planners Academy Registrations Table
+CREATE TABLE IF NOT EXISTS public.academy_registrations (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    experience_level TEXT NOT NULL,
+    business_name TEXT DEFAULT '',
+    reason_for_joining TEXT DEFAULT '',
+    status TEXT DEFAULT 'New Enquiry',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.academy_registrations ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist to allow clean re-runs
 DROP POLICY IF EXISTS "Allow public insert consultations" ON public.consultations;
 DROP POLICY IF EXISTS "Allow public insert enquiries" ON public.enquiries;
 DROP POLICY IF EXISTS "Allow public insert gift_requests" ON public.gift_requests;
+DROP POLICY IF EXISTS "Allow public insert academy_registrations" ON public.academy_registrations;
 DROP POLICY IF EXISTS "Allow select consultations" ON public.consultations;
 DROP POLICY IF EXISTS "Allow select enquiries" ON public.enquiries;
 DROP POLICY IF EXISTS "Allow select gift_requests" ON public.gift_requests;
+DROP POLICY IF EXISTS "Allow select academy_registrations" ON public.academy_registrations;
+DROP POLICY IF EXISTS "Allow authenticated select academy_registrations" ON public.academy_registrations;
 
 -- Allow Public Insert Policies (for website visitors submitting forms)
 CREATE POLICY "Allow public insert consultations" ON public.consultations
@@ -74,7 +91,10 @@ CREATE POLICY "Allow public insert enquiries" ON public.enquiries
 CREATE POLICY "Allow public insert gift_requests" ON public.gift_requests
     FOR INSERT TO public WITH CHECK (true);
 
--- Allow Select Policies (for viewing/syncing in admin)
+CREATE POLICY "Allow public insert academy_registrations" ON public.academy_registrations
+    FOR INSERT TO public WITH CHECK (true);
+
+-- Allow Select Policies (Public consultations/enquiries/gifts, but restrict academy registrations to authenticated users)
 CREATE POLICY "Allow select consultations" ON public.consultations
     FOR SELECT TO public USING (true);
 
@@ -83,3 +103,8 @@ CREATE POLICY "Allow select enquiries" ON public.enquiries
 
 CREATE POLICY "Allow select gift_requests" ON public.gift_requests
     FOR SELECT TO public USING (true);
+
+-- Prevent unauthorized public visitors from reading prospective students' registration details
+CREATE POLICY "Allow authenticated select academy_registrations" ON public.academy_registrations
+    FOR SELECT TO authenticated USING (true);
+

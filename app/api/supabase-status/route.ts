@@ -101,7 +101,8 @@ export async function POST(req: Request) {
       fs.writeFileSync(envPath, envContent, "utf-8");
 
       // Update current process env
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = apiKey;
+      const anonKeyEnvVar = "NEXT_PUBLIC_SUPABASE_ANON_KEY";
+      process.env[anonKeyEnvVar] = apiKey;
 
       return NextResponse.json({
         success: true,

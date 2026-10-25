@@ -122,3 +122,35 @@ export async function pushEnquiryToSupabase(enquiry: Record<string, any>) {
     return { success: false, err };
   }
 }
+
+/**
+ * Safe Supabase push for Royal Planners Academy Registrations
+ */
+export async function pushAcademyRegistrationToSupabase(registration: Record<string, any>) {
+  const client = getSupabase();
+  if (!client) return { success: false, reason: "Supabase key not set in environment" };
+  try {
+    const { data, error } = await client.from("academy_registrations").insert([
+      {
+        id: registration.id,
+        full_name: registration.fullName,
+        email: registration.email,
+        phone: registration.phone,
+        experience_level: registration.experienceLevel,
+        business_name: registration.businessName || "",
+        reason_for_joining: registration.reasonForJoining || "",
+        status: registration.status || "New Enquiry",
+        created_at: registration.createdAt,
+      },
+    ]);
+    if (error) {
+      console.warn("Supabase academy registrations insert notice:", error.message);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  } catch (err) {
+    console.warn("Supabase academy registration sync skipped:", err);
+    return { success: false, err };
+  }
+}
+
