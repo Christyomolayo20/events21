@@ -33,18 +33,15 @@ export default function Hero() {
   const videoSrc = config.heroVideoUrl || "/images/hero-video.mp4";
   const posterSrc = config.heroPosterUrl || "/images/hero-poster.jpg";
 
-  // Calculate loop segment:
-  // If the source video is full-length (duration >= 133s), cue to 02:09 (129s) - 02:13 (133s).
-  // If the video is pre-trimmed (like the local 7s asset), loop 0s - 4s (or full clip duration).
+  // Calculate loop bounds:
+  // 1:28 (88s) to 1:40 (100s) on full-length video, or full duration on the extracted 12s asset.
   const getLoopBounds = useCallback((dur: number) => {
-    if (dur >= 133) {
-      return { start: 129.0, end: 133.0 };
+    if (dur >= 100) {
+      return { start: 88.0, end: 100.0 };
     }
-    const end = dur > 0 ? Math.min(dur, 4.0) : 4.0;
-    return { start: 0.0, end };
+    return { start: 0.0, end: dur > 0 ? dur : 12.0 };
   }, []);
 
-  // Safe playback starter
   const triggerPlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -56,7 +53,7 @@ export default function Hero() {
     const dur = video.duration || 0;
     const { start, end } = getLoopBounds(dur);
 
-    if (video.currentTime >= end || video.currentTime < start) {
+    if (video.currentTime >= end || (dur >= 100 && video.currentTime < start)) {
       try {
         video.currentTime = start;
       } catch {
@@ -69,7 +66,6 @@ export default function Hero() {
       playPromise
         .then(() => setIsVideoLoaded(true))
         .catch(() => {
-          // Fallback user interaction listener for strict browser autoplay policies
           const resume = () => {
             if (videoRef.current) {
               videoRef.current.play().catch(() => {});
@@ -85,7 +81,6 @@ export default function Hero() {
     }
   }, [getLoopBounds]);
 
-  // Autoplay immediately on mount & loop repeatedly
   useEffect(() => {
     const video = videoRef.current;
     if (!video || prefersReducedMotion) return;
@@ -100,14 +95,13 @@ export default function Hero() {
       triggerPlay();
     };
 
-    // Continuous 60fps frame loop check for seamless looping
     const loopCheck = () => {
       if (videoRef.current) {
         const v = videoRef.current;
         const dur = v.duration || 0;
         const { start, end } = getLoopBounds(dur);
 
-        if (v.currentTime >= end || (dur >= 133 && v.currentTime < start - 0.5)) {
+        if (v.currentTime >= end || (dur >= 100 && v.currentTime < start - 0.5)) {
           v.currentTime = start;
         }
 
@@ -132,7 +126,6 @@ export default function Hero() {
     };
   }, [videoSrc, prefersReducedMotion, triggerPlay, getLoopBounds]);
 
-  // Immediately play/resume repeatedly whenever user hovers on the hero section
   const handleSectionHover = () => {
     triggerPlay();
   };
@@ -142,11 +135,10 @@ export default function Hero() {
       onMouseEnter={handleSectionHover}
       onPointerEnter={handleSectionHover}
       onMouseMove={handleSectionHover}
-      className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen flex items-end justify-center overflow-hidden bg-brand-plum text-white pb-14 sm:pb-20 select-none"
+      className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen flex items-center justify-center overflow-hidden bg-brand-plum text-white select-none"
     >
-      {/* Background Video Container */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Cinematic Background Video (Immediate Autoplay + Repeated Hover Loop) */}
+      {/* Background Video Container - Fitted & Centered */}
+      <div className="absolute inset-0 z-0 overflow-hidden flex items-center justify-center">
         {!prefersReducedMotion && (
           <video
             ref={videoRef}
@@ -164,7 +156,7 @@ export default function Hero() {
         )}
 
         {/* Minimal Vignette Scrim for Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/90 via-black/20 to-brand-plum-dark/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/85 via-black/25 to-brand-plum-dark/40 pointer-events-none" />
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-brand-plum-dark/50 pointer-events-none" />
       </div>
 
@@ -172,14 +164,14 @@ export default function Hero() {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-purple/20 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-brand-gold/15 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Minimal Hero Actions Container - Plain & Simple Links Separated by Pipe, Moved Down */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center pb-4 sm:pb-8">
-        <div className="inline-flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-sans tracking-[0.24em] sm:tracking-[0.28em] uppercase font-semibold text-white/90">
+      {/* Hero CTA Container - Centered in Hero Section */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center justify-center py-12">
+        <div className="inline-flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-sans tracking-[0.24em] sm:tracking-[0.28em] uppercase font-semibold text-white/95 drop-shadow-md">
           {/* Link 1: Plan Your Event */}
           <Link
             href="/contact"
             id="hero-cta-plan"
-            className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold"
+            className="text-white hover:text-brand-gold transition-colors duration-300 py-2 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold"
           >
             Plan Your Event
           </Link>
@@ -191,7 +183,7 @@ export default function Hero() {
           <Link
             href="/gallery"
             id="hero-cta-portfolio"
-            className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold"
+            className="text-white hover:text-brand-gold transition-colors duration-300 py-2 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold"
           >
             View Portfolio
           </Link>
