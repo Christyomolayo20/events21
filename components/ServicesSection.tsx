@@ -10,23 +10,16 @@ export default function ServicesSection() {
     <section className="py-14 md:py-20 bg-brand-warm-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-12 gap-6">
-          <div className="max-w-xl">
-            <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2">
-              What We Do
+        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-14">
+          <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2">
+            What We Do
+          </span>
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight">
+            Curated Planning &amp;{" "}
+            <span className="italic font-normal font-serif text-brand-purple">
+              Design Services.
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight">
-              Curated Planning &amp;{" "}
-              <span className="italic font-normal font-serif text-brand-purple">
-                Design Services.
-              </span>
-            </h2>
-          </div>
-
-          <p className="text-sm sm:text-base text-brand-plum/70 font-sans max-w-md leading-relaxed">
-            From comprehensive event architecture to day-of coordination, we bring intentionality,
-            structure, and elevated beauty to every occasion.
-          </p>
+          </h2>
         </div>
 
         {/* Clean Service Grid */}

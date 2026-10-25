@@ -126,24 +126,27 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right Action CTA (Admin lock removed completely as requested) */}
+            {/* Right Action CTA */}
             <div className="hidden lg:flex items-center gap-3">
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold tracking-widest uppercase transition-all shadow-sm hover:shadow active:scale-[0.98]"
+                id="nav-cta-plan-desktop"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-bold tracking-[0.16em] uppercase transition-all shadow-md hover:shadow-elevated hover:scale-[1.02] active:scale-[0.98] border border-brand-gold/40"
               >
                 <span>Plan Your Event</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-brand-gold-light" />
               </Link>
             </div>
 
-            {/* Mobile Hamburger Button */}
+            {/* Mobile Action CTA & Hamburger Button */}
             <div className="flex items-center gap-2 lg:hidden">
               <Link
                 href="/contact"
-                className="inline-flex items-center px-4 py-1.5 rounded-full bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider shadow-xs"
+                id="nav-cta-plan-mobile"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-brand-purple text-white text-xs font-bold uppercase tracking-wider shadow-sm border border-brand-gold/30 active:scale-95"
               >
-                <span>Plan</span>
+                <span>Plan Event</span>
+                <ArrowUpRight className="w-3 h-3 text-brand-gold-light" />
               </Link>
               <button
                 type="button"
@@ -247,13 +250,19 @@ export default function Navbar() {
             );
           })}
 
-          <div className="pt-6 border-t border-brand-warm-border/60 mt-6">
+          <div className="pt-6 border-t border-brand-warm-border/60 mt-6 space-y-3">
             <Link
               href="/contact"
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-brand-purple text-white text-xs uppercase tracking-widest font-semibold hover:bg-brand-purple-hover transition-colors shadow-sm"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs uppercase tracking-widest font-bold transition-all shadow-md border border-brand-gold/40"
             >
               <span>Plan Your Event</span>
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="w-4 h-4 text-brand-gold-light" />
+            </Link>
+            <Link
+              href="/services/royal-planners-academy#register"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-full bg-white border border-brand-purple/20 text-brand-purple text-xs uppercase tracking-widest font-semibold hover:bg-brand-soft-lavender/50 transition-colors"
+            >
+              <span>Royal Planners Academy</span>
             </Link>
           </div>
         </div>
