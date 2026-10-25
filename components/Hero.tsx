@@ -1,12 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { getBrandConfig } from "@/lib/store";
-
-const SEGMENT_START = 129.0; // 02:09
-const SEGMENT_END = 133.0; // 02:13
 
 export default function Hero() {
   const [config, setConfig] = useState(getBrandConfig());
@@ -37,112 +33,138 @@ export default function Hero() {
   const videoSrc = config.heroVideoUrl || "/images/hero-video.mp4";
   const posterSrc = config.heroPosterUrl || "/images/hero-poster.jpg";
 
-  // Ensure video plays immediately on page load and loops 129s - 133s (02:09 - 02:13)
+  // Calculate loop segment:
+  // If the source video is full-length (duration >= 133s), cue to 02:09 (129s) - 02:13 (133s).
+  // If the video is pre-trimmed (like the local 7s asset), loop 0s - 4s (or full clip duration).
+  const getLoopBounds = useCallback((dur: number) => {
+    if (dur >= 133) {
+      return { start: 129.0, end: 133.0 };
+    }
+    const end = dur > 0 ? Math.min(dur, 4.0) : 4.0;
+    return { start: 0.0, end };
+  }, []);
+
+  // Safe playback starter
+  const triggerPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    const dur = video.duration || 0;
+    const { start, end } = getLoopBounds(dur);
+
+    if (video.currentTime >= end || video.currentTime < start) {
+      try {
+        video.currentTime = start;
+      } catch {
+        // Seek pending
+      }
+    }
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => setIsVideoLoaded(true))
+        .catch(() => {
+          // Fallback user interaction listener for strict browser autoplay policies
+          const resume = () => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {});
+            }
+            window.removeEventListener("pointerdown", resume);
+            window.removeEventListener("touchstart", resume);
+            window.removeEventListener("mousemove", resume);
+          };
+          window.addEventListener("pointerdown", resume, { once: true });
+          window.addEventListener("touchstart", resume, { once: true });
+          window.addEventListener("mousemove", resume, { once: true });
+        });
+    }
+  }, [getLoopBounds]);
+
+  // Autoplay immediately on mount & loop repeatedly
   useEffect(() => {
     const video = videoRef.current;
     if (!video || prefersReducedMotion) return;
 
     let animFrameId: number;
 
-    const startPlayback = () => {
-      video.defaultMuted = true;
-      video.muted = true;
-      video.playsInline = true;
-
-      // Cue to 02:09 immediately
-      if (Math.abs(video.currentTime - SEGMENT_START) > 0.4) {
-        try {
-          video.currentTime = SEGMENT_START;
-        } catch {
-          // Seeking pending
-        }
-      }
-
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsVideoLoaded(true);
-          })
-          .catch(() => {
-            // Autoplay unblock retry on user interaction
-            const resumeOnInteraction = () => {
-              video.play().catch(() => {});
-              window.removeEventListener("touchstart", resumeOnInteraction);
-              window.removeEventListener("click", resumeOnInteraction);
-            };
-            window.addEventListener("touchstart", resumeOnInteraction, { once: true });
-            window.addEventListener("click", resumeOnInteraction, { once: true });
-          });
-      }
-    };
-
     const handleLoadedMetadata = () => {
-      video.currentTime = SEGMENT_START;
-      video.play().catch(() => {});
-      setIsVideoLoaded(true);
+      triggerPlay();
     };
 
     const handleCanPlay = () => {
-      if (video.currentTime < SEGMENT_START - 0.5) {
-        video.currentTime = SEGMENT_START;
-      }
-      video.play().catch(() => {});
-      setIsVideoLoaded(true);
+      triggerPlay();
     };
 
+    // Continuous 60fps frame loop check for seamless looping
     const loopCheck = () => {
       if (videoRef.current) {
-        const cur = videoRef.current.currentTime;
-        // Loop back when reaching or exceeding 133s (02:13)
-        if (cur >= SEGMENT_END) {
-          videoRef.current.currentTime = SEGMENT_START;
-        } else if (cur > 0.5 && cur < SEGMENT_START - 0.5) {
-          videoRef.current.currentTime = SEGMENT_START;
+        const v = videoRef.current;
+        const dur = v.duration || 0;
+        const { start, end } = getLoopBounds(dur);
+
+        if (v.currentTime >= end || (dur >= 133 && v.currentTime < start - 0.5)) {
+          v.currentTime = start;
         }
 
-        if (videoRef.current.paused) {
-          videoRef.current.play().catch(() => {});
+        if (v.paused) {
+          v.play().catch(() => {});
         }
       }
       animFrameId = requestAnimationFrame(loopCheck);
     };
 
-    startPlayback();
+    triggerPlay();
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("ended", triggerPlay);
     animFrameId = requestAnimationFrame(loopCheck);
 
     return () => {
       cancelAnimationFrame(animFrameId);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("ended", triggerPlay);
     };
-  }, [videoSrc, prefersReducedMotion]);
+  }, [videoSrc, prefersReducedMotion, triggerPlay, getLoopBounds]);
+
+  // Immediately play/resume repeatedly whenever user hovers on the hero section
+  const handleSectionHover = () => {
+    triggerPlay();
+  };
 
   return (
-    <section className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen flex items-end justify-center overflow-hidden bg-brand-plum text-white pb-14 sm:pb-20">
+    <section
+      onMouseEnter={handleSectionHover}
+      onPointerEnter={handleSectionHover}
+      onMouseMove={handleSectionHover}
+      className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen flex items-end justify-center overflow-hidden bg-brand-plum text-white pb-14 sm:pb-20 select-none"
+    >
       {/* Background Video Container */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Cinematic Background Video (02:09 - 02:13 loop, immediate autoplay, responsive) */}
+        {/* Cinematic Background Video (Immediate Autoplay + Repeated Hover Loop) */}
         {!prefersReducedMotion && (
           <video
             ref={videoRef}
             key={videoSrc}
             autoPlay
+            loop
             muted
             playsInline
             preload="auto"
             poster={posterSrc}
             className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05]"
           >
-            <source src={`${videoSrc}#t=129,133`} type="video/mp4" />
             <source src={videoSrc} type="video/mp4" />
           </video>
         )}
 
         {/* Minimal Vignette Scrim for Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/90 via-black/20 to-brand-plum-dark/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/90 via-black/20 to-brand-plum-dark/40 pointer-events-none" />
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-brand-plum-dark/50 pointer-events-none" />
       </div>
 
