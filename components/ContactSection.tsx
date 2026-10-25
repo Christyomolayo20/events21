@@ -45,7 +45,7 @@ export default function ContactSection() {
               <MessageCircle className="w-5 h-5" />
             </div>
             <h4 className="text-sm font-serif font-bold text-brand-plum mb-1">WhatsApp Hotline</h4>
-            <p className="text-xs text-brand-purple font-mono font-semibold">08060549596</p>
+            <p className="text-xs text-brand-purple font-sans font-semibold">08060549596</p>
             <span className="text-[11px] text-brand-plum/50 block mt-1">Direct instant chat</span>
           </a>
 

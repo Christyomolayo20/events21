@@ -91,64 +91,60 @@ export default function ServicesPage() {
                 <div className="lg:w-7/12 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
                   <div>
                     {/* Tagline */}
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender text-brand-purple text-[11px] font-sans font-semibold uppercase tracking-wider mb-3">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender text-brand-purple text-[10px] sm:text-[11px] font-sans font-semibold uppercase tracking-wider mb-2.5">
                       <Crown className="w-3.5 h-3.5 text-brand-gold" />
                       <span>{service.tagline}</span>
                     </div>
 
                     {/* Title */}
-                    <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-plum leading-snug mb-4">
+                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-plum leading-snug mb-3">
                       {service.title}
                     </h2>
 
-                    {/* Narrative Description */}
-                    <p className="text-sm sm:text-base text-brand-plum/80 font-sans leading-relaxed mb-6">
+                    {/* Concise Description */}
+                    <p className="text-xs sm:text-sm text-brand-plum/75 font-sans leading-relaxed mb-5">
                       {service.description}
                     </p>
 
-                    {/* What This Service Includes (Bullet Points) */}
-                    <div className="mb-6 pt-5 border-t border-brand-warm-border/60">
-                      <h3 className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans mb-3.5">
-                        What This Service Includes:
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Key Inclusions (Clean 2x2 Grid) */}
+                    <div className="mb-5 pt-4 border-t border-brand-warm-border/60">
+                      <span className="text-[10px] uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2.5">
+                        Key Inclusions:
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {service.inclusions.map((inclusion, i) => (
                           <div
                             key={i}
-                            className="flex items-start gap-2.5 text-xs text-brand-plum/80 font-sans leading-relaxed"
+                            className="flex items-start gap-2 text-xs text-brand-plum/80 font-sans leading-snug"
                           >
-                            <CheckCircle2 className="w-4 h-4 text-brand-purple shrink-0 mt-0.5" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-brand-purple shrink-0 mt-0.5" />
                             <span>{inclusion}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Suitable For Banner */}
-                    <div className="p-3.5 sm:p-4 rounded-2xl bg-brand-soft-lavender/40 border border-brand-purple/15 text-xs text-brand-plum/85 font-sans leading-relaxed mb-6">
-                      <span className="font-semibold text-brand-purple block mb-0.5">
-                        Suitable For:
-                      </span>
-                      {service.suitableFor}
-                    </div>
+                    {/* Suitable For (Concise Note) */}
+                    <p className="text-[11px] text-brand-plum/60 font-sans italic mb-4">
+                      <span className="font-semibold text-brand-plum/80 not-italic">Ideal for:</span> {service.suitableFor}
+                    </p>
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-brand-warm-border/60">
+                  <div className="flex items-center gap-3 pt-3 border-t border-brand-warm-border/60">
                     <Link
                       href={`/contact?service=${encodeURIComponent(service.title)}`}
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-xs"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
                     >
-                      <span>Enquire for this Service</span>
+                      <span>Book Consultation</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </Link>
 
                     <Link
-                      href="/contact"
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs font-semibold uppercase tracking-widest transition-colors bg-white"
+                      href="/gallery"
+                      className="text-xs font-sans font-medium text-brand-plum/70 hover:text-brand-purple transition-colors ml-2"
                     >
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>Book Consultation</span>
+                      View Past Events &rarr;
                     </Link>
                   </div>
                 </div>

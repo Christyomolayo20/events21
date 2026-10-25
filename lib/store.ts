@@ -431,11 +431,14 @@ export function getPortfolio(): PortfolioItem[] {
   const combined = [...stored, ...missingDefaults];
   const merged = combined.map((item) => {
     const defaultMatch = PORTFOLIO_DATA.find((d) => d.id === item.id);
-    const category = (item.category as string) === "Ballrooms & Decor" ? "Decor" : item.category;
+    let category = (item.category as string) === "Ballrooms & Decor" ? "Decor" : item.category;
+    if ((category as string) === "Traditional") {
+      category = "Weddings";
+    }
     if (defaultMatch) {
       return {
         ...item,
-        category: defaultMatch.category || category,
+        category: (defaultMatch.category as string) === "Traditional" ? "Weddings" : (defaultMatch.category || category),
         videoUrl: item.videoUrl || defaultMatch.videoUrl,
         mediaType: item.mediaType || defaultMatch.mediaType,
         image: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.image : item.image,

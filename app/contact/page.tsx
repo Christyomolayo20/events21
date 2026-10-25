@@ -86,42 +86,22 @@ function ContactContent() {
               </div>
 
               <div className="space-y-4 text-sm font-sans text-brand-plum/80">
-                {/* Official WhatsApp */}
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#E8F8EE] text-[#25D366] flex items-center justify-center shrink-0">
-                    <MessageSquare className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
-                      WhatsApp Hotline
-                    </span>
-                    <a
-                      href="https://wa.me/2348060549596?text=Hello%20Events%2021!%20I%20would%20like%20to%20enquire%20about%20your%20services."
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium hover:text-[#25D366] transition-colors text-base font-mono block"
-                    >
-                      08060549596
-                    </a>
-                    <span className="text-[11px] text-brand-plum/50 block">Instant chat &amp; calls</span>
-                  </div>
-                </div>
-
-                {/* Telephone */}
+                {/* Phone Number (Merged WhatsApp & Direct Phone) */}
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-xl bg-brand-soft-lavender text-brand-purple flex items-center justify-center shrink-0">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
-                      Direct Telephone
+                      Phone Number
                     </span>
                     <a
                       href="tel:08060549596"
-                      className="font-medium hover:text-brand-purple transition-colors text-sm font-mono block"
+                      className="font-medium hover:text-brand-purple transition-colors text-base font-sans block text-brand-plum"
                     >
                       +234 806 054 9596
                     </a>
+                    <span className="text-[11px] text-brand-plum/50 block">Calls &amp; WhatsApp</span>
                   </div>
                 </div>
 
@@ -161,36 +141,6 @@ function ContactContent() {
                   </div>
                 </div>
 
-                {/* Social Profiles */}
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-brand-blush-pink text-brand-pink flex items-center justify-center shrink-0">
-                    <Instagram className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="block text-xs uppercase tracking-wider text-brand-plum/50 font-semibold">
-                      Instagram Portfolios
-                    </span>
-                    <div className="space-y-0.5">
-                      <a
-                        href="https://www.instagram.com/events_21/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-brand-purple hover:underline block text-xs"
-                      >
-                        @events_21 (Events &amp; Styling)
-                      </a>
-                      <a
-                        href="https://www.instagram.com/giftsbyadeola/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-brand-pink hover:underline block text-xs"
-                      >
-                        @giftsbyadeola (Gifting &amp; Eru Iyawo)
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Hours */}
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-xl bg-brand-warm-gray text-brand-plum/60 flex items-center justify-center shrink-0">
@@ -208,19 +158,6 @@ function ContactContent() {
                     </span>
                   </div>
                 </div>
-              </div>
-
-              {/* Instant WhatsApp Action */}
-              <div className="pt-4 border-t border-brand-warm-border">
-                <a
-                  href="https://wa.me/2348060549596?text=Hello%20Events%2021!%20I%20would%20like%20to%20plan%20an%20event."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs uppercase tracking-wider font-semibold transition-colors shadow-xs"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Chat on WhatsApp: 08060549596</span>
-                </a>
               </div>
             </div>
           </div>

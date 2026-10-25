@@ -138,7 +138,7 @@ export default function AcademyRegistrationForm() {
         </p>
 
         <div className="p-4 rounded-xl bg-brand-soft-lavender/40 border border-brand-purple/15 text-xs text-brand-plum/80 font-sans mb-8">
-          <span className="text-brand-purple font-mono font-bold block text-sm mb-1">
+          <span className="text-brand-purple font-sans font-bold tracking-wider block text-sm mb-1">
             Registration Reference: {registeredId}
           </span>
           Our team will contact you at <strong className="text-brand-plum">{formData.email}</strong> and <strong className="text-brand-plum">{formData.phone}</strong> with full syllabus details, schedule, and next steps for the upcoming cohort.

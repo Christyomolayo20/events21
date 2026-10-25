@@ -22,7 +22,7 @@ export default function GalleryPage() {
     return () => window.removeEventListener("events21_portfolio_updated", handleUpdate);
   }, []);
 
-  const categories = ["All", "Weddings", "Traditional", "Decor", "Celebrations", "Corporate Events", "Proposals"];
+  const categories = ["All", "Weddings", "Decor", "Celebrations", "Corporate Events", "Proposals"];
 
   const filteredItems =
     activeCategory === "All"
