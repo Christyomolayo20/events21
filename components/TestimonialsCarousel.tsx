@@ -131,17 +131,17 @@ export default function TestimonialsCarousel() {
       <div className="absolute inset-0 z-1 pointer-events-none bg-radial from-transparent via-[#18061B]/50 to-[#18061B]/90" />
 
       {/* FOREGROUND CONTENT LAYER: Only Admin-Populated Fields */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-12 md:px-16 pt-16 sm:pt-20 md:pt-24 pb-12 flex-1 flex flex-col justify-between text-center">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-12 md:px-16 pt-12 sm:pt-20 md:pt-24 pb-8 sm:pb-12 flex-1 flex flex-col justify-between text-center">
         {/* Top Header Badge */}
         <div>
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-brand-soft-lavender text-xs font-sans tracking-widest uppercase font-semibold mb-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-brand-soft-lavender text-[11px] sm:text-xs font-sans tracking-widest uppercase font-semibold mb-3 sm:mb-4 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-brand-gold animate-pulse" />
             <span>Client Kind Words • Cherished Hosts</span>
           </div>
 
           {/* Star Rating */}
           {Boolean(current.rating && current.rating > 0) && (
-            <div className="flex items-center justify-center gap-1.5 mb-6">
+            <div className="flex items-center justify-center gap-1.5 mb-4 sm:mb-6">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
@@ -157,20 +157,20 @@ export default function TestimonialsCarousel() {
         </div>
 
         {/* Testimonial Quote - Only the Single Admin Text */}
-        <div className="my-auto py-4 sm:py-6 max-w-4xl mx-auto">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-gold flex items-center justify-center mx-auto mb-6 shadow-inner">
-            <Quote className="w-6 h-6 sm:w-7 sm:h-7 fill-current" />
+        <div className="my-auto py-2 sm:py-6 max-w-4xl mx-auto">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-gold flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-inner">
+            <Quote className="w-5 h-5 sm:w-7 sm:h-7 fill-current" />
           </div>
 
-          <blockquote className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-relaxed sm:leading-snug md:leading-tight text-white font-normal drop-shadow-lg tracking-wide">
+          <blockquote className="font-serif text-base sm:text-2xl md:text-3xl lg:text-4xl leading-relaxed sm:leading-snug md:leading-tight text-white font-normal drop-shadow-lg tracking-wide px-2">
             &ldquo;{reviewText}&rdquo;
           </blockquote>
         </div>
 
         {/* Client Identity & Event Role (No Empty Labels) */}
-        <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
+        <div className="pt-4 sm:pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 max-w-xl mx-auto">
           {hasImage && (
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-brand-gold shrink-0 shadow-lg ring-2 ring-white/10">
+            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-brand-gold shrink-0 shadow-lg ring-2 ring-white/10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={current.image}

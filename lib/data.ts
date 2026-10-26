@@ -170,12 +170,12 @@ export const SERVICES_DATA: ServiceItem[] = [
 export const PORTFOLIO_DATA: PortfolioItem[] = [
   {
     id: "regal-yoruba-engagement",
-    title: "A Regal Yoruba Wedding Celebration",
+    title: "The Kayodes: A Regal Yoruba Wedding Celebration",
     subtitle: "Traditional Yoruba engagement with rich wine aso-oke, heirloom coral beads, and cultural protocol.",
     category: "Weddings",
     year: "2024",
     location: "Ibadan & Lagos",
-    image: "/images/landing-couple-traditional.jpg",
+    image: "/images/the-kayodes-traditional-couple.jpg",
     featured: true,
     description:
       "A culturally majestic traditional engagement celebrating sacred union. Featuring intricately tailored royal burgundy and wine aso-oke, layered coral beadwork, family protocol, and bespoke ceremonial coordination by Events 21.",
@@ -186,8 +186,31 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
       "Alaga protocol and live percussion direction",
     ],
     gallery: [
-      "/images/landing-couple-traditional.jpg",
       "/images/the-kayodes-traditional-couple.jpg",
+      "/images/landing-couple-traditional.jpg",
+      "/images/the-kayodes-traditional.jpg",
+      "/images/the-kayodes-portrait.jpg",
+    ],
+  },
+  {
+    id: "white-wedding-intimacy",
+    title: "Bukola & Dara: Timeless White Wedding & Bridal Elegance",
+    subtitle: "Classic crisp white styling, tender romance, and refined ballroom simplicity.",
+    category: "Weddings",
+    year: "2024",
+    location: "Lagos, Nigeria",
+    image: "/images/landing-couple-white.jpg",
+    featured: true,
+    description:
+      "Understated luxury and genuine romance. Styled with clean tailoring, elegant white shirts, and an intimate aesthetic celebrating natural connection.",
+    highlights: [
+      "Minimalist, pure editorial concept",
+      "Natural warmth and couple choreography",
+      "Pre-wedding and wedding day styling direction",
+    ],
+    gallery: [
+      "/images/landing-couple-white.jpg",
+      "/images/the-kayodes-white-wedding.jpg",
     ],
   },
   {
@@ -212,45 +235,24 @@ export const PORTFOLIO_DATA: PortfolioItem[] = [
     ],
   },
   {
-    id: "white-wedding-intimacy",
-    title: "Timeless White Wedding & Bridal Elegance",
-    subtitle: "Classic crisp white styling, tender romance, and refined simplicity.",
-    category: "Weddings",
-    year: "2024",
-    location: "Lagos, Nigeria",
-    image: "/images/landing-couple-white.jpg",
-    featured: true,
-    description:
-      "Understated luxury and genuine romance. Styled with clean tailoring, elegant white shirts, and an intimate aesthetic celebrating natural connection.",
-    highlights: [
-      "Minimalist, pure editorial concept",
-      "Natural warmth and couple choreography",
-      "Pre-wedding styling direction",
-    ],
-    gallery: [
-      "/images/landing-couple-white.jpg",
-      "/images/the-kayodes-white-wedding.jpg",
-    ],
-  },
-  {
     id: "golden-80th-milestone",
-    title: "The Golden 80th Milestone Celebration",
-    subtitle: "Bespoke tablescape artistry, gold scalloped charger plates, and lush botanical centerpieces.",
+    title: "Chief Mrs. Adeleke: The Golden 80th Milestone Celebration",
+    subtitle: "An opulent 80th birthday dinner celebration honoring our matriarch with regal tablescapes and lush florals.",
     category: "Celebrations",
     year: "2024",
     location: "Ibadan, Nigeria",
-    image: "/images/decor-tablescape-celebration.jpg",
+    image: "/images/milestone-matriarch-celebration.jpg",
     featured: true,
     description:
-      "An opulent 80th birthday dinner celebration. Featuring chocolate table linens, gold scalloped charger plates, crisp green folded napkins, and bespoke multi-hued rose centerpieces designed to honour an extraordinary milestone.",
+      "An opulent 80th birthday dinner celebration honoring our beloved matriarch. Featuring chocolate table linens, gold scalloped charger plates, crisp green folded napkins, and bespoke multi-hued rose centerpieces designed to honour an extraordinary milestone.",
     highlights: [
       "Custom gold and green tablescape architecture",
       "Artisanal fresh floral centerpieces",
       "Milestone birthday tribute and dignitary hospitality",
     ],
     gallery: [
-      "/images/decor-tablescape-celebration.jpg",
       "/images/milestone-matriarch-celebration.jpg",
+      "/images/decor-tablescape-celebration.jpg",
     ],
   },
   {

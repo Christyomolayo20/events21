@@ -422,33 +422,56 @@ export function deleteGiftItem(id: string): void {
   }
 }
 
+// Store version stamp for automatic cross-device sync & cache invalidation
+const DATA_VERSION_KEY = "events21_sync_version";
+const CURRENT_DATA_VERSION = "2026_10_26_v4";
+
 // --- PORTFOLIO (ADMIN EDIT, MULTI-IMAGE, VIDEO & DELETE) ---
 export function getPortfolio(): PortfolioItem[] {
   if (typeof window === "undefined") return PORTFOLIO_DATA;
   if (cachePortfolio) return cachePortfolio;
+
+  // Check if store version is outdated to ensure mobile and web always see the latest curated showcases
+  const storedVersion = safeLocalStorageGet<string | null>(DATA_VERSION_KEY, null);
+  const isVersionOutdated = storedVersion !== CURRENT_DATA_VERSION;
+
   const stored = safeLocalStorageGet<PortfolioItem[]>(PORTFOLIO_KEY, PORTFOLIO_DATA);
-  const missingDefaults = PORTFOLIO_DATA.filter((d) => !stored.some((s) => s.id === d.id));
-  const combined = [...stored, ...missingDefaults];
-  const merged = combined.map((item) => {
-    const defaultMatch = PORTFOLIO_DATA.find((d) => d.id === item.id);
-    let category = (item.category as string) === "Ballrooms & Decor" ? "Decor" : item.category;
-    if ((category as string) === "Traditional") {
-      category = "Weddings";
+
+  // Separate genuinely custom admin projects from default canonical showcases
+  const customAdminItems = stored.filter(
+    (s) => !PORTFOLIO_DATA.some((d) => d.id === s.id)
+  );
+
+  // Map canonical items with latest verified imagery & text while allowing admin modifications
+  const canonicalItems = PORTFOLIO_DATA.map((defaultItem) => {
+    const adminSaved = stored.find((s) => s.id === defaultItem.id);
+    if (!adminSaved || isVersionOutdated) {
+      return defaultItem;
     }
-    if (defaultMatch) {
-      return {
-        ...item,
-        category: (defaultMatch.category as string) === "Traditional" ? "Weddings" : (defaultMatch.category || category),
-        videoUrl: item.videoUrl || defaultMatch.videoUrl,
-        mediaType: item.mediaType || defaultMatch.mediaType,
-        image: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.image : item.image,
-        title: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.title : item.title,
-        subtitle: defaultMatch.image.includes("milestone-matriarch") ? defaultMatch.subtitle : item.subtitle,
-      };
-    }
-    return { ...item, category };
+    return {
+      ...defaultItem,
+      ...adminSaved,
+      // Ensure authentic high-res images are retained if admin hasn't replaced with a new custom photo
+      image:
+        adminSaved.image && !adminSaved.image.includes("landing-couple-traditional.jpg")
+          ? adminSaved.image
+          : defaultItem.image,
+      gallery:
+        adminSaved.gallery && adminSaved.gallery.length >= (defaultItem.gallery?.length || 0)
+          ? adminSaved.gallery
+          : (defaultItem.gallery || []),
+    };
   });
+
+  const merged = [...canonicalItems, ...customAdminItems];
   cachePortfolio = merged;
+
+  // Persist updated merged state and version
+  if (isVersionOutdated) {
+    safeLocalStorageSet(DATA_VERSION_KEY, CURRENT_DATA_VERSION);
+    safeLocalStorageSet(PORTFOLIO_KEY, merged);
+  }
+
   return merged;
 }
 
@@ -543,14 +566,40 @@ export function logoutAdmin(): void {
 export function getTestimonials(): Testimonial[] {
   if (typeof window === "undefined") return INITIAL_TESTIMONIALS;
   if (cacheTestimonials) return cacheTestimonials;
+
+  const storedVersion = safeLocalStorageGet<string | null>(DATA_VERSION_KEY, null);
+  const isVersionOutdated = storedVersion !== CURRENT_DATA_VERSION;
+
   const stored = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
-  if (stored === null) {
-    cacheTestimonials = INITIAL_TESTIMONIALS;
-    safeLocalStorageSet(TESTIMONIALS_KEY, INITIAL_TESTIMONIALS);
-    return INITIAL_TESTIMONIALS;
+  if (!stored || stored.length === 0 || isVersionOutdated) {
+    // Preserve any custom admin reviews added with unique IDs
+    const customAdminTestimonials = (stored || []).filter(
+      (s) => !INITIAL_TESTIMONIALS.some((d) => d.id === s.id)
+    );
+    const merged = [...INITIAL_TESTIMONIALS, ...customAdminTestimonials];
+    cacheTestimonials = merged;
+    safeLocalStorageSet(TESTIMONIALS_KEY, merged);
+    return merged;
   }
-  cacheTestimonials = stored;
-  return stored;
+
+  // Ensure default testimonials retain their verified high-res photos
+  const customItems = stored.filter(
+    (s) => !INITIAL_TESTIMONIALS.some((d) => d.id === s.id)
+  );
+  const canonicalItems = INITIAL_TESTIMONIALS.map((defaultItem) => {
+    const adminSaved = stored.find((s) => s.id === defaultItem.id);
+    if (!adminSaved) return defaultItem;
+    return {
+      ...defaultItem,
+      ...adminSaved,
+      image: adminSaved.image || defaultItem.image,
+      roleOrEvent: adminSaved.roleOrEvent || defaultItem.roleOrEvent,
+    };
+  });
+
+  const finalMerged = [...canonicalItems, ...customItems];
+  cacheTestimonials = finalMerged;
+  return finalMerged;
 }
 
 export function getPublishedTestimonials(): Testimonial[] {

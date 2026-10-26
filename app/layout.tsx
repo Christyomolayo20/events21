@@ -29,17 +29,25 @@ export const metadata: Metadata = {
   description:
     "Events 21 (Royalty Twenty One Events) creates thoughtfully planned, beautifully styled celebrations. Professional wedding planning, milestone birthdays, and event styling—serving clients nationwide and available to travel.",
   keywords: [
-    "Luxury event planner Nigeria",
-    "Wedding planner Nigeria",
     "Events 21",
     "Royalty Twenty One Events",
-    "Event planning and styling",
-    "Birthday event planning",
-    "Wedding decoration and event styling",
+    "Events 21 Nigeria",
+    "Events 21 Lagos",
+    "Events 21 Ibadan",
+    "Adeola Oyeyode",
+    "Luxury event planner Nigeria",
+    "Wedding planner Lagos",
+    "Wedding planner Ibadan",
     "Nigerian luxury wedding planner",
     "Yoruba traditional engagement planner",
+    "Aso-oke wedding styling",
+    "Milestone birthday event planner",
+    "Wedding decoration and event styling",
+    "Ballroom wedding styling Lagos",
     "Nationwide destination event planner",
     "Gifts by Adeola",
+    "Eru Iyawo packaging Lagos",
+    "Executive corporate event planner",
   ],
   alternates: {
     canonical: "https://events21.ng",
@@ -61,9 +69,22 @@ export const metadata: Metadata = {
     locale: "en_NG",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Events 21 | Regal Event Planning & Luxury Wedding Styling",
+    description:
+      "Curating Regal Experiences. Orchestrating Royalty. Luxury weddings, milestone celebrations, and bespoke gifting across Nigeria.",
+    images: ["/images/landing-couple-traditional.jpg"],
+  },
   icons: {
-    icon: "/images/royalty-logo-transparent.png",
-    apple: "/images/royalty-logo-transparent.png",
+    icon: [
+      { url: "/images/royalty-logo-transparent.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/images/royalty-logo-transparent.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/images/royalty-logo-transparent.png",
   },
 };
 

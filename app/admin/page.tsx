@@ -62,6 +62,7 @@ import {
   Upload,
   Check,
   Eye,
+  EyeOff,
   ShoppingBag,
   Star,
   Images,
@@ -80,6 +81,8 @@ import {
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSupabaseKey, setShowSupabaseKey] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<
     "enquiries" | "consultations" | "academy" | "portfolio" | "gifts" | "testimonials" | "settings"
@@ -639,15 +642,27 @@ export default function AdminPage() {
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div>
+            <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 placeholder="Enter admin password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum text-center tracking-widest placeholder:tracking-normal placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden"
+                className="w-full px-4 py-3 pr-11 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum text-center tracking-widest placeholder:tracking-normal placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide admin password" : "Show admin password"}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 text-brand-plum/50 hover:text-brand-purple focus:outline-none transition-colors rounded-lg cursor-pointer"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
 
             {loginError && (
@@ -1660,14 +1675,26 @@ export default function AdminPage() {
                 </p>
 
                 <form onSubmit={handleConnectSupabase} className="space-y-3 font-sans">
-                  <div>
+                  <div className="relative">
                     <input
-                      type="password"
+                      type={showSupabaseKey ? "text" : "password"}
                       placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                       value={supabaseKeyInput}
                       onChange={(e) => setSupabaseKeyInput(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-white text-xs font-mono text-brand-plum focus:outline-brand-purple placeholder:font-sans placeholder:text-brand-plum/40"
+                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-brand-warm-border bg-white text-xs font-mono text-brand-plum focus:outline-brand-purple placeholder:font-sans placeholder:text-brand-plum/40"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowSupabaseKey(!showSupabaseKey)}
+                      aria-label={showSupabaseKey ? "Hide API key" : "Show API key"}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-brand-plum/50 hover:text-brand-purple focus:outline-none transition-colors rounded-md cursor-pointer"
+                    >
+                      {showSupabaseKey ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5" />
+                      )}
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-3">

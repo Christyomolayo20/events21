@@ -4,11 +4,22 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { getBrandConfig } from "@/lib/store";
 
+// User-specified highlight segments from master wedding footage:
+// 1. 0:19 - 0:24 (19.0s to 24.0s - Bride royal entrance)
+// 2. 1:28 - 1:41 (88.0s to 101.0s - Grand ballroom celebration & dancing)
+// 3. 2:06 - 2:14 (126.0s to 134.0s - First dance & celebratory cheers)
+const HIGHLIGHT_SEGMENTS = [
+  { start: 19.0, end: 24.0 },
+  { start: 88.0, end: 101.0 },
+  { start: 126.0, end: 134.0 },
+];
+
 export default function Hero() {
   const [config, setConfig] = useState(getBrandConfig());
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const currentSegmentRef = useRef<number>(0);
 
   useEffect(() => {
     setConfig(getBrandConfig());
@@ -33,15 +44,6 @@ export default function Hero() {
   const videoSrc = config.heroVideoUrl || "/images/hero-video.mp4";
   const posterSrc = config.heroPosterUrl || "/images/hero-poster.jpg";
 
-  // Calculate loop bounds:
-  // 1:28 (88s) to 1:40 (100s) on full-length video, or full duration on the extracted 12s asset.
-  const getLoopBounds = useCallback((dur: number) => {
-    if (dur >= 100) {
-      return { start: 88.0, end: 100.0 };
-    }
-    return { start: 0.0, end: dur > 0 ? dur : 12.0 };
-  }, []);
-
   const triggerPlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -49,17 +51,6 @@ export default function Hero() {
     video.defaultMuted = true;
     video.muted = true;
     video.playsInline = true;
-
-    const dur = video.duration || 0;
-    const { start, end } = getLoopBounds(dur);
-
-    if (video.currentTime >= end || (dur >= 100 && video.currentTime < start)) {
-      try {
-        video.currentTime = start;
-      } catch {
-        // Seek pending
-      }
-    }
 
     const playPromise = video.play();
     if (playPromise !== undefined) {
@@ -79,7 +70,7 @@ export default function Hero() {
           window.addEventListener("mousemove", resume, { once: true });
         });
     }
-  }, [getLoopBounds]);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -88,6 +79,16 @@ export default function Hero() {
     let animFrameId: number;
 
     const handleLoadedMetadata = () => {
+      const dur = video.duration || 0;
+      // If long source video (> 134s), seek to start of first highlight segment
+      if (dur >= 134) {
+        currentSegmentRef.current = 0;
+        try {
+          video.currentTime = HIGHLIGHT_SEGMENTS[0].start;
+        } catch {
+          // Seek pending
+        }
+      }
       triggerPlay();
     };
 
@@ -95,14 +96,25 @@ export default function Hero() {
       triggerPlay();
     };
 
+    // Continuous loop check supporting both stitched 26s asset and full multi-segment master
     const loopCheck = () => {
       if (videoRef.current) {
         const v = videoRef.current;
         const dur = v.duration || 0;
-        const { start, end } = getLoopBounds(dur);
 
-        if (v.currentTime >= end || (dur >= 100 && v.currentTime < start - 0.5)) {
-          v.currentTime = start;
+        // If playing the full-length video (> 134s), sequence through the 3 highlight segments
+        if (dur >= 134) {
+          const segIndex = currentSegmentRef.current;
+          const currentSeg = HIGHLIGHT_SEGMENTS[segIndex];
+
+          if (v.currentTime >= currentSeg.end || v.currentTime < currentSeg.start - 1.0) {
+            const nextIndex = (segIndex + 1) % HIGHLIGHT_SEGMENTS.length;
+            currentSegmentRef.current = nextIndex;
+            v.currentTime = HIGHLIGHT_SEGMENTS[nextIndex].start;
+          }
+        } else if (dur > 0 && v.currentTime >= dur - 0.2) {
+          // Pre-stitched 26s web asset: loop seamlessly to beginning
+          v.currentTime = 0;
         }
 
         if (v.paused) {
@@ -124,7 +136,7 @@ export default function Hero() {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("ended", triggerPlay);
     };
-  }, [videoSrc, prefersReducedMotion, triggerPlay, getLoopBounds]);
+  }, [videoSrc, prefersReducedMotion, triggerPlay]);
 
   const handleSectionHover = () => {
     triggerPlay();
@@ -137,48 +149,41 @@ export default function Hero() {
       onMouseMove={handleSectionHover}
       className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen landscape:min-h-screen flex items-center justify-center overflow-hidden bg-brand-plum text-white select-none"
     >
-      {/* Background Video Stage - Proportional, Unzoomed Native Resolution across PC, Tablet & Mobile */}
-      <div className="absolute inset-0 z-0 overflow-hidden flex items-center justify-center bg-brand-plum-dark">
-        {!prefersReducedMotion && (
-          <>
-            {/* Ambient Blurred Video Glow for Widescreen PC & Tablet Depth */}
-            <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none select-none">
-              <video
-                key={`${videoSrc}-ambient`}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="none"
-                aria-hidden="true"
-                className="w-full h-full object-cover blur-3xl opacity-35 brightness-75 scale-110"
-              >
-                <source src={videoSrc} type="video/mp4" />
-              </video>
-            </div>
+      {/* Background Video Stage - Full-Bleed Cinematic Backdrop across PC, Tablet & Mobile */}
+      <div className="absolute inset-0 z-0 overflow-hidden bg-brand-plum-dark">
+        {/* Poster Frame */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={posterSrc}
+          alt="Events 21 Grand Royal Celebration"
+          className={`absolute inset-0 w-full h-full object-cover object-[center_28%] sm:object-[center_25%] filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ${
+            isVideoLoaded && !prefersReducedMotion ? "opacity-0" : "opacity-100"
+          }`}
+        />
 
-            {/* Primary High-Definition Video - Scaled to Natural Aspect Ratio without Excessive Zoom */}
-            <div className="relative z-0 h-full w-full flex items-center justify-center pointer-events-none">
-              <video
-                ref={videoRef}
-                key={videoSrc}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                poster={posterSrc}
-                className="h-full w-full object-cover sm:object-cover sm:max-w-[500px] md:max-w-[580px] lg:max-w-[660px] xl:max-w-[720px] sm:aspect-[9/16] landscape:max-w-[340px] landscape:aspect-[9/16] object-[center_24%] sm:object-[center_18%] filter brightness-[0.96] contrast-[1.04] transition-all duration-500 shadow-2xl"
-              >
-                <source src={videoSrc} type="video/mp4" />
-              </video>
-            </div>
-          </>
+        {/* Primary Full-Bleed Video */}
+        {!prefersReducedMotion && (
+          <video
+            ref={videoRef}
+            key={videoSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            poster={posterSrc}
+            onLoadedData={() => setIsVideoLoaded(true)}
+            className={`absolute inset-0 w-full h-full object-cover object-[center_28%] sm:object-[center_25%] filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ${
+              isVideoLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
         )}
 
-        {/* Cinematic Vignette Scrim for Contrast & Natural Edge Feathering */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/95 via-transparent to-brand-plum-dark/50 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-brand-plum-dark/65 pointer-events-none" />
+        {/* Cinematic Vignette Scrim for Luxury Contrast & CTA Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/90 via-black/25 to-brand-plum-dark/45 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-brand-plum-dark/55 pointer-events-none" />
       </div>
 
       {/* Subtle Ambient Lighting Effects */}
@@ -186,10 +191,9 @@ export default function Hero() {
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-brand-gold/15 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Hero CTA Container - Centered in Hero Section */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center justify-center py-8 sm:py-12 landscape:py-4">
-        {/* Desktop CTA Arrangement (Clean, minimalist horizontal arrangement preserved) */}
-        <div className="hidden sm:inline-flex items-center justify-center gap-6 text-xs sm:text-sm font-sans tracking-[0.28em] uppercase font-semibold text-white/95 drop-shadow-md">
-          {/* Link 1: Plan Your Event */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center justify-center py-8 sm:py-12">
+        {/* Desktop CTA Arrangement: Minimalist horizontal text links */}
+        <div className="hidden sm:inline-flex items-center justify-center gap-6 text-xs sm:text-sm font-sans tracking-[0.28em] uppercase font-semibold text-white drop-shadow-md">
           <Link
             href="/contact"
             id="hero-cta-plan"
@@ -198,10 +202,8 @@ export default function Hero() {
             Plan Your Event
           </Link>
 
-          {/* Minimalist Divider */}
           <span className="text-white/40 font-light select-none text-base">|</span>
 
-          {/* Link 2: View Portfolio */}
           <Link
             href="/gallery"
             id="hero-cta-portfolio"
@@ -211,22 +213,20 @@ export default function Hero() {
           </Link>
         </div>
 
-        {/* Mobile CTA Arrangement: Stacked vertically in portrait, side-by-side in landscape */}
-        <div className="flex sm:hidden flex-col landscape:flex-row items-center justify-center gap-3 sm:gap-3.5 w-full max-w-[280px] landscape:max-w-md">
-          {/* 1. Plan Your Event (Primary CTA) */}
+        {/* Mobile CTA Arrangement: Plain text links without background colors, stacked vertically */}
+        <div className="flex sm:hidden flex-col items-center justify-center gap-4 text-xs font-sans tracking-[0.28em] uppercase font-semibold text-white drop-shadow-md">
           <Link
             href="/contact"
             id="hero-cta-plan-mobile"
-            className="w-full landscape:w-auto landscape:px-6 py-3.5 px-6 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-bold uppercase tracking-[0.2em] transition-all shadow-lg border border-brand-gold/40 text-center active:scale-95"
+            className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center active:text-brand-gold"
           >
             Plan Your Event
           </Link>
 
-          {/* 2. View Portfolio (Secondary CTA) */}
           <Link
             href="/gallery"
             id="hero-cta-portfolio-mobile"
-            className="w-full landscape:w-auto landscape:px-6 py-3.5 px-6 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-white/95 text-xs font-semibold uppercase tracking-[0.2em] transition-all shadow-md border border-white/30 text-center active:scale-95"
+            className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center active:text-brand-gold"
           >
             View Portfolio
           </Link>
