@@ -62,8 +62,8 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/images/events21-logo.jpg",
-    apple: "/images/events21-logo.jpg",
+    icon: "/images/royalty-logo-transparent.png",
+    apple: "/images/royalty-logo-transparent.png",
   },
 };
 

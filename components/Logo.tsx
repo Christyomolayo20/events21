@@ -7,6 +7,7 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   className?: string;
   showSubtitle?: boolean;
+  hideTextOnMobile?: boolean;
 }
 
 export default function Logo({
@@ -14,6 +15,7 @@ export default function Logo({
   size = "md",
   className = "",
   showSubtitle = true,
+  hideTextOnMobile = false,
 }: LogoProps) {
   const isLarge = size === "lg";
   const isSmall = size === "sm";
@@ -22,25 +24,33 @@ export default function Logo({
     <Link
       href="/"
       className={`inline-flex items-center gap-3 group transition-opacity hover:opacity-90 ${className}`}
-      aria-label="Event 21 - Home"
+      aria-label="Events 21 - Home"
     >
-      {/* Brand Icon Badge */}
+      {/* Brand Logo Emblem - Transparent, No White Box, Bigger & Clearly Visible */}
       <div
-        className={`relative flex items-center justify-center rounded-xl overflow-hidden shrink-0 shadow-sm border border-brand-purple/20 ${
-          isSmall ? "w-9 h-9" : isLarge ? "w-14 h-14" : "w-11 h-11"
-        } bg-[#532180]`}
+        className={`relative flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+          isSmall
+            ? "w-16 h-12 sm:w-20 sm:h-14"
+            : isLarge
+            ? "w-32 h-22 sm:w-40 sm:h-28"
+            : "w-20 h-14 sm:w-24 sm:h-16 md:w-28 md:h-18 lg:w-32 lg:h-20"
+        }`}
       >
         <Image
-          src="/images/events21-logo.jpg"
-          alt="Event 21"
+          src={
+            variant === "white"
+              ? "/images/royalty-logo-white.png"
+              : "/images/royalty-logo-transparent.png"
+          }
+          alt="Royalty Twenty One Events"
           fill
-          className="object-cover"
+          className="object-contain"
           priority
         />
       </div>
 
-      {/* Brand Wordmark (Strictly Event 21) */}
-      <div className="flex flex-col">
+      {/* Brand Wordmark (Strictly Events 21) - hidden on mobile when hideTextOnMobile is true */}
+      <div className={`flex-col ${hideTextOnMobile ? "hidden lg:flex" : "flex"}`}>
         <span
           className={`font-serif tracking-wider font-bold leading-none ${
             variant === "white"

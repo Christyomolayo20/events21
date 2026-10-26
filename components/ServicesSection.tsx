@@ -133,13 +133,21 @@ export default function ServicesSection() {
           </div>
         </div>
 
-        {/* View All Services Footer Link */}
-        <div className="text-center mt-10 md:mt-12">
+        {/* View All Services & Packages Action Links */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-10 md:mt-12">
+          <Link
+            href="/services#packages"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-sm border border-brand-gold/30"
+          >
+            <span>Explore Event Packages</span>
+            <ArrowUpRight className="w-4 h-4 text-brand-gold-light" />
+          </Link>
+
           <Link
             href="/services"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-xs"
           >
-            <span>View Detailed Service Breakdown</span>
+            <span>View All Services</span>
             <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>

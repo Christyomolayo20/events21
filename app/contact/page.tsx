@@ -43,11 +43,11 @@ function ContactContent() {
           </p>
 
           {/* Mode Switcher: Calendar Booking vs Event Brief */}
-          <div className="inline-flex items-center p-1.5 rounded-full bg-brand-warm-gray border border-brand-warm-border mt-6">
+          <div className="inline-flex flex-col sm:flex-row items-center p-1.5 rounded-2xl sm:rounded-full bg-brand-warm-gray border border-brand-warm-border mt-6 w-full sm:w-auto max-w-sm sm:max-w-none gap-1 sm:gap-0">
             <button
               type="button"
               onClick={() => setActiveMode("calendar")}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans font-semibold tracking-wide transition-all ${
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 sm:py-2 rounded-xl sm:rounded-full text-xs font-sans font-semibold tracking-wide transition-all w-full sm:w-auto ${
                 activeMode === "calendar"
                   ? "bg-brand-purple text-white shadow-xs"
                   : "text-brand-plum/70 hover:text-brand-plum"
@@ -59,7 +59,7 @@ function ContactContent() {
             <button
               type="button"
               onClick={() => setActiveMode("brief")}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans font-semibold tracking-wide transition-all ${
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 sm:py-2 rounded-xl sm:rounded-full text-xs font-sans font-semibold tracking-wide transition-all w-full sm:w-auto ${
                 activeMode === "brief"
                   ? "bg-brand-purple text-white shadow-xs"
                   : "text-brand-plum/70 hover:text-brand-plum"

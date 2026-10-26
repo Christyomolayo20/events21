@@ -93,6 +93,16 @@ export interface ServiceItem {
   suitableFor: string;
 }
 
+export interface EventPackage {
+  id: string;
+  title: string;
+  tagline: string;
+  description: string;
+  image: string;
+  inclusions: string[];
+  ctaText: string;
+}
+
 export interface Testimonial {
   id: string;
   clientName: string;

@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles, CheckCircle2, Crown, Calendar } from "lucide-react";
-import { SERVICES_DATA } from "@/lib/data";
+import { ArrowUpRight, Sparkles, CheckCircle2, Crown, Calendar, Layers, ShieldCheck } from "lucide-react";
+import { SERVICES_DATA, EVENT_PACKAGES } from "@/lib/data";
 import ConsultationCTA from "@/components/ConsultationCTA";
 
 export const metadata = {
-  title: "Services & Scope | Events 21 • Event Planning, Styling & Coordination",
+  title: "Services & Packages | Events 21 • Event Planning, Styling & Coordination",
   description:
-    "Explore the complete scope of Events 21's luxury wedding planning, romantic proposal concepts, milestone celebrations, and royal event coordination—serving clients nationwide and available to travel.",
+    "Explore Events 21's event planning packages—Full Planning, Partial Planning, and Day-of-Event Coordination—as well as bespoke styling, celebrations, and royal event coordination.",
 };
 
 export default function ServicesPage() {
@@ -18,7 +18,7 @@ export default function ServicesPage() {
         <div className="text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Comprehensive Service Scope</span>
+            <span>Curated Event Services &amp; Packages</span>
           </div>
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
             Curated Planning &amp;{" "}
@@ -28,12 +28,27 @@ export default function ServicesPage() {
           </h1>
           <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed">
             Every celebration orchestrated by Events 21 is anchored in intentional spatial design, cultural reverence,
-            and flawless day-of logistics. Below is the detailed breakdown of what we offer and what is included in each service.
+            and flawless day-of logistics. Explore our signature planning packages and bespoke celebration services.
           </p>
         </div>
 
         {/* Quick Navigation Jump Anchors */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-8 max-w-4xl mx-auto">
+          <a
+            href="#packages"
+            className="px-4 py-2 rounded-full text-xs font-sans font-semibold bg-brand-purple text-white hover:bg-brand-purple-hover transition-all shadow-2xs"
+          >
+            Planning Packages ★
+          </a>
+          {EVENT_PACKAGES.map((pkg) => (
+            <a
+              key={pkg.id}
+              href={`#${pkg.id}`}
+              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-white border border-brand-warm-border text-brand-plum/80 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-soft-lavender/30 transition-all shadow-2xs"
+            >
+              {pkg.title}
+            </a>
+          ))}
           {SERVICES_DATA.map((service) => (
             <a
               key={service.id}
@@ -52,8 +67,118 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Expanded "Reading More" Editorial Service Sections */}
+      {/* =========================================================================
+          SECTION 1: CORE PLANNING PACKAGES (From Reference Image: Full, Partial, Day-of-Event)
+          Strictly NO prices displayed. Clean 3-card desktop grid, stacked vertically on mobile.
+      ========================================================================= */}
+      <section id="packages" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24 scroll-mt-28">
+        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-gold/15 text-brand-gold-dark text-[11px] font-sans font-semibold uppercase tracking-wider mb-2.5">
+            <Crown className="w-3.5 h-3.5 text-brand-gold" />
+            <span>Signature Packages</span>
+          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum">
+            Event Packages
+          </h2>
+          <p className="text-sm sm:text-base text-brand-plum/75 font-sans mt-2.5">
+            Choose the coordination scope that best aligns with your celebration. Enquire to discuss custom requirements with our lead planning team.
+          </p>
+        </div>
+
+        {/* 3-Card Balanced Desktop Grid / Mobile Stacked in Required Order */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          {EVENT_PACKAGES.map((pkg, idx) => (
+            <article
+              key={pkg.id}
+              id={pkg.id}
+              className="scroll-mt-28 bg-white rounded-3xl overflow-hidden border border-brand-warm-border/90 hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all duration-300 flex flex-col justify-between"
+            >
+              <div>
+                {/* Visual Media with proportional scaling */}
+                <div className="relative w-full h-56 sm:h-64 lg:h-56 bg-brand-plum overflow-hidden shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={pkg.image}
+                    alt={pkg.title}
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    style={{ objectPosition: "top center" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70" />
+
+                  {/* Badge */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="px-3.5 py-1 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-sm">
+                      Package 0{idx + 1}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Package Details */}
+                <div className="p-6 sm:p-7">
+                  <span className="text-[10px] uppercase tracking-wider font-semibold text-brand-gold font-sans block mb-1">
+                    {pkg.tagline}
+                  </span>
+
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-brand-plum mb-3 leading-snug">
+                    {pkg.title}
+                  </h3>
+
+                  <p className="text-xs sm:text-sm text-brand-plum/75 font-sans leading-relaxed mb-6">
+                    {pkg.description}
+                  </p>
+
+                  {/* What the service includes */}
+                  <div className="pt-4 border-t border-brand-warm-border/60">
+                    <span className="text-[11px] uppercase tracking-wider text-brand-purple font-bold font-sans block mb-3">
+                      What the service includes:
+                    </span>
+                    <ul className="space-y-2.5">
+                      {pkg.inclusions.map((inclusion, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2.5 text-xs text-brand-plum/85 font-sans leading-relaxed"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-brand-purple shrink-0 mt-0.5" />
+                          <span>{inclusion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Working CTA configured to preselect the package */}
+              <div className="p-6 sm:p-7 pt-4 border-t border-brand-warm-border/60 mt-auto bg-brand-warm-white/40">
+                <Link
+                  href={`/contact?service=${encodeURIComponent(pkg.title)}`}
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:shadow-md active:scale-[0.98] border border-brand-gold/30"
+                >
+                  <span>{pkg.ctaText}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-brand-gold-light" />
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION 2: BESPOKE STYLING & SPECIALISED SERVICES
+          Preserving all existing services without removal.
+      ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 md:space-y-16 mb-16 md:mb-24">
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2">
+            Bespoke Event Experiences
+          </span>
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight">
+            Specialised Styling &amp; Celebrations
+          </h2>
+          <p className="text-sm sm:text-base text-brand-plum/75 font-sans mt-2.5">
+            In addition to our core packages, explore our dedicated event production and luxury design disciplines.
+          </p>
+        </div>
+
         {SERVICES_DATA.map((service, index) => {
           const isEven = index % 2 === 1;
 
@@ -69,7 +194,7 @@ export default function ServicesPage() {
                 } items-stretch`}
               >
                 {/* Visual Media Column */}
-                <div className="lg:w-5/12 relative min-h-[340px] sm:min-h-[420px] lg:min-h-full bg-brand-plum overflow-hidden shrink-0">
+                <div className="lg:w-5/12 relative min-h-[300px] sm:min-h-[380px] lg:min-h-full bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={service.image}
@@ -79,10 +204,10 @@ export default function ServicesPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
 
-                  {/* Service Number Badge */}
+                  {/* Service Category Badge */}
                   <div className="absolute top-5 left-5 z-10">
                     <span className="px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-xs text-[11px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-md">
-                      Service 0{index + 1}
+                      Specialisation 0{index + 1}
                     </span>
                   </div>
                 </div>
@@ -124,14 +249,14 @@ export default function ServicesPage() {
                       </div>
                     </div>
 
-                    {/* Suitable For (Concise Note) */}
+                    {/* Suitable For */}
                     <p className="text-[11px] text-brand-plum/60 font-sans italic mb-4">
                       <span className="font-semibold text-brand-plum/80 not-italic">Ideal for:</span> {service.suitableFor}
                     </p>
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="flex items-center gap-3 pt-3 border-t border-brand-warm-border/60">
+                  <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-brand-warm-border/60">
                     <Link
                       href={`/contact?service=${encodeURIComponent(service.title)}`}
                       className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
@@ -160,7 +285,7 @@ export default function ServicesPage() {
         >
           <div className="flex flex-col lg:flex-row items-stretch">
             {/* Visual Media Column */}
-            <div className="lg:w-5/12 relative min-h-[340px] sm:min-h-[420px] lg:min-h-full bg-brand-plum overflow-hidden shrink-0">
+            <div className="lg:w-5/12 relative min-h-[300px] sm:min-h-[380px] lg:min-h-full bg-brand-plum overflow-hidden shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/about-team-seated.jpg"

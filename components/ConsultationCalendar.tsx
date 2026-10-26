@@ -85,25 +85,76 @@ export default function ConsultationCalendar({
     return () => window.removeEventListener("events21_consultations_updated", updateSlots);
   }, [selectedDate, selectedSlot]);
 
-  // Quick next 14 days selector
-  const nextDates = useMemo(() => {
-    const dates: { dateStr: string; dayName: string; dayNum: number; monthName: string; isSunday: boolean }[] = [];
-    const base = new Date();
-    for (let i = 1; i <= 14; i++) {
-      const d = new Date();
-      d.setDate(base.getDate() + i);
-      const dateStr = d.toISOString().split("T")[0];
-      const isSunday = d.getDay() === 0;
-      dates.push({
+  // Month view state (defaults to current month or month of selected date)
+  const [viewDate, setViewDate] = useState<Date>(() => {
+    const tm = new Date();
+    tm.setDate(tm.getDate() + 1);
+    return new Date(tm.getFullYear(), tm.getMonth(), 1);
+  });
+
+  const currentYear = viewDate.getFullYear();
+  const currentMonth = viewDate.getMonth();
+  const monthName = viewDate.toLocaleDateString("en-US", { month: "long" });
+
+  const prevMonthDisabled = useMemo(() => {
+    const prev = new Date(currentYear, currentMonth - 1, 1);
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    return prev < thisMonth;
+  }, [currentYear, currentMonth, today]);
+
+  const handlePrevMonth = () => {
+    if (prevMonthDisabled) return;
+    setViewDate(new Date(currentYear, currentMonth - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewDate(new Date(currentYear, currentMonth + 1, 1));
+  };
+
+  // Calendar cells calculation for conventional 7-column grid
+  const calendarCells = useMemo(() => {
+    const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay(); // 0 = Sun ... 6 = Sat
+    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    const cells: {
+      type: "empty" | "day";
+      dayNum?: number;
+      dateStr?: string;
+      isPast?: boolean;
+      isToday?: boolean;
+      isSunday?: boolean;
+      isSelectable?: boolean;
+    }[] = [];
+
+    // Empty leading padding cells
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      cells.push({ type: "empty" });
+    }
+
+    // Days in current month
+    for (let d = 1; d <= totalDays; d++) {
+      const mStr = String(currentMonth + 1).padStart(2, "0");
+      const dStr = String(d).padStart(2, "0");
+      const dateStr = `${currentYear}-${mStr}-${dStr}`;
+      const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+      const isPast = dateStr < todayStr;
+      const isToday = dateStr === todayStr;
+      const isSunday = dayOfWeek === 0;
+      const isSelectable = !isPast && !isSunday;
+
+      cells.push({
+        type: "day",
+        dayNum: d,
         dateStr,
-        dayName: d.toLocaleDateString("en-US", { weekday: "short" }),
-        dayNum: d.getDate(),
-        monthName: d.toLocaleDateString("en-US", { month: "short" }),
+        isPast,
+        isToday,
         isSunday,
+        isSelectable,
       });
     }
-    return dates;
-  }, []);
+
+    return cells;
+  }, [currentYear, currentMonth, todayStr]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,7 +241,7 @@ export default function ConsultationCalendar({
 
   if (confirmedBooking) {
     return (
-      <div className="bg-white rounded-3xl p-8 sm:p-12 border border-brand-purple/30 shadow-elevated text-center animate-fade-in relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-6 sm:p-12 border border-brand-purple/30 shadow-elevated text-center animate-fade-in relative overflow-hidden">
         <div className="w-16 h-16 bg-brand-soft-lavender text-brand-purple rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-purple/20">
           <CheckCircle2 className="w-9 h-9" />
         </div>
@@ -300,8 +351,23 @@ export default function ConsultationCalendar({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-warm-border shadow-elevated relative overflow-hidden"
+      className="bg-white rounded-3xl p-5 sm:p-10 lg:p-12 border border-brand-warm-border shadow-elevated relative overflow-hidden"
     >
+      {/* Service Pre-selection notice */}
+      {initialService && (
+        <div className="mb-6 p-4 rounded-2xl bg-brand-soft-lavender/70 border border-brand-purple/30 text-xs text-brand-purple font-sans flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 shrink-0 text-brand-gold" />
+            <span>
+              Enquiring About Package: <strong className="font-bold text-brand-plum">{initialService}</strong>
+            </span>
+          </div>
+          <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-brand-purple text-white shrink-0">
+            Selected
+          </span>
+        </div>
+      )}
+
       {error && (
         <div className="mb-6 p-4 rounded-xl bg-red-50 text-red-700 text-xs flex items-center gap-2 border border-red-200">
           <AlertCircle className="w-4 h-4 shrink-0" />
@@ -309,107 +375,172 @@ export default function ConsultationCalendar({
         </div>
       )}
 
-      {/* Step 1: Select Consultation Date */}
+      {/* Step 1: Select Consultation Date (Clean, conventional calendar view) */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
           <label className="text-xs uppercase tracking-wider font-bold text-brand-plum flex items-center gap-2 font-sans">
             <CalendarIcon className="w-4 h-4 text-brand-purple" />
             <span>1. Choose Consultation Date</span>
             <span className="text-brand-pink">*</span>
           </label>
           <span className="text-[11px] text-brand-plum/60 font-sans">
-            (Mon – Sat, Sundays closed)
+            Mon – Sat (Sundays closed)
           </span>
         </div>
 
-        {/* Date Selector Pills (Next 14 Days) */}
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
-          {nextDates.map((item) => {
-            const isSelected = selectedDate === item.dateStr;
-            const disabled = item.isSunday;
+        {/* Conventional Monthly Calendar Component */}
+        <div className="bg-brand-warm-white rounded-2xl border border-brand-warm-border/80 p-3.5 sm:p-5 max-w-xl">
+          {/* Header with Month/Year and Prev/Next Navigation */}
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-brand-warm-border/60">
+            <div className="font-serif text-lg sm:text-xl font-bold text-brand-plum flex items-center gap-2">
+              <span>{monthName}</span>
+              <span className="text-brand-purple font-sans font-semibold text-sm sm:text-base">
+                {currentYear}
+              </span>
+            </div>
 
-            return (
+            <div className="flex items-center gap-1">
               <button
-                key={item.dateStr}
                 type="button"
-                disabled={disabled}
-                onClick={() => setSelectedDate(item.dateStr)}
-                className={`flex flex-col items-center justify-center p-3 rounded-2xl min-w-[70px] shrink-0 border transition-all text-center ${
-                  disabled
-                    ? "opacity-35 bg-brand-warm-gray border-transparent cursor-not-allowed"
-                    : isSelected
-                    ? "bg-brand-purple text-white border-brand-purple shadow-sm scale-102"
-                    : "bg-brand-warm-white text-brand-plum border-brand-warm-border hover:border-brand-purple/40 hover:bg-white"
+                onClick={handlePrevMonth}
+                disabled={prevMonthDisabled}
+                aria-label="Previous month"
+                className="p-2 rounded-lg text-brand-plum hover:text-brand-purple hover:bg-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                aria-label="Next month"
+                className="p-2 rounded-lg text-brand-plum hover:text-brand-purple hover:bg-white transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Days of the Week Row */}
+          <div className="grid grid-cols-7 gap-1 text-center mb-2">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, idx) => (
+              <div
+                key={day}
+                className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider font-sans py-1 ${
+                  idx === 0 ? "text-brand-plum/35" : "text-brand-plum/70"
                 }`}
               >
-                <span className="text-[10px] uppercase font-sans font-semibold tracking-wider opacity-80">
-                  {item.dayName}
-                </span>
-                <span className="text-lg font-serif font-bold my-0.5">
-                  {item.dayNum}
-                </span>
-                <span className="text-[9px] uppercase tracking-wider opacity-70">
-                  {item.monthName}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                {day}
+              </div>
+            ))}
+          </div>
 
-        {/* Manual Date Input Fallback */}
-        <div className="mt-3 flex items-center gap-3 text-xs text-brand-plum/70 font-sans">
-          <span>Or choose any upcoming date:</span>
-          <input
-            type="date"
-            min={tomorrowStr}
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-brand-warm-border bg-brand-warm-white text-xs text-brand-plum focus:border-brand-purple focus:outline-hidden"
-          />
+          {/* 7-Column Dates Grid */}
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+            {calendarCells.map((cell, idx) => {
+              if (cell.type === "empty") {
+                return <div key={`empty-${idx}`} className="aspect-square" />;
+              }
+
+              const isSelected = selectedDate === cell.dateStr;
+
+              return (
+                <button
+                  key={cell.dateStr}
+                  type="button"
+                  disabled={!cell.isSelectable}
+                  onClick={() => cell.dateStr && setSelectedDate(cell.dateStr)}
+                  className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center text-xs sm:text-sm font-sans transition-all relative ${
+                    !cell.isSelectable
+                      ? "text-brand-plum/25 bg-transparent cursor-not-allowed"
+                      : isSelected
+                      ? "bg-brand-purple text-white font-bold shadow-xs scale-102 z-10 ring-2 ring-brand-purple/20"
+                      : "text-brand-plum hover:bg-white hover:text-brand-purple hover:shadow-2xs border border-transparent hover:border-brand-purple/30 cursor-pointer"
+                  } ${cell.isToday && !isSelected ? "border border-brand-purple/40 font-bold text-brand-purple" : ""}`}
+                >
+                  <span>{cell.dayNum}</span>
+                  {cell.isToday && (
+                    <span
+                      className={`w-1 h-1 rounded-full mt-0.5 ${
+                        isSelected ? "bg-brand-gold-light" : "bg-brand-purple"
+                      }`}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Calendar Legend */}
+          <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-brand-plum/60 font-sans mt-4 pt-3 border-t border-brand-warm-border/60">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand-purple inline-block" />
+              <span>Selected Date</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full border border-brand-purple inline-block" />
+              <span>Today</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand-plum/20 inline-block" />
+              <span>Unavailable / Closed</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Step 2: Select Time Slot (Genuinely Available Only) */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
           <label className="text-xs uppercase tracking-wider font-bold text-brand-plum flex items-center gap-2 font-sans">
             <Clock className="w-4 h-4 text-brand-purple" />
             <span>2. Select Available Time Slot</span>
             <span className="text-brand-pink">*</span>
           </label>
-          <span className="text-[11px] text-brand-plum/60 font-sans">
-            45-minute 1-on-1 session
+          <span className="text-[11px] text-brand-purple font-sans font-medium">
+            {selectedDate
+              ? new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "45-minute 1-on-1 session"}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
-          {availableSlots.map(({ slot, available }) => {
-            const isSelected = selectedSlot === slot && available;
+        {availableSlots.filter((s) => s.available).length === 0 ? (
+          <div className="p-4 rounded-xl bg-amber-50 text-amber-800 text-xs border border-amber-200/80 font-sans">
+            No consultation slots are available for this date. Please choose another date on the calendar above.
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5">
+            {availableSlots.map(({ slot, available }) => {
+              const isSelected = selectedSlot === slot && available;
 
-            return (
-              <button
-                key={slot}
-                type="button"
-                disabled={!available}
-                onClick={() => setSelectedSlot(slot)}
-                className={`py-3 px-2 rounded-xl text-xs font-sans font-semibold tracking-wide border transition-all text-center ${
-                  !available
-                    ? "opacity-35 bg-brand-warm-gray border-transparent line-through cursor-not-allowed text-brand-plum/50"
-                    : isSelected
-                    ? "bg-brand-purple text-white border-brand-purple shadow-xs"
-                    : "bg-brand-warm-white text-brand-plum border-brand-warm-border hover:border-brand-purple/40 hover:bg-white"
-                }`}
-              >
-                <span>{slot}</span>
-                {!available && (
-                  <span className="block text-[9px] font-normal no-underline text-red-500 mt-0.5">
-                    Reserved
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  disabled={!available}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`py-3 px-2 rounded-xl text-xs font-sans font-semibold tracking-wide border transition-all text-center ${
+                    !available
+                      ? "opacity-35 bg-brand-warm-gray border-transparent line-through cursor-not-allowed text-brand-plum/50"
+                      : isSelected
+                      ? "bg-brand-purple text-white border-brand-purple shadow-xs"
+                      : "bg-brand-warm-white text-brand-plum border-brand-warm-border hover:border-brand-purple/40 hover:bg-white"
+                  }`}
+                >
+                  <span>{slot}</span>
+                  {!available && (
+                    <span className="block text-[9px] font-normal no-underline text-red-500 mt-0.5">
+                      Reserved
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Step 3: Visitor Contact & Event Details */}

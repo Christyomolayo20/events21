@@ -50,10 +50,10 @@ export default function AboutPage() {
 
       {/* A. ABOUT EVENTS 21 */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-brand-warm-border shadow-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+        <div className="bg-white rounded-3xl p-5 sm:p-8 md:p-12 border border-brand-warm-border shadow-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
             <div className="lg:col-span-5">
-              <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border h-[340px] sm:h-[400px] w-full bg-brand-plum">
+              <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-brand-warm-border h-[300px] sm:h-[400px] w-full bg-brand-plum">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/images/about-team-portrait.jpg"
@@ -103,7 +103,7 @@ export default function AboutPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* B. Our Vision */}
-          <div className="bg-gradient-to-br from-brand-warm-white via-white to-brand-soft-lavender/30 rounded-3xl p-8 sm:p-10 border border-brand-warm-border shadow-xs flex flex-col justify-between">
+          <div className="bg-gradient-to-br from-brand-warm-white via-white to-brand-soft-lavender/30 rounded-3xl p-5 sm:p-8 md:p-10 border border-brand-warm-border shadow-xs flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-brand-soft-lavender text-brand-purple flex items-center justify-center mb-6">
                 <Eye className="w-6 h-6" />
@@ -128,7 +128,7 @@ export default function AboutPage() {
           </div>
 
           {/* C. Our Commitment */}
-          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-brand-warm-border shadow-xs flex flex-col justify-between">
+          <div className="bg-white rounded-3xl p-5 sm:p-8 md:p-10 border border-brand-warm-border shadow-xs flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-brand-warm-gray text-brand-gold flex items-center justify-center mb-6">
                 <HeartHandshake className="w-6 h-6" />
@@ -164,11 +164,11 @@ export default function AboutPage() {
 
       {/* D. MEET THE FOUNDER */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24">
-        <div className="bg-gradient-to-br from-white via-brand-warm-white to-brand-soft-lavender/30 rounded-3xl p-8 sm:p-12 border border-brand-purple/20 shadow-subtle">
+        <div className="bg-gradient-to-br from-white via-brand-warm-white to-brand-soft-lavender/30 rounded-3xl p-5 sm:p-8 md:p-12 border border-brand-purple/20 shadow-subtle">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Founder Image (1st uploaded image) */}
             <div className="lg:col-span-5 flex flex-col items-center text-center">
-              <div className="relative w-60 h-72 sm:w-68 sm:h-84 rounded-3xl overflow-hidden shadow-elevated border-4 border-white ring-2 ring-brand-purple/20 bg-brand-plum shrink-0">
+              <div className="relative w-52 h-64 sm:w-68 sm:h-84 max-w-full rounded-3xl overflow-hidden shadow-elevated border-4 border-white ring-2 ring-brand-purple/20 bg-brand-plum shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={founder.image || "/images/founder-events21.jpg"}

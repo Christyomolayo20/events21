@@ -181,7 +181,7 @@ export default function AcademyRegistrationForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-warm-border shadow-subtle max-w-2xl mx-auto text-left relative"
+      className="bg-white rounded-3xl p-5 sm:p-10 lg:p-12 border border-brand-warm-border shadow-subtle max-w-2xl mx-auto text-left relative"
     >
       {error && (
         <div

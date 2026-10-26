@@ -83,10 +83,10 @@ export default function GalleryPage() {
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[420px] mx-auto"
+                className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-full sm:max-w-[420px] mx-auto"
               >
-                {/* Photo with Fixed Height & Top-Center Alignment */}
-                <div className="relative w-full h-[380px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
+                {/* Photo with Responsive Height & Top-Center Alignment */}
+                <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image}

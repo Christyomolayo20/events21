@@ -1,4 +1,4 @@
-import { EventEnquiry, GiftItem, GiftRequest, PortfolioItem, ServiceItem, Testimonial, ConsultationBooking, TeamMember, FounderInfo } from "./types";
+import { EventEnquiry, GiftItem, GiftRequest, PortfolioItem, ServiceItem, EventPackage, Testimonial, ConsultationBooking, TeamMember, FounderInfo } from "./types";
 
 export const BRAND_CONFIG = {
   name: "Events 21",
@@ -23,6 +23,60 @@ export const BRAND_CONFIG = {
   heroVideoUrl: "/images/hero-video.mp4",
   heroPosterUrl: "/images/hero-poster.jpg",
 };
+
+export const EVENT_PACKAGES: EventPackage[] = [
+  {
+    id: "full-planning",
+    title: "Full Planning",
+    tagline: "Comprehensive End-to-End Orchestration",
+    description:
+      "Comprehensive event planning and coordination from the initial concept through final execution.",
+    image: "/images/package-full-planning.jpg",
+    inclusions: [
+      "Manage the event from A–Z.",
+      "Budget development.",
+      "Venue selection.",
+      "Vendor sourcing and management.",
+      "Event timeline creation and management.",
+      "Contract negotiation and review.",
+      "Event setup oversight.",
+    ],
+    ctaText: "Enquire About Full Planning",
+  },
+  {
+    id: "partial-planning",
+    title: "Partial Planning",
+    tagline: "Professional Coordination & Support",
+    description:
+      "Professional support for clients who have started planning their event and need expert coordination to bring everything together smoothly.",
+    image: "/images/package-partial-planning.jpg",
+    inclusions: [
+      "Review and confirmation of vendors.",
+      "Support to ensure the event runs smoothly.",
+      "Vendor setup oversight.",
+      "Timeline development and coordination.",
+      "Venue floor planning and layout.",
+      "Vendor management.",
+    ],
+    ctaText: "Enquire About Partial Planning",
+  },
+  {
+    id: "day-of-event-coordination",
+    title: "Day-of-Event Coordination",
+    tagline: "Flawless On-the-Day Management",
+    description:
+      "On-the-day coordination to keep your event organised, manage vendors, and ensure activities run according to plan.",
+    image: "/images/package-day-of-coordination.jpg",
+    inclusions: [
+      "Confirm vendor arrival.",
+      "Coordinate vendors.",
+      "Ensure vendors fulfil their delivery responsibilities.",
+      "Keep the day's activities running smoothly.",
+      "Manage setup and teardown.",
+    ],
+    ctaText: "Enquire About Day-of-Event Coordination",
+  },
+];
 
 
 export const SERVICES_DATA: ServiceItem[] = [

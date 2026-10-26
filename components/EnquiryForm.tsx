@@ -154,8 +154,22 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-warm-border shadow-elevated relative overflow-hidden"
+      className="bg-white rounded-3xl p-5 sm:p-10 lg:p-12 border border-brand-warm-border shadow-elevated relative overflow-hidden"
     >
+      {initialStyle && (
+        <div className="mb-6 p-4 rounded-2xl bg-brand-soft-lavender/70 border border-brand-purple/30 text-xs text-brand-purple font-sans flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Crown className="w-4 h-4 shrink-0 text-brand-gold" />
+            <span>
+              Selected Enquiry Focus: <strong className="font-bold text-brand-plum">{initialStyle}</strong>
+            </span>
+          </div>
+          <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-brand-purple text-white shrink-0">
+            Preselected
+          </span>
+        </div>
+      )}
+
       {error && (
         <div className="mb-6 p-4 rounded-xl bg-red-50 text-red-700 text-xs flex items-center gap-2 border border-red-200">
           <AlertCircle className="w-4 h-4 shrink-0" />

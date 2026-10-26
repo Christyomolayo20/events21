@@ -27,6 +27,8 @@ function getStoredAnonKey(): string {
   return "";
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
   const anonKey = getStoredAnonKey();
@@ -45,6 +47,7 @@ export async function GET() {
           }
         : {},
       cache: "no-store",
+      signal: AbortSignal.timeout(3000),
     });
 
     serverResponseCode = res.status;
@@ -92,6 +95,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       cache: "no-store",
+      signal: AbortSignal.timeout(3000),
     });
 
     if (testRes.status === 200) {

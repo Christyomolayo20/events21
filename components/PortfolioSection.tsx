@@ -77,10 +77,10 @@ export default function PortfolioSection() {
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-500 shadow-xs hover:shadow-elevated flex flex-col justify-between w-full max-w-[420px] mx-auto"
+                className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-500 shadow-xs hover:shadow-elevated flex flex-col justify-between w-full max-w-full sm:max-w-[420px] mx-auto"
               >
-                {/* Photo Container with Fixed Height & Top-Center Alignment */}
-                <div className="relative w-full h-[380px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
+                {/* Photo Container with Responsive Height & Top-Center Alignment */}
+                <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image}

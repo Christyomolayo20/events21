@@ -115,20 +115,20 @@ export default function RoyalPlannersAcademyPage() {
             Learn the Art and Business of Event Planning.
           </p>
 
-          {/* Plain & Simple CTAs - Matching Landing Page Style */}
-          <div className="inline-flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-sans tracking-[0.22em] sm:tracking-[0.26em] uppercase font-semibold text-white/95 drop-shadow-sm">
+          {/* Responsive CTAs */}
+          <div className="flex flex-col sm:inline-flex sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-sans tracking-[0.2em] sm:tracking-[0.26em] uppercase font-semibold text-white/95 drop-shadow-sm w-full max-w-xs sm:max-w-none">
             <a
               href="#register"
               id="academy-cta-register"
-              className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold"
+              className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center"
             >
               REGISTER FOR NEXT COHORT
             </a>
-            <span className="text-brand-gold/60 select-none">|</span>
+            <span className="hidden sm:inline text-brand-gold/60 select-none">|</span>
             <a
               href="#curriculum"
               id="academy-cta-curriculum"
-              className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold"
+              className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center"
             >
               EXPLORE CURRICULUM
             </a>

@@ -12,32 +12,33 @@ export default function Footer() {
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
+    { name: "Royal Planners Academy", href: "/services/royal-planners-academy" },
     { name: "Gallery", href: "/gallery" },
     { name: "Gifts by Adeola", href: "/gifts-by-adeola" },
     { name: "Contact", href: "/contact" },
   ];
 
   return (
-    <footer className="bg-brand-plum text-brand-warm-white border-t border-brand-plum-dark/40 pt-16 pb-12">
+    <footer className="bg-brand-plum text-brand-warm-white border-t border-brand-plum-dark/40 pt-12 sm:pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Row */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-12 border-b border-white/10">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 sm:gap-8 pb-10 sm:pb-12 border-b border-white/10">
           {/* Logo & Concise Description */}
           <div className="max-w-md space-y-3">
             <Logo variant="white" size="md" />
-            <p className="text-white/75 text-sm leading-relaxed font-sans font-light">
+            <p className="text-white/75 text-xs sm:text-sm leading-relaxed font-sans font-light">
               Events 21 creates thoughtfully planned, beautifully styled celebrations that turn meaningful
               moments into lasting memories.
             </p>
           </div>
 
           {/* Social Links */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <a
               href="https://www.instagram.com/events_21/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-sans transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-sans transition-colors"
               aria-label="Events 21 on Instagram"
             >
               <Instagram className="w-3.5 h-3.5 text-brand-gold" />
@@ -49,7 +50,7 @@ export default function Footer() {
               href="https://www.instagram.com/giftsbyadeola/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand-pink/20 hover:bg-brand-pink/30 text-white text-xs font-sans transition-colors border border-brand-pink/30"
+              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-brand-pink/20 hover:bg-brand-pink/30 text-white text-xs font-sans transition-colors border border-brand-pink/30"
               aria-label="Gifts by Adeola on Instagram"
             >
               <Instagram className="w-3.5 h-3.5 text-brand-pink" />
@@ -60,14 +61,14 @@ export default function Footer() {
         </div>
 
         {/* Secondary Row: Navigation Links & Copyright */}
-        <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-xs text-white/60 font-sans">
+        <div className="pt-6 sm:pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6 text-xs text-white/60 font-sans">
           {/* Essential Navigation Links */}
-          <nav className="flex flex-wrap items-center gap-6">
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2.5">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors py-1"
               >
                 {link.name}
               </Link>
