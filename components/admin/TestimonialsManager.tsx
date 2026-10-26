@@ -14,6 +14,7 @@ import {
   X,
   MessageSquareQuote,
   ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 import { Testimonial } from "@/lib/types";
 import {
@@ -22,6 +23,7 @@ import {
   updateTestimonial,
   deleteTestimonial,
   compressImageFile,
+  syncTestimonialsToServer,
 } from "@/lib/store";
 
 interface TestimonialsManagerProps {
@@ -33,6 +35,7 @@ export default function TestimonialsManager({ onNotify }: TestimonialsManagerPro
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Testimonial | null>(null);
   const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const addFileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +56,33 @@ export default function TestimonialsManager({ onNotify }: TestimonialsManagerPro
   };
 
   useEffect(() => {
-    refreshData();
+    const initData = async () => {
+      const local = getTestimonials();
+      setTestimonials(local);
+
+      // Reconcile with server API so desktop admin and mobile user views are identical
+      try {
+        const res = await fetch("/api/testimonials", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.testimonials)) {
+            if (data.testimonials.length > 0) {
+              setTestimonials(data.testimonials);
+              if (typeof window !== "undefined") {
+                localStorage.setItem("events21_testimonials", JSON.stringify(data.testimonials));
+              }
+            } else if (local.length > 0) {
+              // Local has data but server is empty: push local to server
+              syncTestimonialsToServer(local).catch(() => {});
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not check /api/testimonials:", err);
+      }
+    };
+
+    initData();
     const handleUpdate = () => refreshData();
     window.addEventListener("events21_testimonials_updated", handleUpdate);
     return () => {
@@ -152,6 +181,20 @@ export default function TestimonialsManager({ onNotify }: TestimonialsManagerPro
     }
   };
 
+  const handleSyncLive = async () => {
+    setIsSyncing(true);
+    try {
+      const success = await syncTestimonialsToServer(testimonials);
+      if (success) {
+        onNotify?.("Testimonials successfully synchronized to live website & mobile!");
+      } else {
+        onNotify?.("Sync notice: testimonials updated in memory & local storage.");
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const publishedCount = testimonials.filter((t) => t.isPublished).length;
 
   return (
@@ -165,19 +208,32 @@ export default function TestimonialsManager({ onNotify }: TestimonialsManagerPro
               Genuine Client Reviews & Testimonials Manager
             </p>
             <p className="text-brand-plum/70 mt-0.5">
-              Only published testimonials appear in the landing page carousel. If no testimonials are published, the section automatically hides on the public website.
+              Only published testimonials appear in the landing page carousel. Mobile and web views automatically synchronize via <code>/api/testimonials</code>.
             </p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsAddOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Testimonial</span>
-        </button>
+        <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={handleSyncLive}
+            disabled={isSyncing}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-white hover:bg-brand-soft-lavender/40 border border-brand-purple/30 text-brand-purple text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            title="Sync all testimonials to server API so mobile devices immediately show the identical list"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-brand-gold" : ""}`} />
+            <span>{isSyncing ? "Syncing..." : "Sync to Mobile & Web"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsAddOpen(true)}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Testimonial</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Counter */}

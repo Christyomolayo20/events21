@@ -567,44 +567,34 @@ export function getTestimonials(): Testimonial[] {
   if (typeof window === "undefined") return INITIAL_TESTIMONIALS;
   if (cacheTestimonials) return cacheTestimonials;
 
-  const storedVersion = safeLocalStorageGet<string | null>(DATA_VERSION_KEY, null);
-  const isVersionOutdated = storedVersion !== CURRENT_DATA_VERSION;
-
   const stored = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
-  if (!stored || stored.length === 0 || isVersionOutdated) {
-    // Preserve any custom admin reviews added with unique IDs
-    const customAdminTestimonials = (stored || []).filter(
-      (s) => !INITIAL_TESTIMONIALS.some((d) => d.id === s.id)
-    );
-    const merged = [...INITIAL_TESTIMONIALS, ...customAdminTestimonials];
-    cacheTestimonials = merged;
-    safeLocalStorageSet(TESTIMONIALS_KEY, merged);
-    return merged;
+  if (stored && Array.isArray(stored)) {
+    cacheTestimonials = stored;
+    return stored;
   }
 
-  // Ensure default testimonials retain their verified high-res photos
-  const customItems = stored.filter(
-    (s) => !INITIAL_TESTIMONIALS.some((d) => d.id === s.id)
-  );
-  const canonicalItems = INITIAL_TESTIMONIALS.map((defaultItem) => {
-    const adminSaved = stored.find((s) => s.id === defaultItem.id);
-    if (!adminSaved) return defaultItem;
-    return {
-      ...defaultItem,
-      ...adminSaved,
-      image: adminSaved.image || defaultItem.image,
-      roleOrEvent: adminSaved.roleOrEvent || defaultItem.roleOrEvent,
-    };
-  });
-
-  const finalMerged = [...canonicalItems, ...customItems];
-  cacheTestimonials = finalMerged;
-  return finalMerged;
+  // If nothing stored yet, return empty list (no unwanted mock reviews)
+  cacheTestimonials = [];
+  return [];
 }
 
 export function getPublishedTestimonials(): Testimonial[] {
   const all = getTestimonials();
   return all.filter((t) => t.isPublished);
+}
+
+export async function syncTestimonialsToServer(list: Testimonial[]): Promise<boolean> {
+  try {
+    const res = await fetch("/api/testimonials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ testimonials: list }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn("Could not sync testimonials to server:", err);
+    return false;
+  }
 }
 
 export function addTestimonial(item: Omit<Testimonial, "id" | "createdAt">): Testimonial {
@@ -621,6 +611,8 @@ export function addTestimonial(item: Omit<Testimonial, "id" | "createdAt">): Tes
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_testimonials_updated"));
+    // Sync with server in background
+    syncTestimonialsToServer(updated).catch(() => {});
   }
   return newTestimonial;
 }
@@ -634,6 +626,8 @@ export function updateTestimonial(id: string, updates: Partial<Testimonial>): vo
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_testimonials_updated"));
+    // Sync with server in background
+    syncTestimonialsToServer(updated).catch(() => {});
   }
 }
 
@@ -646,6 +640,9 @@ export function deleteTestimonial(id: string): void {
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_testimonials_updated"));
+    // Sync with server in background
+    syncTestimonialsToServer(updated).catch(() => {});
+    fetch(`/api/testimonials?id=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
   }
 }
 

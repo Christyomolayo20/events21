@@ -147,21 +147,36 @@ export default function Hero() {
       onMouseEnter={handleSectionHover}
       onPointerEnter={handleSectionHover}
       onMouseMove={handleSectionHover}
-      className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen landscape:min-h-screen flex items-center justify-center overflow-hidden bg-brand-plum text-white select-none"
+      className="relative min-h-[92vh] sm:min-h-[94vh] lg:min-h-screen lg:h-screen xl:min-h-[105vh] landscape:min-h-screen flex items-center justify-center overflow-hidden bg-brand-plum text-white select-none"
     >
       {/* Background Video Stage - Full-Bleed Cinematic Backdrop across PC, Tablet & Mobile */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-brand-plum-dark">
+        {/* Ambient Video Backdrop for PC view: Provides luxury glowing atmosphere when main video zooms out on widescreen monitors */}
+        {!prefersReducedMotion && (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            className="hidden lg:block absolute inset-0 w-full h-full object-cover object-center filter blur-2xl brightness-50 contrast-125 scale-110 pointer-events-none"
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+        )}
+
         {/* Poster Frame */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={posterSrc}
           alt="Events 21 Grand Royal Celebration"
-          className={`absolute inset-0 w-full h-full object-cover object-[center_28%] sm:object-[center_25%] filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ${
+          className={`absolute inset-0 w-full h-full object-cover object-[center_28%] sm:object-[center_25%] lg:scale-[0.88] xl:scale-[0.84] lg:origin-center filter brightness-[0.92] contrast-[1.05] transition-all duration-700 ${
             isVideoLoaded && !prefersReducedMotion ? "opacity-0" : "opacity-100"
           }`}
         />
 
-        {/* Primary Full-Bleed Video */}
+        {/* Primary Video - PC view is zoomed out a bit (scale 0.88 / 0.84) to reveal more vertical framing and royal decor; Mobile/Tablet remain full-bleed */}
         {!prefersReducedMotion && (
           <video
             ref={videoRef}
@@ -173,7 +188,7 @@ export default function Hero() {
             preload="auto"
             poster={posterSrc}
             onLoadedData={() => setIsVideoLoaded(true)}
-            className={`absolute inset-0 w-full h-full object-cover object-[center_28%] sm:object-[center_25%] filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ${
+            className={`absolute inset-0 w-full h-full object-cover object-[center_28%] sm:object-[center_25%] lg:scale-[0.88] xl:scale-[0.84] lg:origin-center filter brightness-[0.92] contrast-[1.05] transition-all duration-700 ${
               isVideoLoaded ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -213,20 +228,22 @@ export default function Hero() {
           </Link>
         </div>
 
-        {/* Mobile CTA Arrangement: Plain text links without background colors, stacked vertically */}
-        <div className="flex sm:hidden flex-col items-center justify-center gap-4 text-xs font-sans tracking-[0.28em] uppercase font-semibold text-white drop-shadow-md">
+        {/* Mobile CTA Arrangement: Plain text links with | divider in between */}
+        <div className="flex sm:hidden items-center justify-center gap-3 text-[11px] sm:text-xs font-sans tracking-[0.22em] uppercase font-semibold text-white drop-shadow-md">
           <Link
             href="/contact"
             id="hero-cta-plan-mobile"
-            className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center active:text-brand-gold"
+            className="text-white hover:text-brand-gold transition-colors duration-300 py-1 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center active:text-brand-gold whitespace-nowrap"
           >
             Plan Your Event
           </Link>
 
+          <span className="text-white/45 font-light select-none text-xs">|</span>
+
           <Link
             href="/gallery"
             id="hero-cta-portfolio-mobile"
-            className="text-white hover:text-brand-gold transition-colors duration-300 py-1.5 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center active:text-brand-gold"
+            className="text-white hover:text-brand-gold transition-colors duration-300 py-1 border-b border-transparent hover:border-brand-gold focus:outline-none focus:text-brand-gold text-center active:text-brand-gold whitespace-nowrap"
           >
             View Portfolio
           </Link>

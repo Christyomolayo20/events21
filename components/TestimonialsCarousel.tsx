@@ -16,9 +16,26 @@ export default function TestimonialsCarousel() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadData = useCallback(() => {
-    const list = getPublishedTestimonials();
-    setTestimonials(list);
+  const loadData = useCallback(async () => {
+    // 1. Check local cache first
+    const localList = getPublishedTestimonials();
+    if (localList.length > 0) {
+      setTestimonials(localList);
+    }
+
+    // 2. Fetch live testimonials from server API so mobile and web are 100% synchronized
+    try {
+      const res = await fetch("/api/testimonials", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.testimonials)) {
+          const published = data.testimonials.filter((t: Testimonial) => t.isPublished);
+          setTestimonials(published);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch live testimonials:", err);
+    }
   }, []);
 
   useEffect(() => {
