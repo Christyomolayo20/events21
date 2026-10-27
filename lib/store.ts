@@ -573,9 +573,9 @@ export function getTestimonials(): Testimonial[] {
     return stored;
   }
 
-  // If nothing stored yet, return empty list (no unwanted mock reviews)
-  cacheTestimonials = [];
-  return [];
+  // If nothing stored yet, initialize with authoritative published testimonials
+  cacheTestimonials = [...INITIAL_TESTIMONIALS];
+  return cacheTestimonials;
 }
 
 export function getPublishedTestimonials(): Testimonial[] {

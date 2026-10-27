@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { Testimonial } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase";
+import { INITIAL_TESTIMONIALS } from "@/lib/data";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -15,7 +16,7 @@ const TMP_FILE = path.join("/tmp", "events21_testimonials.json");
 const PUBLIC_FILE = path.join(process.cwd(), "public", "testimonials.json");
 
 function loadStoredTestimonials(): Testimonial[] {
-  if (global.__events21_testimonials && Array.isArray(global.__events21_testimonials)) {
+  if (global.__events21_testimonials && Array.isArray(global.__events21_testimonials) && global.__events21_testimonials.length > 0) {
     return global.__events21_testimonials;
   }
 
@@ -24,7 +25,7 @@ function loadStoredTestimonials(): Testimonial[] {
     if (fs.existsSync(TMP_FILE)) {
       const data = fs.readFileSync(TMP_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         global.__events21_testimonials = parsed;
         return parsed;
       }
@@ -38,7 +39,7 @@ function loadStoredTestimonials(): Testimonial[] {
     if (fs.existsSync(PUBLIC_FILE)) {
       const data = fs.readFileSync(PUBLIC_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         global.__events21_testimonials = parsed;
         return parsed;
       }
@@ -47,8 +48,8 @@ function loadStoredTestimonials(): Testimonial[] {
     console.warn("Could not read testimonials from public file:", err);
   }
 
-  global.__events21_testimonials = [];
-  return [];
+  global.__events21_testimonials = [...INITIAL_TESTIMONIALS];
+  return global.__events21_testimonials;
 }
 
 function persistTestimonials(list: Testimonial[]): void {

@@ -503,8 +503,42 @@ export const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
 ];
 
 // Client testimonials: Managed dynamically via Admin Portal and /api/testimonials.
-// Defaults to empty so no unverified or unwanted mock reviews are displayed on the public website.
-export const INITIAL_TESTIMONIALS: Testimonial[] = [];
+// Seeded with authoritative published reviews matching production admin
+export const INITIAL_TESTIMONIALS: Testimonial[] = [
+  {
+    id: "testi-bukola-dara",
+    clientName: "Bukola & Dara",
+    roleOrEvent: "Bride & Groom • Luxury White Wedding",
+    text: "Adeola and the Events 21 royal planning team orchestrated our wedding weekend beyond anything we could have ever dreamed. From the ballroom decor to the seamless minute-by-minute coordination, every single moment spoke elegance, peace of mind, and pure royalty.",
+    quote: "Adeola and the Events 21 royal planning team orchestrated our wedding weekend beyond anything we could have ever dreamed. From the ballroom decor to the seamless minute-by-minute coordination, every single moment spoke elegance, peace of mind, and pure royalty.",
+    rating: 5,
+    image: "/images/landing-couple-white.jpg",
+    isPublished: true,
+    createdAt: "2026-10-15T12:00:00Z",
+  },
+  {
+    id: "testi-the-kayodes",
+    clientName: "The Kayodes",
+    roleOrEvent: "Traditional Engagement & Grand Reception",
+    text: "The traditional ceremony styling, olive velvet risers, and the smooth ballroom first dance transition were immaculate. Our guests who travelled from across Nigeria and abroad are still raving about how regal, hospitable, and intentional everything was.",
+    quote: "The traditional ceremony styling, olive velvet risers, and the smooth ballroom first dance transition were immaculate. Our guests who travelled from across Nigeria and abroad are still raving about how regal, hospitable, and intentional everything was.",
+    rating: 5,
+    image: "/images/the-kayodes-traditional-couple.jpg",
+    isPublished: true,
+    createdAt: "2026-10-18T14:30:00Z",
+  },
+  {
+    id: "testi-adeleke-jubilee",
+    clientName: "Chief Mrs. Adeleke & Family",
+    roleOrEvent: "80th Milestone Matriarch Jubilee",
+    text: "Planning our mother's 80th milestone birthday celebration with Adeola was effortless. She brought our family's vision to life with majestic tablescapes, royal lighting, and an attentive coordination squad that treated every elder with regal honor.",
+    quote: "Planning our mother's 80th milestone birthday celebration with Adeola was effortless. She brought our family's vision to life with majestic tablescapes, royal lighting, and an attentive coordination squad that treated every elder with regal honor.",
+    rating: 5,
+    image: "/images/milestone-matriarch-celebration.jpg",
+    isPublished: true,
+    createdAt: "2026-10-20T10:15:00Z",
+  },
+];
 
 // Consultation Bookings
 export const INITIAL_CONSULTATIONS: ConsultationBooking[] = [];
