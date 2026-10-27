@@ -33,7 +33,7 @@ export default function Logo({
             ? "w-16 h-12 sm:w-20 sm:h-14"
             : isLarge
             ? "w-32 h-22 sm:w-40 sm:h-28"
-            : "w-20 h-14 sm:w-24 sm:h-16 md:w-28 md:h-18 lg:w-32 lg:h-20"
+            : "w-20 h-14 sm:w-22 sm:h-15 md:w-24 md:h-15 lg:w-26 lg:h-14"
         }`}
       >
         <Image

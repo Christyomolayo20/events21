@@ -49,8 +49,8 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-white/95 backdrop-blur-md shadow-subtle border-b border-brand-warm-border/60 py-3 sm:py-3.5"
-            : "bg-white/80 backdrop-blur-sm border-b border-brand-warm-border/30 py-3.5 sm:py-4.5"
+            ? "bg-white/95 backdrop-blur-md shadow-subtle border-b border-brand-warm-border/60 py-2 sm:py-2.5 lg:py-2"
+            : "bg-white/80 backdrop-blur-sm border-b border-brand-warm-border/30 py-2.5 sm:py-3 lg:py-2"
         }`}
       >
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
@@ -143,7 +143,7 @@ export default function Navbar() {
               <Link
                 href="/contact"
                 id="nav-cta-plan-desktop"
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-bold tracking-[0.16em] uppercase transition-all shadow-md hover:shadow-elevated hover:scale-[1.02] active:scale-[0.98] border border-brand-gold/40"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-bold tracking-[0.16em] uppercase transition-all shadow-md hover:shadow-elevated hover:scale-[1.02] active:scale-[0.98] border border-brand-gold/40"
               >
                 <span>Plan Your Event</span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-brand-gold-light" />
