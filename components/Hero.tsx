@@ -222,7 +222,7 @@ export default function Hero() {
         <img
           src={posterSrc}
           alt="Events 21 Grand Royal Celebration"
-          className={`absolute inset-0 w-full h-full object-cover object-[center_20%] sm:object-[center_22%] lg:object-[center_20%] filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ease-out ${
+          className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ease-out ${
             isVideoLoaded && !prefersReducedMotion ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         />
@@ -238,7 +238,7 @@ export default function Hero() {
             playsInline
             preload="auto"
             poster={posterSrc}
-            className={`absolute inset-0 w-full h-full object-cover object-[center_20%] sm:object-[center_22%] lg:object-[center_20%] filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ease-out ${
+            className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.05] transition-opacity duration-700 ease-out ${
               isVideoLoaded ? "opacity-100" : "opacity-0"
             }`}
           >
