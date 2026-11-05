@@ -19,12 +19,11 @@ export default function ConsultationCTA({
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-soft-lavender/60 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-4 shadow-2xs">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Start the Conversation</span>
-        </div>
+        <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-2">
+          Start the Conversation
+        </span>
 
-        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight mb-4">
+        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-brand-plum leading-tight mb-4">
           {title}
         </h2>
 

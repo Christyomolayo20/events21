@@ -33,16 +33,12 @@ export default function IntroSection() {
 
           {/* Narrative Content */}
           <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>The Brand Philosophy</span>
-            </div>
+            <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block">
+              The Brand Philosophy
+            </span>
 
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-[1.2]">
-              Every Celebration{" "}
-              <span className="italic font-normal font-serif text-brand-purple">
-                Deserves Poise &amp; Peace of Mind.
-              </span>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-[1.2]">
+              Every Celebration Deserves Poise &amp; Peace of Mind
             </h2>
 
             <div className="space-y-4 text-base sm:text-lg text-brand-plum/80 font-sans leading-relaxed font-light">

@@ -111,15 +111,11 @@ export default function FeaturedEventsCarousel() {
         {/* Header with Navigation Controls */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 md:mb-14 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Selected Celebrations</span>
-            </div>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight">
-              Featured{" "}
-              <span className="italic font-normal font-serif text-brand-purple">
-                Events &amp; Portfolio.
-              </span>
+            <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-2">
+              Selected Celebrations
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-tight">
+              Featured Events &amp; Portfolio
             </h2>
           </div>
 

@@ -11,14 +11,11 @@ export default function ServicesSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 md:mb-14">
-          <span className="text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans block mb-2">
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-2">
             What We Do
           </span>
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight">
-            Curated Planning &amp;{" "}
-            <span className="italic font-normal font-serif text-brand-purple">
-              Design Services.
-            </span>
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-tight">
+            Curated Planning &amp; Design Services
           </h2>
         </div>
 

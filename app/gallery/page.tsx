@@ -39,15 +39,11 @@ export default function GalleryPage() {
       {/* Header */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-12">
         <div className="text-center max-w-3xl mx-auto mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Visual Portfolio</span>
-          </div>
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
-            The Gallery: Real Moments,{" "}
-            <span className="italic font-normal font-serif text-brand-purple">
-              Exquisite Details.
-            </span>
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-3">
+            Visual Portfolio
+          </span>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-brand-plum font-normal leading-tight mb-4">
+            The Gallery: Real Moments, Exquisite Details
           </h1>
           <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed">
             Explore a curated selection of weddings, traditional celebrations, and grand ballroom

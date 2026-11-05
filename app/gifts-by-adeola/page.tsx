@@ -121,17 +121,12 @@ export default function GiftsByAdeolaPage() {
       {/* Sub-brand Hero */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-16">
         <div className="text-center max-w-3xl mx-auto">
-          {/* Sub-brand Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-4 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-brand-gold animate-pulse" />
-            <span>Gifts by Adeola • By Events 21</span>
-          </div>
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-3">
+            Gifts by Adeola • By EVENTS21
+          </span>
 
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
-            Thoughtful Gifts.{" "}
-            <span className="italic font-normal font-serif text-brand-purple">
-              Curated on a Budget.
-            </span>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-brand-plum font-normal leading-tight mb-4">
+            Thoughtful Gifts. Curated on a Budget.
           </h1>
 
           {/* Exact Brand Copy */}

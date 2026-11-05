@@ -16,15 +16,11 @@ export default function ServicesPage() {
       {/* Page Header */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-14">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Curated Event Services &amp; Packages</span>
-          </div>
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-brand-plum leading-tight mb-4">
-            Curated Planning &amp;{" "}
-            <span className="italic font-normal font-serif text-brand-purple">
-              Styling Services.
-            </span>
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-3">
+            Curated Event Services &amp; Packages
+          </span>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-brand-plum font-normal leading-tight mb-4">
+            Curated Planning &amp; Styling Services
           </h1>
           <p className="text-base sm:text-lg text-brand-plum/75 font-sans leading-relaxed">
             Every celebration orchestrated by Events 21 is anchored in intentional spatial design, cultural reverence,

@@ -38,16 +38,12 @@ export default function GiftsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Sub-brand Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 md:mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-soft-lavender border border-brand-purple/20 text-brand-purple text-xs font-sans tracking-widest uppercase font-semibold mb-3.5 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
-            <span>Gifts by Adeola • By Events 21</span>
-          </div>
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-2">
+            Gifts by Adeola • By EVENTS21
+          </span>
 
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-tight mb-3.5">
-            Thoughtful Gifts.{" "}
-            <span className="italic font-normal font-serif text-brand-purple">
-              Curated on a Budget.
-            </span>
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-tight mb-3.5">
+            Thoughtful Gifts. Curated on a Budget.
           </h2>
 
           {/* User's Exact Brand Copy with Eru Iyawo */}

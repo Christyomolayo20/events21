@@ -33,15 +33,12 @@ export default function AboutSection() {
 
           {/* Editorial Content (7 cols) */}
           <div className="lg:col-span-7 order-1 lg:order-2 space-y-5">
-            <div className="inline-block text-xs uppercase tracking-widest text-brand-purple font-semibold font-sans">
-              About Events 21
-            </div>
+            <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block">
+              About EVENTS21
+            </span>
 
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-brand-plum leading-[1.2]">
-              Every Celebration{" "}
-              <span className="italic font-normal font-serif text-brand-purple">
-                Has a Story.
-              </span>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-[1.2]">
+              Every Celebration Has a Story
             </h2>
 
             <div className="space-y-4 text-base sm:text-lg text-brand-plum/80 font-sans leading-relaxed font-light">
