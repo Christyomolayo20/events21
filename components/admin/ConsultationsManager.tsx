@@ -29,9 +29,32 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
   const [consultations, setConsultations] = useState<ConsultationBooking[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [emailStatusNote, setEmailStatusNote] = useState<string | null>(null);
 
   const refreshData = () => {
     setConsultations(getConsultations());
+  };
+
+  const handleTestEmail = async () => {
+    setIsTestingEmail(true);
+    setEmailStatusNote(null);
+    try {
+      const res = await fetch("/api/admin/test-email", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setEmailStatusNote(`✓ Success: Test email sent via ${data.provider} to Royaltyeventservice@gmail.com!`);
+        onNotify?.(`Test email delivered to Royaltyeventservice@gmail.com!`);
+      } else {
+        setEmailStatusNote(
+          `⚠️ Live email credentials needed in Vercel: Set GMAIL_APP_PASSWORD (for Royaltyeventservice@gmail.com) or RESEND_API_KEY in Vercel Project Settings > Environment Variables.`
+        );
+      }
+    } catch (err: any) {
+      setEmailStatusNote(`Error testing email: ${err?.message || "Failed to reach email service"}`);
+    } finally {
+      setIsTestingEmail(false);
+    }
   };
 
   useEffect(() => {
@@ -43,10 +66,29 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
     };
   }, []);
 
-  const handleStatus = (id: string, newStatus: ConsultationBooking["status"]) => {
+  const handleStatus = async (id: string, newStatus: ConsultationBooking["status"]) => {
     updateConsultationStatus(id, newStatus);
     refreshData();
-    onNotify?.(`Booking status updated to "${newStatus}".`);
+    onNotify?.(`Booking status updated to "${newStatus}". Sending email notification...`);
+
+    const booking = consultations.find((c) => c.id === id);
+    if (booking) {
+      try {
+        const res = await fetch("/api/consultations/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, status: newStatus, booking }),
+        });
+        const data = await res.json();
+        if (data.clientEmailSent) {
+          onNotify?.(`Status updated to "${newStatus}" and email notification delivered to ${booking.email}!`);
+        } else {
+          onNotify?.(`Status updated to "${newStatus}".`);
+        }
+      } catch {
+        onNotify?.(`Status updated to "${newStatus}".`);
+      }
+    }
   };
 
   const handleDelete = (id: string, name: string) => {
@@ -111,16 +153,36 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3 px-4 flex items-center justify-between text-xs text-emerald-800">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>
-            Client confirmation emails are sent from <strong>Royaltyeventservice@gmail.com</strong> upon booking, and admin alerts are sent to <strong>Royaltyeventservice@gmail.com</strong>.
-          </span>
+      {/* Email Integration Status & Verification Card */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4 text-brand-purple" />
+            <span className="font-serif font-bold text-sm text-brand-plum">
+              Automated Email System (Royaltyeventservice@gmail.com)
+            </span>
+          </div>
+          <p className="text-xs text-brand-plum/60 font-sans mt-0.5">
+            Dispatches appointment booking confirmations, status updates, and notifications to clients &amp; admin.
+          </p>
+          {emailStatusNote && (
+            <p className={`text-xs font-sans mt-2 font-medium ${emailStatusNote.startsWith("✓") ? "text-emerald-700" : "text-amber-700"}`}>
+              {emailStatusNote}
+            </p>
+          )}
         </div>
+
+        <button
+          type="button"
+          onClick={handleTestEmail}
+          disabled={isTestingEmail}
+          className="px-4 py-2 rounded-xl bg-brand-soft-lavender hover:bg-brand-purple/20 text-brand-purple text-xs font-semibold uppercase tracking-wider transition-all shrink-0 cursor-pointer disabled:opacity-50"
+        >
+          {isTestingEmail ? "Testing..." : "Send Test Email"}
+        </button>
       </div>
 
+      {/* Search & Filter Bar */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-plum/40" />
@@ -187,6 +249,12 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
                     booking.date
                   )}%20at%20${encodeURIComponent(booking.timeSlot)}.`;
 
+                  const emailClientUrl = `mailto:${booking.email}?subject=${encodeURIComponent(
+                    `EVENTS21 Consultation (${booking.eventType}) - #${booking.id}`
+                  )}&body=${encodeURIComponent(
+                    `Dear ${booking.fullName},\n\nWe are following up regarding your consultation appointment with EVENTS21 for ${booking.eventType} on ${booking.date} at ${booking.timeSlot}.\n\nStatus: ${booking.status}\n\nWarm regards,\nAdeola Oyeyode\nEVENTS21 (Royalty Twenty One Events)\nRoyaltyeventservice@gmail.com\n+234 806 054 9596`
+                  )}`;
+
                   return (
                     <tr
                       key={booking.id}
@@ -220,10 +288,6 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
                         <div className="text-brand-plum/60 text-[11px] truncate max-w-[160px]">
                           {booking.email}
                         </div>
-                        <div className="text-[10px] text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
-                          <CheckCircle2 className="w-2.5 h-2.5" />
-                          <span>Confirmation dispatched</span>
-                        </div>
                         <div className="flex items-center gap-2 mt-2">
                           <a
                             href={whatsappUrl}
@@ -235,7 +299,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
                             <span>WhatsApp</span>
                           </a>
                           <a
-                            href={`mailto:${booking.email}?subject=Events%2021%20Consultation%20Confirmation`}
+                            href={emailClientUrl}
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 font-medium text-[10px] transition-colors"
                           >
                             <Mail className="w-3 h-3" />

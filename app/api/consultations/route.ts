@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { sendEmail, OFFICIAL_EMAIL } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
-const OFFICIAL_EMAIL = "Royaltyeventservice@gmail.com";
 const STUDIO_PHONE = "+234 806 054 9596";
 const STUDIO_WHATSAPP = "2348060549596";
 
@@ -173,54 +173,6 @@ function buildAdminEmailHtml(booking: {
   `;
 }
 
-// Universal Email Dispatcher
-async function sendEmail({
-  to,
-  from = `EVENTS21 <${OFFICIAL_EMAIL}>`,
-  replyTo = OFFICIAL_EMAIL,
-  subject,
-  html,
-}: {
-  to: string;
-  from?: string;
-  replyTo?: string;
-  subject: string;
-  html: string;
-}): Promise<{ sent: boolean; provider: string; error?: string }> {
-  // 1. Resend API if API Key is configured
-  const resendApiKey = process.env.RESEND_API_KEY;
-  if (resendApiKey) {
-    try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [to],
-          reply_to: replyTo,
-          subject,
-          html,
-        }),
-      });
-
-      if (res.ok) {
-        return { sent: true, provider: "resend" };
-      }
-      const errData = await res.json().catch(() => ({}));
-      console.warn("Resend API warning:", errData);
-    } catch (err: any) {
-      console.warn("Resend fetch error:", err?.message);
-    }
-  }
-
-  // 2. Fallback / Log Mode: Ensure guaranteed reliability and zero crash
-  console.log(`[EMAIL DISPATCHED] To: ${to} | From: ${from} | Subject: ${subject}`);
-  return { sent: true, provider: "events21-mail-gateway" };
-}
-
 function sanitize(input: unknown, maxLen = 300): string {
   if (typeof input !== "string") return "";
   return input.trim().slice(0, maxLen).replace(/[<>]/g, "");
@@ -310,8 +262,8 @@ export async function POST(req: Request) {
       {
         success: true,
         booking,
-        clientEmailDelivered: clientRes.sent,
-        adminEmailDelivered: adminRes.sent,
+        clientEmailDelivered: clientRes.success,
+        adminEmailDelivered: adminRes.success,
         sender: OFFICIAL_EMAIL,
         message: `Confirmation email dispatched from ${OFFICIAL_EMAIL} to ${booking.email}`,
       },
