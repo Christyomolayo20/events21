@@ -162,3 +162,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error?.message || "Failed to update consultation status" }, { status: 500 });
   }
 }
+
