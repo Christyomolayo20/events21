@@ -221,6 +221,13 @@ async function sendEmail({
   return { sent: true, provider: "events21-mail-gateway" };
 }
 
+function sanitize(input: unknown, maxLen = 300): string {
+  if (typeof input !== "string") return "";
+  return input.trim().slice(0, maxLen).replace(/[<>]/g, "");
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -233,18 +240,23 @@ export async function POST(req: Request) {
       );
     }
 
+    const cleanEmail = String(email).trim().toLowerCase().slice(0, 100);
+    if (!EMAIL_REGEX.test(cleanEmail)) {
+      return NextResponse.json({ error: "Please provide a valid email address format." }, { status: 400 });
+    }
+
     const bookingId = body.id || `cst-${Date.now().toString(36).toUpperCase()}`;
     const createdAt = body.createdAt || new Date().toISOString();
 
     const booking = {
       id: bookingId,
-      fullName: String(fullName).trim(),
-      email: String(email).trim().toLowerCase(),
-      phone: String(phone).trim(),
-      eventType: String(eventType || "Event Planning"),
-      date: String(date).trim(),
-      timeSlot: String(timeSlot).trim(),
-      message: message ? String(message).trim() : undefined,
+      fullName: sanitize(fullName, 100),
+      email: cleanEmail,
+      phone: sanitize(phone, 30),
+      eventType: sanitize(eventType || "Event Planning", 80),
+      date: sanitize(date, 20),
+      timeSlot: sanitize(timeSlot, 20),
+      message: message ? sanitize(message, 1000) : undefined,
       status: "Confirmed",
       createdAt,
     };

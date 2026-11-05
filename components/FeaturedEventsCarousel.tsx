@@ -55,10 +55,8 @@ export default function FeaturedEventsCarousel() {
 
   // Keep index within bounds when visibleCount changes on rotate/resize
   useEffect(() => {
-    if (currentIndex > maxIndex) {
-      setCurrentIndex(maxIndex);
-    }
-  }, [maxIndex, currentIndex]);
+    setCurrentIndex((prev) => (prev > maxIndex ? maxIndex : prev));
+  }, [maxIndex]);
 
   const handlePrev = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : maxIndex));

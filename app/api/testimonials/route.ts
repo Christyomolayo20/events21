@@ -21,12 +21,25 @@ const LEGACY_DEFAULT_IDS = new Set([
   "testi-adeleke-jubilee",
 ]);
 
+function sanitizeString(val: unknown, maxLen = 800): string {
+  if (typeof val !== "string") return "";
+  return val.trim().slice(0, maxLen).replace(/[<>]/g, "");
+}
+
 function filterOutLegacy(list: unknown): Testimonial[] {
   if (!Array.isArray(list)) return [];
-  return list.filter(
-    (item): item is Testimonial =>
-      Boolean(item && typeof item === "object" && item.id && !LEGACY_DEFAULT_IDS.has(item.id))
-  );
+  return list
+    .filter(
+      (item): item is Testimonial =>
+        Boolean(item && typeof item === "object" && item.id && !LEGACY_DEFAULT_IDS.has(item.id))
+    )
+    .map((item) => ({
+      ...item,
+      clientName: sanitizeString(item.clientName, 100),
+      quote: sanitizeString(item.quote || item.text, 800),
+      text: sanitizeString(item.text || item.quote, 800),
+      roleOrEvent: item.roleOrEvent ? sanitizeString(item.roleOrEvent, 100) : undefined,
+    }));
 }
 
 function loadStoredTestimonials(): Testimonial[] {

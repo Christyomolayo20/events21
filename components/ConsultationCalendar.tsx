@@ -72,18 +72,19 @@ export default function ConsultationCalendar({
       const slots = getAvailableTimeSlots(selectedDate);
       setAvailableSlots(slots);
 
-      // If currently selected slot is not available, pick first available
-      const currentAvailable = slots.find((s) => s.slot === selectedSlot && s.available);
-      if (!currentAvailable) {
+      // If currently selected slot is not available, safely pick first available
+      setSelectedSlot((currentSlot) => {
+        const currentAvailable = slots.find((s) => s.slot === currentSlot && s.available);
+        if (currentAvailable) return currentSlot;
         const firstAvail = slots.find((s) => s.available);
-        if (firstAvail) setSelectedSlot(firstAvail.slot);
-      }
+        return firstAvail ? firstAvail.slot : "";
+      });
     };
 
     updateSlots();
     window.addEventListener("events21_consultations_updated", updateSlots);
     return () => window.removeEventListener("events21_consultations_updated", updateSlots);
-  }, [selectedDate, selectedSlot]);
+  }, [selectedDate]);
 
   // Month view state (defaults to current month or month of selected date)
   const [viewDate, setViewDate] = useState<Date>(() => {

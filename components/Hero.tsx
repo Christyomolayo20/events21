@@ -202,7 +202,7 @@ export default function Hero() {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("ended", handleLoadedMetadata);
     };
-  }, [videoSrc, prefersReducedMotion, triggerPlay, isVideoLoaded]);
+  }, [videoSrc, prefersReducedMotion, triggerPlay]);
 
   const handleInteraction = () => {
     triggerPlay();
