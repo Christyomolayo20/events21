@@ -1,14 +1,14 @@
 import { EventEnquiry, GiftItem, GiftRequest, PortfolioItem, ServiceItem, EventPackage, Testimonial, ConsultationBooking, TeamMember, FounderInfo } from "./types";
 
 export const BRAND_CONFIG = {
-  name: "Events 21",
+  name: "EVENTS21",
   legalName: "Royalty Twenty One Events",
   subBrand: "Gifts by Adeola",
-  tagline: "Curating Regal Experiences. Orchestrating Royalty.",
+  tagline: "Creating Memorable Experiences. Delivering Excellence.",
   description:
-    "Events 21 creates thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories.",
+    "At EVENTS21, we believe that every celebration is more than just an event; it is an opportunity to create meaningful experiences, lasting impressions and unforgettable memories.",
   longDescription:
-    "A premier royal event planning and styling brand specialising in weddings, birthdays, celebrations, and memorable gatherings—serving clients nationwide and available to travel.",
+    "Established in 2021, EVENTS21 is a professional event planning, design and production company specialising in the planning, coordination and execution of weddings, corporate events and social celebrations.",
   instagramUrl: "https://www.instagram.com/events_21/",
   instagramHandle: "@events_21",
   giftsInstagramUrl: "https://www.instagram.com/giftsbyadeola/",
@@ -479,10 +479,10 @@ export const INITIAL_GIFT_REQUESTS: GiftRequest[] = [
 
 export const DEFAULT_FOUNDER_INFO: FounderInfo = {
   name: "Adeola Oyeyode",
-  title: "CEO & Creative Director",
-  image: "/images/founder-events21.jpg",
-  bio: "Adeola Oyeyode is the founder and visionary leader of Events 21 (Royalty Twenty One Events) and Gifts by Adeola. Guided by a profound passion for design, African culture, and logistical precision, she has orchestrated weddings, milestone jubilees, and VIP galas nationwide and is available to travel.",
-  vision: "To create thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories, allowing every host to be a relaxed guest at their own event.",
+  title: "Founder & Creative Director EVENTS21",
+  image: "/images/adeola-oyeyode-founder.jpg",
+  bio: "Adeola Oyeyode is an experienced event planning professional, creative director and entrepreneur with over 10 years of experience in event planning, programme coordination, event management and production.\n\nHer journey in the events industry began at Covenant University, where she worked as a Programme Coordinator at the University's Entrepreneurial Centre for over five years. During this period, she gained valuable experience coordinating workshops, conferences, institutional programmes and corporate engagements. This foundational experience strengthened her expertise in project coordination, stakeholder management, logistics, relationship building and the strategic execution of events.\n\nDriven by her passion for creativity, organisation and creating meaningful experiences, Adeola transitioned from programme coordination into entrepreneurship, establishing EVENTS21 in 2021.\n\nToday, she leads EVENTS21 as its Founder and Creative Director, bringing together years of professional experience, business insight and creative expertise to deliver exceptional weddings, corporate events, social celebrations and large-scale institutional events.\n\nWith an academic background in Agricultural Economics and a Master's degree in Business Administration, Adeola combines business strategy with creative thinking, operational efficiency and a strong understanding of client expectations.\n\nHer approach to event planning goes beyond aesthetics. She believes that every successful event requires intentional planning, clear communication, strategic budgeting, effective vendor management, attention to detail and seamless execution.\n\nBeyond creating memorable events, Adeola is passionate about contributing to the growth of the event industry through knowledge sharing, professional development and mentoring aspiring event planners.\n\nHer vision is to build EVENTS21 into a distinguished and trusted event planning and production brand recognised for excellence, creativity, integrity and exceptional client experiences.",
+  vision: "Adding Value Through Seamless Event Planning.",
 };
 
 export const DEFAULT_TEAM_MEMBERS: TeamMember[] = [

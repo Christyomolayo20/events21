@@ -424,7 +424,7 @@ export function deleteGiftItem(id: string): void {
 
 // Store version stamp for automatic cross-device sync & cache invalidation
 const DATA_VERSION_KEY = "events21_sync_version";
-const CURRENT_DATA_VERSION = "2026_10_26_v4";
+const CURRENT_DATA_VERSION = "2026_11_05_v5";
 
 // --- PORTFOLIO (ADMIN EDIT, MULTI-IMAGE, VIDEO & DELETE) ---
 export function getPortfolio(): PortfolioItem[] {
@@ -751,7 +751,17 @@ export function deleteConsultation(id: string): void {
 export function getFounderInfo(): FounderInfo {
   if (typeof window === "undefined") return DEFAULT_FOUNDER_INFO;
   if (cacheFounder) return cacheFounder;
-  const stored = safeLocalStorageGet<FounderInfo>(FOUNDER_KEY, DEFAULT_FOUNDER_INFO);
+  const storedVersion = safeLocalStorageGet<string | null>(DATA_VERSION_KEY, null);
+  const isVersionOutdated = storedVersion !== CURRENT_DATA_VERSION;
+  const stored = safeLocalStorageGet<FounderInfo | null>(FOUNDER_KEY, null);
+
+  if (!stored || isVersionOutdated || stored.title === "CEO & Creative Director") {
+    cacheFounder = { ...DEFAULT_FOUNDER_INFO };
+    safeLocalStorageSet(FOUNDER_KEY, DEFAULT_FOUNDER_INFO);
+    idbSet(FOUNDER_KEY, DEFAULT_FOUNDER_INFO);
+    return cacheFounder;
+  }
+
   cacheFounder = { ...DEFAULT_FOUNDER_INFO, ...stored };
   return cacheFounder;
 }
