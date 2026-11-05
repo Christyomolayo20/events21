@@ -568,9 +568,11 @@ export function getTestimonials(): Testimonial[] {
   if (cacheTestimonials) return cacheTestimonials;
 
   const stored = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
-  if (stored && Array.isArray(stored)) {
-    cacheTestimonials = stored;
-    return stored;
+  if (stored && Array.isArray(stored) && stored.length > 0) {
+    const missingDefaults = INITIAL_TESTIMONIALS.filter((d) => !stored.some((s) => s.id === d.id));
+    const merged = [...stored, ...missingDefaults];
+    cacheTestimonials = merged;
+    return merged;
   }
 
   // If nothing stored yet, initialize with authoritative published testimonials

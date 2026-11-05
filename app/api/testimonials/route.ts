@@ -15,9 +15,15 @@ export const dynamic = "force-dynamic";
 const TMP_FILE = path.join("/tmp", "events21_testimonials.json");
 const PUBLIC_FILE = path.join(process.cwd(), "public", "testimonials.json");
 
+function mergeWithDefaults(list: Testimonial[]): Testimonial[] {
+  if (!Array.isArray(list)) return [...INITIAL_TESTIMONIALS];
+  const missingDefaults = INITIAL_TESTIMONIALS.filter((d) => !list.some((s) => s.id === d.id));
+  return [...list, ...missingDefaults];
+}
+
 function loadStoredTestimonials(): Testimonial[] {
   if (global.__events21_testimonials && Array.isArray(global.__events21_testimonials) && global.__events21_testimonials.length > 0) {
-    return global.__events21_testimonials;
+    return mergeWithDefaults(global.__events21_testimonials);
   }
 
   // 1. Try reading from /tmp (persists within serverless worker)
@@ -26,8 +32,9 @@ function loadStoredTestimonials(): Testimonial[] {
       const data = fs.readFileSync(TMP_FILE, "utf-8");
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        global.__events21_testimonials = parsed;
-        return parsed;
+        const merged = mergeWithDefaults(parsed);
+        global.__events21_testimonials = merged;
+        return merged;
       }
     }
   } catch (err) {
@@ -40,8 +47,9 @@ function loadStoredTestimonials(): Testimonial[] {
       const data = fs.readFileSync(PUBLIC_FILE, "utf-8");
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        global.__events21_testimonials = parsed;
-        return parsed;
+        const merged = mergeWithDefaults(parsed);
+        global.__events21_testimonials = merged;
+        return merged;
       }
     }
   } catch (err) {
