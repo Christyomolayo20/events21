@@ -173,3 +173,14 @@ export interface AcademyRegistration {
   notes?: string;
 }
 
+export interface AdminNotification {
+  id: string;
+  type: "consultation" | "enquiry" | "gift_request" | "academy";
+  title: string;
+  message: string;
+  details?: Record<string, any>;
+  read: boolean;
+  createdAt: string;
+}
+
+

@@ -27,8 +27,11 @@ import {
   getConsultations,
   getTestimonials,
   getAcademyRegistrations,
+  getAdminNotifications,
+  markAdminNotificationRead,
+  markAllAdminNotificationsRead,
 } from "@/lib/store";
-import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem } from "@/lib/types";
+import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem, AdminNotification } from "@/lib/types";
 import ConsultationsManager from "@/components/admin/ConsultationsManager";
 import TestimonialsManager from "@/components/admin/TestimonialsManager";
 import BrandAndTeamManager from "@/components/admin/BrandAndTeamManager";
@@ -76,6 +79,7 @@ import {
   Copy,
   Code,
   GraduationCap,
+  Bell,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -97,6 +101,7 @@ export default function AdminPage() {
   const [consultationsCount, setConsultationsCount] = useState(0);
   const [testimonialsCount, setTestimonialsCount] = useState(0);
   const [academyCount, setAcademyCount] = useState(0);
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
 
   // Filter & Search
   const [enquirySearch, setEnquirySearch] = useState("");
@@ -198,6 +203,7 @@ export default function AdminPage() {
     window.addEventListener("events21_consultations_updated", handleUpdate);
     window.addEventListener("events21_testimonials_updated", handleUpdate);
     window.addEventListener("events21_academy_updated", handleUpdate);
+    window.addEventListener("events21_notification_received", handleUpdate);
 
     return () => {
       window.removeEventListener("events21_enquiries_updated", handleUpdate);
@@ -208,6 +214,7 @@ export default function AdminPage() {
       window.removeEventListener("events21_consultations_updated", handleUpdate);
       window.removeEventListener("events21_testimonials_updated", handleUpdate);
       window.removeEventListener("events21_academy_updated", handleUpdate);
+      window.removeEventListener("events21_notification_received", handleUpdate);
     };
   }, []);
 
@@ -220,6 +227,7 @@ export default function AdminPage() {
     setConsultationsCount(getConsultations().length);
     setTestimonialsCount(getTestimonials().length);
     setAcademyCount(getAcademyRegistrations().length);
+    setNotifications(getAdminNotifications());
     checkSupabaseStatus();
   };
 
@@ -736,6 +744,50 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Live Appointment Alert Banner */}
+      {notifications.filter((n) => !n.read && n.type === "consultation").length > 0 && (
+        <div className="bg-gradient-to-r from-[#24132E] via-brand-plum to-[#3D1445] text-white px-4 sm:px-6 lg:px-8 py-3.5 border-b border-brand-gold/50 shadow-md">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-brand-gold text-brand-plum flex items-center justify-center shrink-0">
+                <Bell className="w-4 h-4 animate-bounce" />
+              </span>
+              <div>
+                <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-brand-gold block">
+                  New Appointment Booked
+                </span>
+                <p className="text-xs sm:text-sm font-sans text-white/95">
+                  {notifications.filter((n) => !n.read && n.type === "consultation")[0]?.message}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("consultations");
+                  const top = notifications.filter((n) => !n.read && n.type === "consultation")[0];
+                  if (top) markAdminNotificationRead(top.id);
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-brand-gold text-brand-plum text-xs font-semibold uppercase tracking-wider hover:bg-brand-gold-light transition-all cursor-pointer"
+              >
+                View Appointment
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const top = notifications.filter((n) => !n.read && n.type === "consultation")[0];
+                  if (top) markAdminNotificationRead(top.id);
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white/80 transition-all cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Navigation Tabs */}
         <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-brand-warm-border pb-4">
@@ -757,7 +809,12 @@ export default function AdminPage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab("consultations")}
+            onClick={() => {
+              setActiveTab("consultations");
+              notifications
+                .filter((n) => !n.read && n.type === "consultation")
+                .forEach((n) => markAdminNotificationRead(n.id));
+            }}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "consultations"
                 ? "bg-brand-purple text-white shadow-xs"
@@ -769,6 +826,11 @@ export default function AdminPage() {
             <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
               {consultationsCount}
             </span>
+            {notifications.filter((n) => !n.read && n.type === "consultation").length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse">
+                {notifications.filter((n) => !n.read && n.type === "consultation").length} NEW
+              </span>
+            )}
           </button>
 
           <button

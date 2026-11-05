@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import { Testimonial } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase";
-import { INITIAL_TESTIMONIALS } from "@/lib/data";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -15,15 +14,24 @@ export const dynamic = "force-dynamic";
 const TMP_FILE = path.join("/tmp", "events21_testimonials.json");
 const PUBLIC_FILE = path.join(process.cwd(), "public", "testimonials.json");
 
-function mergeWithDefaults(list: Testimonial[]): Testimonial[] {
-  if (!Array.isArray(list)) return [...INITIAL_TESTIMONIALS];
-  const missingDefaults = INITIAL_TESTIMONIALS.filter((d) => !list.some((s) => s.id === d.id));
-  return [...list, ...missingDefaults];
+// Legacy IDs to permanently purge
+const LEGACY_DEFAULT_IDS = new Set([
+  "testi-bukola-dara",
+  "testi-the-kayodes",
+  "testi-adeleke-jubilee",
+]);
+
+function filterOutLegacy(list: unknown): Testimonial[] {
+  if (!Array.isArray(list)) return [];
+  return list.filter(
+    (item): item is Testimonial =>
+      Boolean(item && typeof item === "object" && item.id && !LEGACY_DEFAULT_IDS.has(item.id))
+  );
 }
 
 function loadStoredTestimonials(): Testimonial[] {
-  if (global.__events21_testimonials && Array.isArray(global.__events21_testimonials) && global.__events21_testimonials.length > 0) {
-    return mergeWithDefaults(global.__events21_testimonials);
+  if (global.__events21_testimonials && Array.isArray(global.__events21_testimonials)) {
+    return filterOutLegacy(global.__events21_testimonials);
   }
 
   // 1. Try reading from /tmp (persists within serverless worker)
@@ -31,10 +39,10 @@ function loadStoredTestimonials(): Testimonial[] {
     if (fs.existsSync(TMP_FILE)) {
       const data = fs.readFileSync(TMP_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const merged = mergeWithDefaults(parsed);
-        global.__events21_testimonials = merged;
-        return merged;
+      if (Array.isArray(parsed)) {
+        const cleaned = filterOutLegacy(parsed);
+        global.__events21_testimonials = cleaned;
+        return cleaned;
       }
     }
   } catch (err) {
@@ -46,33 +54,34 @@ function loadStoredTestimonials(): Testimonial[] {
     if (fs.existsSync(PUBLIC_FILE)) {
       const data = fs.readFileSync(PUBLIC_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const merged = mergeWithDefaults(parsed);
-        global.__events21_testimonials = merged;
-        return merged;
+      if (Array.isArray(parsed)) {
+        const cleaned = filterOutLegacy(parsed);
+        global.__events21_testimonials = cleaned;
+        return cleaned;
       }
     }
   } catch (err) {
     console.warn("Could not read testimonials from public file:", err);
   }
 
-  global.__events21_testimonials = [...INITIAL_TESTIMONIALS];
-  return global.__events21_testimonials;
+  global.__events21_testimonials = [];
+  return [];
 }
 
 function persistTestimonials(list: Testimonial[]): void {
-  global.__events21_testimonials = list;
+  const cleaned = filterOutLegacy(list);
+  global.__events21_testimonials = cleaned;
 
   // Persist to /tmp
   try {
-    fs.writeFileSync(TMP_FILE, JSON.stringify(list, null, 2), "utf-8");
+    fs.writeFileSync(TMP_FILE, JSON.stringify(cleaned, null, 2), "utf-8");
   } catch (err) {
     console.warn("Could not write testimonials to /tmp:", err);
   }
 
   // Persist to public/testimonials.json if filesystem is writable
   try {
-    fs.writeFileSync(PUBLIC_FILE, JSON.stringify(list, null, 2), "utf-8");
+    fs.writeFileSync(PUBLIC_FILE, JSON.stringify(cleaned, null, 2), "utf-8");
   } catch {
     // Expected on read-only serverless filesystems
   }
@@ -90,20 +99,23 @@ export async function GET() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (!error && Array.isArray(data) && data.length > 0) {
-        const mapped: Testimonial[] = data.map((d: any) => ({
-          id: d.id,
-          clientName: d.client_name || d.clientName,
-          clientRole: d.client_role || d.clientRole,
-          eventName: d.event_name || d.eventName,
-          roleOrEvent: d.role_or_event || d.roleOrEvent,
-          quote: d.quote || d.text,
-          text: d.text || d.quote,
-          rating: Number(d.rating) || 5,
-          image: d.image || undefined,
-          isPublished: d.is_published ?? d.isPublished ?? true,
-          createdAt: d.created_at || d.createdAt || new Date().toISOString(),
-        }));
+      if (!error && Array.isArray(data)) {
+        const mapped: Testimonial[] = data
+          .map((d: any) => ({
+            id: d.id,
+            clientName: d.client_name || d.clientName || "",
+            clientRole: d.client_role || d.clientRole,
+            eventName: d.event_name || d.eventName,
+            roleOrEvent: d.role_or_event || d.roleOrEvent,
+            quote: d.quote || d.text || "",
+            text: d.text || d.quote || "",
+            rating: Number(d.rating) || 5,
+            image: d.image || undefined,
+            isPublished: d.is_published ?? d.isPublished ?? true,
+            createdAt: d.created_at || d.createdAt || new Date().toISOString(),
+          }))
+          .filter((t) => !LEGACY_DEFAULT_IDS.has(t.id));
+
         persistTestimonials(mapped);
         return NextResponse.json(
           { success: true, testimonials: mapped, source: "supabase" },
@@ -136,15 +148,17 @@ export async function POST(req: Request) {
 
     if (Array.isArray(body.testimonials)) {
       // Full list replacement from admin sync
-      current = body.testimonials;
+      current = filterOutLegacy(body.testimonials);
     } else if (body.testimonial && typeof body.testimonial === "object") {
       // Single testimonial add or update
       const item: Testimonial = body.testimonial;
-      const index = current.findIndex((t) => t.id === item.id);
-      if (index >= 0) {
-        current[index] = item;
-      } else {
-        current = [item, ...current];
+      if (!LEGACY_DEFAULT_IDS.has(item.id)) {
+        const index = current.findIndex((t) => t.id === item.id);
+        if (index >= 0) {
+          current[index] = item;
+        } else {
+          current = [item, ...current];
+        }
       }
     }
 
@@ -154,7 +168,7 @@ export async function POST(req: Request) {
     const supabase = getSupabase();
     if (supabase) {
       try {
-        if (body.testimonial) {
+        if (body.testimonial && !LEGACY_DEFAULT_IDS.has(body.testimonial.id)) {
           const item: Testimonial = body.testimonial;
           await supabase.from("testimonials").upsert({
             id: item.id,

@@ -21,6 +21,7 @@ import {
   TeamMember,
   FounderInfo,
   AcademyRegistration,
+  AdminNotification,
 } from "./types";
 import { pushConsultationToSupabase, pushEnquiryToSupabase, pushAcademyRegistrationToSupabase } from "./supabase";
 
@@ -35,6 +36,13 @@ const CONSULTATIONS_KEY = "events21_consultations";
 const FOUNDER_KEY = "events21_founder";
 const TEAM_KEY = "events21_team";
 const ACADEMY_REGISTRATIONS_KEY = "events21_academy_registrations";
+const NOTIFICATIONS_KEY = "events21_admin_notifications";
+
+export const LEGACY_TESTIMONIAL_IDS = [
+  "testi-bukola-dara",
+  "testi-the-kayodes",
+  "testi-adeleke-jubilee",
+];
 
 
 // --- CLIENT-SIDE IMAGE COMPRESSION (Prevents QuotaExceededError & Speeds Up Browsing) ---
@@ -186,6 +194,7 @@ let cacheConsultations: ConsultationBooking[] | null = null;
 let cacheFounder: FounderInfo | null = null;
 let cacheTeam: TeamMember[] | null = null;
 let cacheAcademy: AcademyRegistration[] | null = null;
+let cacheNotifications: AdminNotification[] | null = null;
 
 // Background hydration from IndexedDB on startup
 if (typeof window !== "undefined") {
@@ -207,8 +216,10 @@ if (typeof window !== "undefined") {
 
       const idbTestimonials = await idbGet<Testimonial[]>(TESTIMONIALS_KEY);
       if (idbTestimonials && Array.isArray(idbTestimonials)) {
-        cacheTestimonials = idbTestimonials;
-        safeLocalStorageSet(TESTIMONIALS_KEY, idbTestimonials);
+        const cleaned = idbTestimonials.filter((s) => !LEGACY_TESTIMONIAL_IDS.includes(s.id));
+        cacheTestimonials = cleaned;
+        safeLocalStorageSet(TESTIMONIALS_KEY, cleaned);
+        idbSet(TESTIMONIALS_KEY, cleaned);
         window.dispatchEvent(new Event("events21_testimonials_updated"));
       }
 
@@ -224,6 +235,13 @@ if (typeof window !== "undefined") {
         cacheAcademy = idbAcademy;
         safeLocalStorageSet(ACADEMY_REGISTRATIONS_KEY, idbAcademy);
         window.dispatchEvent(new Event("events21_academy_updated"));
+      }
+
+      const idbNotifs = await idbGet<AdminNotification[]>(NOTIFICATIONS_KEY);
+      if (idbNotifs && Array.isArray(idbNotifs)) {
+        cacheNotifications = idbNotifs;
+        safeLocalStorageSet(NOTIFICATIONS_KEY, idbNotifs);
+        window.dispatchEvent(new Event("events21_notification_received"));
       }
     } catch {
       // Ignored
@@ -424,7 +442,7 @@ export function deleteGiftItem(id: string): void {
 
 // Store version stamp for automatic cross-device sync & cache invalidation
 const DATA_VERSION_KEY = "events21_sync_version";
-const CURRENT_DATA_VERSION = "2026_11_05_v5";
+const CURRENT_DATA_VERSION = "2026_11_05_v6";
 
 // --- PORTFOLIO (ADMIN EDIT, MULTI-IMAGE, VIDEO & DELETE) ---
 export function getPortfolio(): PortfolioItem[] {
@@ -470,6 +488,13 @@ export function getPortfolio(): PortfolioItem[] {
   if (isVersionOutdated) {
     safeLocalStorageSet(DATA_VERSION_KEY, CURRENT_DATA_VERSION);
     safeLocalStorageSet(PORTFOLIO_KEY, merged);
+    const existingTestimonials = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
+    if (existingTestimonials && Array.isArray(existingTestimonials)) {
+      const cleaned = existingTestimonials.filter((s) => !LEGACY_TESTIMONIAL_IDS.includes(s.id));
+      safeLocalStorageSet(TESTIMONIALS_KEY, cleaned);
+      idbSet(TESTIMONIALS_KEY, cleaned);
+      cacheTestimonials = cleaned;
+    }
   }
 
   return merged;
@@ -562,21 +587,19 @@ export function logoutAdmin(): void {
   }
 }
 
-// --- TESTIMONIALS (ADMIN MANAGED, 5-STAR RATING, OPTIONAL IMAGE, PUBLISH/UNPUBLISH) ---
+// --- TESTIMONIALS (ADMIN MANAGED ONLY - NO HARDCODED CONTENT) ---
 export function getTestimonials(): Testimonial[] {
-  if (typeof window === "undefined") return INITIAL_TESTIMONIALS;
+  if (typeof window === "undefined") return [];
   if (cacheTestimonials) return cacheTestimonials;
 
   const stored = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
-  if (stored && Array.isArray(stored) && stored.length > 0) {
-    const missingDefaults = INITIAL_TESTIMONIALS.filter((d) => !stored.some((s) => s.id === d.id));
-    const merged = [...stored, ...missingDefaults];
-    cacheTestimonials = merged;
-    return merged;
+  if (stored && Array.isArray(stored)) {
+    const cleaned = stored.filter((s) => !LEGACY_TESTIMONIAL_IDS.includes(s.id));
+    cacheTestimonials = cleaned;
+    return cleaned;
   }
 
-  // If nothing stored yet, initialize with authoritative published testimonials
-  cacheTestimonials = [...INITIAL_TESTIMONIALS];
+  cacheTestimonials = [];
   return cacheTestimonials;
 }
 
@@ -712,11 +735,34 @@ export function bookConsultation(
   safeLocalStorageSet(CONSULTATIONS_KEY, updated);
   idbSet(CONSULTATIONS_KEY, updated);
 
+  // 1. Record In-App Admin Notification
+  addAdminNotification({
+    type: "consultation",
+    title: "New Appointment Booked",
+    message: `${newBooking.fullName} booked a consultation for ${newBooking.date} at ${newBooking.timeSlot} (${newBooking.eventType}).`,
+    details: {
+      bookingId: newBooking.id,
+      fullName: newBooking.fullName,
+      email: newBooking.email,
+      phone: newBooking.phone,
+      date: newBooking.date,
+      timeSlot: newBooking.timeSlot,
+      eventType: newBooking.eventType,
+    },
+  });
+
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_consultations_updated"));
+
+    // 2. Dispatch Confirmation Email to Client & Alert Email to Admin from Royaltyeventservice@gmail.com
+    fetch("/api/consultations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newBooking),
+    }).catch((err) => console.warn("Consultation email API trigger:", err));
   }
 
-  // Sync to Supabase in background
+  // 3. Sync to Supabase in background
   pushConsultationToSupabase(newBooking).catch(() => {});
 
   return { success: true, booking: newBooking };
@@ -902,5 +948,74 @@ export function deleteAcademyRegistration(id: string): void {
     window.dispatchEvent(new Event("events21_academy_updated"));
   }
 }
+
+// --- ADMIN IN-APP NOTIFICATIONS SYSTEM ---
+export function getAdminNotifications(): AdminNotification[] {
+  if (typeof window === "undefined") return [];
+  if (cacheNotifications) return cacheNotifications;
+  const stored = safeLocalStorageGet<AdminNotification[]>(NOTIFICATIONS_KEY, []);
+  cacheNotifications = stored;
+  return stored;
+}
+
+export function getUnreadAdminNotificationsCount(): number {
+  return getAdminNotifications().filter((n) => !n.read).length;
+}
+
+export function addAdminNotification(
+  notification: Omit<AdminNotification, "id" | "read" | "createdAt">
+): AdminNotification {
+  const newNotif: AdminNotification = {
+    ...notification,
+    id: `notif-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+    read: false,
+    createdAt: new Date().toISOString(),
+  };
+  const existing = getAdminNotifications();
+  const updated = [newNotif, ...existing].slice(0, 50); // retain latest 50 notifications
+  cacheNotifications = updated;
+  safeLocalStorageSet(NOTIFICATIONS_KEY, updated);
+  idbSet(NOTIFICATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("events21_notification_received", { detail: newNotif }));
+  }
+  return newNotif;
+}
+
+export function markAdminNotificationRead(id: string): void {
+  const existing = getAdminNotifications();
+  const updated = existing.map((n) => (n.id === id ? { ...n, read: true } : n));
+  cacheNotifications = updated;
+  safeLocalStorageSet(NOTIFICATIONS_KEY, updated);
+  idbSet(NOTIFICATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_notification_received"));
+  }
+}
+
+export function markAllAdminNotificationsRead(): void {
+  const existing = getAdminNotifications();
+  const updated = existing.map((n) => ({ ...n, read: true }));
+  cacheNotifications = updated;
+  safeLocalStorageSet(NOTIFICATIONS_KEY, updated);
+  idbSet(NOTIFICATIONS_KEY, updated);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_notification_received"));
+  }
+}
+
+export function clearAdminNotifications(): void {
+  cacheNotifications = [];
+  safeLocalStorageSet(NOTIFICATIONS_KEY, []);
+  idbSet(NOTIFICATIONS_KEY, []);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_notification_received"));
+  }
+}
+
 
 

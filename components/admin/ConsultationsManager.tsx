@@ -112,6 +112,15 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
       </div>
 
       {/* Search & Filter Bar */}
+      <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3 px-4 flex items-center justify-between text-xs text-emerald-800">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>
+            Client confirmation emails are sent from <strong>Royaltyeventservice@gmail.com</strong> upon booking, and admin alerts are sent to <strong>Royaltyeventservice@gmail.com</strong>.
+          </span>
+        </div>
+      </div>
+
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-plum/40" />
@@ -210,6 +219,10 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
                         <div className="text-brand-plum/90">{booking.phone}</div>
                         <div className="text-brand-plum/60 text-[11px] truncate max-w-[160px]">
                           {booking.email}
+                        </div>
+                        <div className="text-[10px] text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
+                          <CheckCircle2 className="w-2.5 h-2.5" />
+                          <span>Confirmation dispatched</span>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <a

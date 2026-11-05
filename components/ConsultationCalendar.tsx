@@ -254,8 +254,10 @@ export default function ConsultationCalendar({
           Appointment Confirmed!
         </h3>
 
-        <p className="text-sm text-brand-plum/75 font-sans max-w-md mx-auto mb-6 leading-relaxed">
-          Your 1-on-1 consultation appointment is reserved.
+        <p className="text-sm text-brand-plum/75 font-sans max-w-md mx-auto mb-4 leading-relaxed">
+          Your 1-on-1 consultation appointment is confirmed. A confirmation email has been sent to{" "}
+          <span className="font-semibold text-brand-purple">{confirmedBooking.email}</span> from{" "}
+          <span className="font-semibold text-brand-purple">Royaltyeventservice@gmail.com</span>.
         </p>
 
         {/* Appointment Summary Box */}
@@ -273,6 +275,13 @@ export default function ConsultationCalendar({
             <span className="text-xs text-brand-plum/60">Host Name</span>
             <span className="text-sm font-semibold text-brand-plum">
               {confirmedBooking.fullName}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-brand-plum/60">Email Confirmation</span>
+            <span className="text-xs font-medium text-brand-plum truncate max-w-[200px]" title={confirmedBooking.email}>
+              {confirmedBooking.email}
             </span>
           </div>
 
