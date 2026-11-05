@@ -44,11 +44,6 @@ export default function TestimonialsCarousel() {
     return () => window.removeEventListener("events21_testimonials_updated", loadData);
   }, [loadData]);
 
-  // If no testimonials created from admin, render nothing
-  if (testimonials.length === 0) {
-    return null;
-  }
-
   const changeSlide = useCallback(
     (newIndex: number) => {
       if (isAnimating || testimonials.length <= 1) return;
@@ -60,10 +55,12 @@ export default function TestimonialsCarousel() {
   );
 
   const handleNext = useCallback(() => {
+    if (testimonials.length <= 1) return;
     changeSlide((currentIndex + 1) % testimonials.length);
   }, [changeSlide, currentIndex, testimonials.length]);
 
   const handlePrev = useCallback(() => {
+    if (testimonials.length <= 1) return;
     changeSlide((currentIndex - 1 + testimonials.length) % testimonials.length);
   }, [changeSlide, currentIndex, testimonials.length]);
 
@@ -105,6 +102,11 @@ export default function TestimonialsCarousel() {
       handlePrev();
     }
   };
+
+  // If no testimonials created from admin, render nothing (guaranteed called after ALL hooks)
+  if (testimonials.length === 0) {
+    return null;
+  }
 
   const current = testimonials[currentIndex % testimonials.length] || testimonials[0];
   const reviewText = (current?.quote || current?.text || "").trim();
