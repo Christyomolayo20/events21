@@ -66,11 +66,6 @@ const nextConfig = {
         destination: "/services/royal-planners-academy",
         permanent: false,
       },
-      {
-        source: "/testimonials",
-        destination: "/#testimonials",
-        permanent: false,
-      },
     ];
   },
 };

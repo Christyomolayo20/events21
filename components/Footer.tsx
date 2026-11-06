@@ -14,6 +14,7 @@ export default function Footer() {
     { name: "Services", href: "/services" },
     { name: "Royal Planners Academy", href: "/services/royal-planners-academy" },
     { name: "Gallery", href: "/gallery" },
+    { name: "Testimonials", href: "/testimonials" },
     { name: "Gifts by Adeola", href: "/gifts-by-adeola" },
     { name: "Contact", href: "/contact" },
   ];
