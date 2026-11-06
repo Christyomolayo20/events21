@@ -14,10 +14,7 @@ export default function ConsultationCTA({
   subtitle = "Whether planning a regal wedding, an intimate milestone birthday, or a grand gala nationwide, we are here to guide every step with poise—available to travel wherever your milestone calls.",
 }: ConsultationCTAProps) {
   return (
-    <section className="py-16 md:py-24 bg-brand-warm-white relative overflow-hidden">
-      {/* Subtle Ambient Background Gradient */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-soft-lavender/60 rounded-full blur-[100px] pointer-events-none" />
-
+    <section className="py-20 md:py-28 bg-[#FAF8F5] border-t border-brand-warm-border/60 relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-2">
           Start the Conversation

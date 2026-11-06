@@ -2,73 +2,54 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 export default function IntroSection() {
   return (
-    <section className="py-16 md:py-24 bg-white border-b border-brand-warm-border/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-          {/* Visual Showcase Frame */}
-          <div className="lg:col-span-5 order-2 lg:order-1">
-            <div className="relative rounded-3xl overflow-hidden shadow-elevated border border-brand-warm-border bg-brand-plum h-[340px] sm:h-[400px] w-full group">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/about-team-portrait.jpg"
-                alt="Events 21 Event Planning Team"
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                style={{ objectPosition: "center center" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 text-white">
-                <span className="text-[10px] font-sans uppercase tracking-widest text-brand-gold font-semibold block mb-1">
-                  Royalty Twenty One Events
-                </span>
-                <p className="font-serif italic text-lg sm:text-xl text-brand-soft-lavender">
-                  "Thoughtfully Planned. Beautifully Styled."
-                </p>
-              </div>
-            </div>
-          </div>
+    <section className="py-20 sm:py-24 md:py-28 bg-[#FAF8F5] border-b border-brand-warm-border/60">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {/* Subtle Brand Tagline */}
+        <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-brand-purple font-sans font-semibold block mb-4">
+          The Brand Philosophy
+        </span>
 
-          {/* Narrative Content */}
-          <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
-            <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block">
-              The Brand Philosophy
-            </span>
+        {/* Editorial Headline */}
+        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-[1.2] mb-8 text-balance">
+          Every Celebration Deserves Poise &amp; Peace of Mind
+        </h2>
 
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-brand-plum font-normal leading-[1.2]">
-              Every Celebration Deserves Poise &amp; Peace of Mind
-            </h2>
+        {/* Fine Decorative Accent Divider */}
+        <div className="w-16 h-px bg-brand-gold/60 mx-auto mb-8" />
 
-            <div className="space-y-4 text-base sm:text-lg text-brand-plum/80 font-sans leading-relaxed font-light">
-              <p>
-                At <strong>Events 21</strong>, we believe you should never feel like a coordinator at your own milestone.
-                We bridge the gap between creative visual architecture and seamless day-of execution, crafting celebrations
-                that reflect who you are without the stress of managing the moving parts.
-              </p>
-              <p className="text-sm sm:text-base text-brand-plum/70">
-                From vibrant traditional Yoruba engagements and contemporary white weddings to milestone birthdays and private dinners—serving clients nationwide and available to travel, our team orchestrates every timeline, vendor, and floral installation with genuine care and unwavering professionalism.
-              </p>
-            </div>
+        {/* Narrative Prose */}
+        <div className="space-y-6 text-base sm:text-lg text-brand-plum/85 font-sans leading-relaxed font-light max-w-3xl mx-auto">
+          <p>
+            At <strong>Events 21</strong>, we believe you should never feel like a coordinator at your own milestone.
+            We bridge the gap between creative visual architecture and seamless day-of execution, crafting celebrations
+            that reflect who you are without the stress of managing the moving parts.
+          </p>
+          <p className="text-sm sm:text-base text-brand-plum/70 leading-relaxed">
+            From vibrant traditional Yoruba engagements and contemporary white weddings to milestone birthdays and private dinners—serving clients nationwide and available to travel, our team orchestrates every timeline, vendor, and floral installation with genuine care and unwavering professionalism.
+          </p>
+        </div>
 
-            <div className="pt-2 flex items-center gap-6">
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-purple hover:text-brand-purple-hover font-sans group transition-colors"
-              >
-                <span>Read Our Full Story</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
+        {/* Human Navigation Links */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-purple hover:text-brand-purple-hover font-sans group transition-colors py-2 border-b border-brand-purple/30 hover:border-brand-purple"
+          >
+            <span>Read Our Full Story</span>
+            <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
 
-              <Link
-                href="/services"
-                className="text-xs font-semibold uppercase tracking-wider text-brand-plum/60 hover:text-brand-plum font-sans transition-colors"
-              >
-                Explore Services
-              </Link>
-            </div>
-          </div>
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-plum/70 hover:text-brand-plum font-sans transition-colors py-2 border-b border-transparent hover:border-brand-plum/40"
+          >
+            <span>Explore Services &amp; Packages</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
     </section>

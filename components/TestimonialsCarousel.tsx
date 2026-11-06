@@ -19,8 +19,6 @@ export default function TestimonialsCarousel() {
     const localList = getPublishedTestimonials();
     if (localList && localList.length > 0) {
       setTestimonials(localList);
-    } else {
-      setTestimonials([]);
     }
 
     // 2. Reconcile with server API
@@ -28,9 +26,18 @@ export default function TestimonialsCarousel() {
       const res = await fetch("/api/testimonials", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data.testimonials)) {
+        if (Array.isArray(data.testimonials) && data.testimonials.length > 0) {
           const published = data.testimonials.filter((t: Testimonial) => t.isPublished);
-          setTestimonials(published);
+          if (published.length > 0) {
+            setTestimonials(published);
+          }
+        } else if (localList && localList.length > 0) {
+          // Push local testimonials to server so API has them
+          fetch("/api/testimonials", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ testimonials: localList }),
+          }).catch(() => {});
         }
       }
     } catch {
@@ -103,9 +110,27 @@ export default function TestimonialsCarousel() {
     }
   };
 
-  // If no testimonials created from admin, render nothing (guaranteed called after ALL hooks)
+  // If no testimonials created from admin yet, render an elegant minimal anchor section
   if (testimonials.length === 0) {
-    return null;
+    return (
+      <section
+        id="testimonials"
+        className="relative w-full py-16 sm:py-20 bg-brand-plum text-white text-center overflow-hidden border-t border-brand-warm-border/20"
+        aria-label="Client Testimonials"
+      >
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-brand-gold flex items-center justify-center mx-auto mb-4">
+            <Quote className="w-4 h-4 fill-current opacity-80" />
+          </div>
+          <h2 className="font-serif text-2xl sm:text-3xl text-white font-normal mb-2">
+            Client Words of Praise
+          </h2>
+          <p className="text-xs sm:text-sm text-brand-gold-light/75 font-sans font-light max-w-md mx-auto">
+            Thoughtfully planned, beautifully styled celebrations. Genuine reviews from our clients appear here.
+          </p>
+        </div>
+      </section>
+    );
   }
 
   const current = testimonials[currentIndex % testimonials.length] || testimonials[0];
@@ -122,15 +147,14 @@ export default function TestimonialsCarousel() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Subtle ambient lighting glow */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand-purple/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-brand-gold/10 rounded-full blur-[120px] pointer-events-none" />
-
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+          <span className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-brand-gold font-sans font-medium block mb-2">
+            Words of Praise
+          </span>
           <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-white font-normal">
-            Testimonials
+            Client Testimonials
           </h2>
         </div>
 

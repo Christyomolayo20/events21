@@ -665,9 +665,9 @@ export function deleteTestimonial(id: string): void {
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_testimonials_updated"));
-    // Sync with server in background
-    syncTestimonialsToServer(updated).catch(() => {});
-    fetch(`/api/testimonials?id=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
+    fetch(`/api/testimonials?id=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {
+      syncTestimonialsToServer(updated).catch(() => {});
+    });
   }
 }
 

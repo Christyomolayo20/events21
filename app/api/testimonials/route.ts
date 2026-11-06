@@ -112,7 +112,7 @@ export async function GET() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (!error && Array.isArray(data)) {
+      if (!error && Array.isArray(data) && data.length > 0) {
         const mapped: Testimonial[] = data
           .map((d: any) => ({
             id: d.id,
@@ -129,15 +129,17 @@ export async function GET() {
           }))
           .filter((t) => !LEGACY_DEFAULT_IDS.has(t.id));
 
-        persistTestimonials(mapped);
-        return NextResponse.json(
-          { success: true, testimonials: mapped, source: "supabase" },
-          {
-            headers: {
-              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-            },
-          }
-        );
+        if (mapped.length > 0) {
+          persistTestimonials(mapped);
+          return NextResponse.json(
+            { success: true, testimonials: mapped, source: "supabase" },
+            {
+              headers: {
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+              },
+            }
+          );
+        }
       }
     } catch {
       // Supabase table may not exist yet; fall back safely
@@ -156,7 +158,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     let current = loadStoredTestimonials();
 
     if (Array.isArray(body.testimonials)) {
@@ -181,7 +183,23 @@ export async function POST(req: Request) {
     const supabase = getSupabase();
     if (supabase) {
       try {
-        if (body.testimonial && !LEGACY_DEFAULT_IDS.has(body.testimonial.id)) {
+        if (Array.isArray(body.testimonials)) {
+          for (const item of current) {
+            await supabase.from("testimonials").upsert({
+              id: item.id,
+              client_name: item.clientName,
+              client_role: item.clientRole || null,
+              event_name: item.eventName || null,
+              role_or_event: item.roleOrEvent || null,
+              quote: item.quote || item.text,
+              text: item.text || item.quote,
+              rating: item.rating,
+              image: item.image || null,
+              is_published: item.isPublished,
+              created_at: item.createdAt,
+            });
+          }
+        } else if (body.testimonial && !LEGACY_DEFAULT_IDS.has(body.testimonial.id)) {
           const item: Testimonial = body.testimonial;
           await supabase.from("testimonials").upsert({
             id: item.id,
@@ -217,13 +235,22 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const idFromQuery = searchParams.get("id");
-    let idToDelete = idFromQuery;
+    // Robust URL parsing that handles both absolute and relative request URLs
+    let idToDelete: string | null = null;
+    try {
+      const url = new URL(req.url, "http://localhost");
+      idToDelete = url.searchParams.get("id");
+    } catch {
+      // Fallback
+    }
 
     if (!idToDelete) {
-      const body = await req.json().catch(() => ({}));
-      idToDelete = body?.id;
+      try {
+        const body = await req.json();
+        idToDelete = body?.id || null;
+      } catch {
+        // Body may be empty in standard DELETE requests
+      }
     }
 
     if (!idToDelete) {
@@ -241,8 +268,8 @@ export async function DELETE(req: Request) {
     if (supabase) {
       try {
         await supabase.from("testimonials").delete().eq("id", idToDelete);
-      } catch {
-        // Safe skip
+      } catch (err) {
+        console.warn("Supabase delete notice:", err);
       }
     }
 
@@ -252,6 +279,7 @@ export async function DELETE(req: Request) {
       testimonials: updated,
     });
   } catch (err: any) {
+    console.error("Testimonial delete error:", err);
     return NextResponse.json(
       { success: false, message: err?.message || "Failed to delete testimonial" },
       { status: 500 }

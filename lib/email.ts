@@ -3,8 +3,12 @@ import tls from "tls";
 export const OFFICIAL_EMAIL = "Royaltyeventservice@gmail.com";
 export const OWNER_EMAIL = "christianahomolayo19@gmail.com";
 export const OFFICIAL_SENDER_NAME = "EVENTS21";
+
 // Decoded fallback to allow automated email dispatch out of the box even before Vercel environment variables are set
-const RESEND_FALLBACK = Buffer.from("cmVfRWRvajdQcGJfSjc2RFN4UldWR3NaNXFrbTJzRWNoUkRI", "base64").toString("utf-8");
+const RESEND_FALLBACK = Buffer.from(
+  "cmVfRWRvajdQcGJfSjc2RFN4UldWR3NaNXFrbTJzRWNoUkRI",
+  "base64"
+).toString("utf-8");
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -180,29 +184,44 @@ function sendViaNativeSmtp(
 
 /**
  * Universal email dispatcher:
- * 1. Checks Resend API key (process.env.RESEND_API_KEY or user-provided key)
- * 2. Checks Brevo API key (process.env.BREVO_API_KEY)
- * 3. Checks Gmail App Password or SMTP credentials (process.env.GMAIL_APP_PASSWORD, process.env.SMTP_PASS)
+ * 1. Checks Gmail App Password or SMTP credentials (process.env.GMAIL_APP_PASSWORD, process.env.SMTP_PASS)
+ * 2. Checks Resend API key (process.env.RESEND_API_KEY or verified fallback key)
+ * 3. Checks Brevo API key (process.env.BREVO_API_KEY)
  */
 export async function sendEmail(
   options: SendEmailOptions
 ): Promise<{ success: boolean; provider: string; error?: string; messageId?: string }> {
   const recipients = Array.isArray(options.to) ? options.to : [options.to];
 
-  // 1. Resend API (HTTP POST)
+  // 1. Direct Native SMTP if Gmail App Password is configured (Full freedom to send to Royaltyeventservice@gmail.com & clients)
+  const gmailPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+  const smtpUser = process.env.GMAIL_USER || process.env.SMTP_USER || OFFICIAL_EMAIL;
+  const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+  const smtpPort = Number(process.env.SMTP_PORT) || 465;
+
+  if (gmailPass) {
+    try {
+      const result = await sendViaNativeSmtp(smtpHost, smtpPort, smtpUser, gmailPass, options);
+      if (result.success) {
+        return result;
+      }
+      console.warn("Native SMTP attempt error:", result.error);
+    } catch (err: any) {
+      console.warn("Native SMTP error:", err?.message);
+    }
+  }
+
+  // 2. Resend API (HTTP POST)
   const resendApiKey = process.env.RESEND_API_KEY || RESEND_FALLBACK;
   if (resendApiKey) {
     try {
-      // For Resend: use verified onboarding domain unless custom domain is configured
-      const fromAddress = options.from && !options.from.includes(OFFICIAL_EMAIL)
-        ? options.from
-        : `${OFFICIAL_SENDER_NAME} <onboarding@resend.dev>`;
+      // Use standard onboarding sender unless custom domain is verified
+      const fromAddress =
+        options.from && !options.from.includes(OFFICIAL_EMAIL)
+          ? options.from
+          : `${OFFICIAL_SENDER_NAME} <onboarding@resend.dev>`;
 
-      // If sending to official brand address during test mode, also ensure owner address is included
-      const targetRecipients = recipients.map((r) =>
-        r.toLowerCase() === OFFICIAL_EMAIL.toLowerCase() ? OWNER_EMAIL : r
-      );
-
+      // Attempt to send to exact requested recipients
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -211,7 +230,7 @@ export async function sendEmail(
         },
         body: JSON.stringify({
           from: fromAddress,
-          to: targetRecipients,
+          to: recipients,
           reply_to: options.replyTo || OFFICIAL_EMAIL,
           subject: options.subject,
           html: options.html,
@@ -225,11 +244,14 @@ export async function sendEmail(
         return { success: true, provider: "resend", messageId: data.id };
       }
 
-      // If Resend returns 403 because recipient is outside verified domain (test mode restriction):
+      // If Resend returns 403 validation_error (recipient address outside unverified test sandbox):
       if (res.status === 403 && data.name === "validation_error") {
-        console.warn("[Resend Notice] Client address is outside test domain. Forwarding client copy to verified owner inbox:", OWNER_EMAIL);
+        console.warn(
+          "[Resend Sandbox Restriction] Target recipient outside verified sandbox. Delivering priority alert to registered owner inbox:",
+          OWNER_EMAIL
+        );
 
-        // Forward a copy to the verified owner address so no booking is missed
+        // Deliver an exact copy to OWNER_EMAIL so no booking or status notification is missed
         const ownerCopyRes = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -240,11 +262,12 @@ export async function sendEmail(
             from: "EVENTS21 <onboarding@resend.dev>",
             to: [OWNER_EMAIL],
             reply_to: recipients[0] || OFFICIAL_EMAIL,
-            subject: `[Client Confirmation Copy] ${options.subject}`,
+            subject: `[ADMIN ALERT for Royaltyeventservice@gmail.com] ${options.subject}`,
             html: `
-              <div style="background:#FFF9EB;padding:12px 18px;border-left:4px solid #C5A265;margin-bottom:18px;font-family:sans-serif;font-size:13px;color:#4A1E4A;">
-                <strong>Admin Notification:</strong> The client below just received this confirmation (Client Email: <strong>${recipients.join(", ")}</strong>).
-                To enable direct outbound sending to third-party client domains on Resend, verify your domain at <a href="https://resend.com/domains" target="_blank">resend.com/domains</a>.
+              <div style="background:#FFF9EB;padding:14px 20px;border-left:4px solid #C5A265;margin-bottom:20px;font-family:sans-serif;font-size:13px;color:#2A1736;line-height:1.5;">
+                <strong style="color:#C5A265;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px;">Events 21 Notification Gateway</strong>
+                Intended for: <strong>${recipients.join(", ")}</strong><br>
+                <em>Note: To receive directly into Royaltyeventservice@gmail.com without sandbox restriction, either verify your custom domain on <a href="https://resend.com/domains" target="_blank" style="color:#2A1736;font-weight:bold;">resend.com/domains</a> or add a Gmail App Password for Royaltyeventservice@gmail.com.</em>
               </div>
               ${options.html}
             `,
@@ -267,7 +290,7 @@ export async function sendEmail(
     }
   }
 
-  // 2. Brevo API (HTTP POST)
+  // 3. Brevo API (HTTP POST)
   const brevoApiKey = process.env.BREVO_API_KEY;
   if (brevoApiKey) {
     try {
@@ -295,24 +318,6 @@ export async function sendEmail(
       console.warn("Brevo API error:", data);
     } catch (err: any) {
       console.warn("Brevo fetch error:", err?.message);
-    }
-  }
-
-  // 3. Native SMTP (Gmail or custom host)
-  const gmailPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
-  const smtpUser = process.env.GMAIL_USER || process.env.SMTP_USER || OFFICIAL_EMAIL;
-  const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-  const smtpPort = Number(process.env.SMTP_PORT) || 465;
-
-  if (gmailPass) {
-    try {
-      const result = await sendViaNativeSmtp(smtpHost, smtpPort, smtpUser, gmailPass, options);
-      if (result.success) {
-        return result;
-      }
-      console.warn("Native SMTP attempt error:", result.error);
-    } catch (err: any) {
-      console.warn("Native SMTP error:", err?.message);
     }
   }
 

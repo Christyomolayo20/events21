@@ -247,13 +247,8 @@ export default function Hero() {
         )}
 
         {/* Cinematic Scrim for Text Contrast and Luxury Atmosphere */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/90 via-black/25 to-brand-plum-dark/45 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-brand-plum-dark/55 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-plum-dark/85 via-black/20 to-brand-plum-dark/40 pointer-events-none" />
       </div>
-
-      {/* Subtle Ambient Lighting Accents */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-purple/20 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-72 h-72 bg-brand-gold/15 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Hero CTA Container - Centered within Hero Section */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center justify-center py-8 sm:py-12">

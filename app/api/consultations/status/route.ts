@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     `;
 
     const adminRes = await sendEmail({
-      to: OFFICIAL_EMAIL,
+      to: [OFFICIAL_EMAIL, "christianahomolayo19@gmail.com"],
       subject: adminSubject,
       html: adminHtml,
     });

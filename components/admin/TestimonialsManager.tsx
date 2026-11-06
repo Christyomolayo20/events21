@@ -173,10 +173,15 @@ export default function TestimonialsManager({ onNotify }: TestimonialsManagerPro
     );
   };
 
-  const handleDelete = (id: string, clientName: string) => {
+  const handleDelete = async (id: string, clientName: string) => {
     if (confirm(`Are you sure you want to delete the testimonial from "${clientName}"?`)) {
       deleteTestimonial(id);
       refreshData();
+      try {
+        await fetch(`/api/testimonials?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch (err) {
+        console.warn("Delete API sync notice:", err);
+      }
       onNotify?.(`Testimonial from "${clientName}" deleted.`);
     }
   };

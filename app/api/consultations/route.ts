@@ -228,7 +228,7 @@ export async function POST(req: Request) {
     const adminSubject = `🔔 New Consultation Booked: ${booking.fullName} - ${booking.date} (${booking.timeSlot})`;
     const adminHtml = buildAdminEmailHtml(booking);
     const adminEmailPromise = sendEmail({
-      to: OFFICIAL_EMAIL,
+      to: [OFFICIAL_EMAIL, "christianahomolayo19@gmail.com"],
       from: `EVENTS21 Bookings <${OFFICIAL_EMAIL}>`,
       replyTo: booking.email,
       subject: adminSubject,
