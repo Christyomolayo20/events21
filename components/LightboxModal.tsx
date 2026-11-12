@@ -67,7 +67,7 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
       <button
         type="button"
         onClick={onClose}
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 p-2.5 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden cursor-pointer"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 p-2.5 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-none cursor-pointer"
         aria-label="Close modal"
       >
         <X className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -77,7 +77,7 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
       <button
         type="button"
         onClick={handlePrev}
-        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden cursor-pointer"
+        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-none cursor-pointer"
         aria-label="Previous item"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -87,7 +87,7 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
       <button
         type="button"
         onClick={handleNext}
-        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-hidden cursor-pointer"
+        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors focus:outline-none cursor-pointer"
         aria-label="Next item"
       >
         <ChevronRight className="w-6 h-6" />
@@ -121,17 +121,16 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
           </div>
 
           {/* Media Navigation & Thumbnail Strip */}
-          <div className="p-3 bg-brand-plum-dark/90 backdrop-blur-xs border-t border-white/10 flex items-center justify-between gap-3">
+          <div className="p-3 bg-brand-plum-dark/90 backdrop-blur-sm border-t border-white/10 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {item.videoUrl && (
                 <button
                   type="button"
                   onClick={() => setViewMode("video")}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium transition-all ${
-                    viewMode === "video"
-                      ? "bg-brand-purple text-white shadow-xs"
-                      : "bg-white/10 text-white/70 hover:bg-white/20"
-                  }`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium transition-all ${viewMode === "video"
+                    ? "bg-brand-purple text-white shadow-sm"
+                    : "bg-white/10 text-white/70 hover:bg-white/20"
+                    }`}
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Video Reel</span>
@@ -142,11 +141,10 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
                 <button
                   type="button"
                   onClick={() => setViewMode("image")}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium transition-all ${
-                    viewMode === "image"
-                      ? "bg-brand-purple text-white shadow-xs"
-                      : "bg-white/10 text-white/70 hover:bg-white/20"
-                  }`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium transition-all ${viewMode === "image"
+                    ? "bg-brand-purple text-white shadow-sm"
+                    : "bg-white/10 text-white/70 hover:bg-white/20"
+                    }`}
                 >
                   <VideoIcon className="w-3.5 h-3.5" />
                   <span>Photos ({projectImages.length})</span>
@@ -162,11 +160,10 @@ export default function LightboxModal({ item, items, onClose, onSelect }: Lightb
                     key={idx}
                     type="button"
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`relative w-12 h-9 rounded-md overflow-hidden border transition-all shrink-0 cursor-pointer ${
-                      activeImageIndex === idx
-                        ? "border-brand-gold ring-1 ring-brand-gold scale-105"
-                        : "border-white/20 opacity-60 hover:opacity-100"
-                    }`}
+                    className={`relative w-12 h-9 rounded-md overflow-hidden border transition-all shrink-0 cursor-pointer ${activeImageIndex === idx
+                      ? "border-brand-gold ring-1 ring-brand-gold scale-105"
+                      : "border-white/20 opacity-60 hover:opacity-100"
+                      }`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img} alt="" className="w-full h-full object-cover" />

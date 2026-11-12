@@ -5,6 +5,8 @@ import { saveEnquiry } from "@/lib/store";
 import { EventType } from "@/lib/types";
 import { Send, CheckCircle2, AlertCircle, MessageSquare, Crown } from "lucide-react";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 interface EnquiryFormProps {
   initialStyle?: string;
   onSuccess?: () => void;
@@ -44,22 +46,54 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
     e.preventDefault();
     setError("");
 
-    if (!formData.fullName.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.eventType) {
+    const cleanName = formData.fullName.trim();
+    const cleanEmail = formData.email.trim();
+    const cleanPhone = formData.phone.trim();
+
+    if (!cleanName || !cleanEmail || !cleanPhone || !formData.eventType) {
       setError("Please fill in your name, email, phone number, and select an event category.");
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(cleanEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (cleanPhone.replace(/\D/g, "").length < 8) {
+      setError("Please enter a valid phone / WhatsApp number (at least 8 digits).");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      await fetch("/api/enquiries", {
+      const response = await fetch("/api/enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          fullName: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+        }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data?.success === false) {
+        setError(data?.error || "Could not submit your event brief. Please verify your details.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const created = saveEnquiry({
+        id: data?.enquiry?.id,
+        createdAt: data?.enquiry?.createdAt,
         ...formData,
+        fullName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
         eventType: formData.eventType as EventType,
       });
 
@@ -67,11 +101,9 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
       setIsSubmitting(false);
       if (onSuccess) onSuccess();
     } catch {
-      const created = saveEnquiry({
-        ...formData,
-        eventType: formData.eventType as EventType,
-      });
-      setSubmittedId(created.id);
+      setError(
+        "Unable to reach our server right now. Please check your internet connection and try again, or message us directly on WhatsApp (08060549596)."
+      );
       setIsSubmitting(false);
     }
   };
@@ -189,7 +221,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             placeholder="e.g. Chief & Mrs. Adeleke"
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
 
@@ -203,7 +235,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             placeholder="e.g. adeleke@example.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
       </div>
@@ -220,7 +252,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             placeholder="e.g. 08060549596"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
 
@@ -232,7 +264,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             required
             value={formData.eventType}
             onChange={(e) => setFormData({ ...formData, eventType: e.target.value as EventType })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           >
             <option value="" disabled>
               Select event category...
@@ -253,7 +285,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             type="date"
             value={formData.eventDate}
             onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
       </div>
@@ -269,7 +301,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             placeholder="e.g. Ojodu Berger, Ikeja, Lagos"
             value={formData.eventLocation}
             onChange={(e) => setFormData({ ...formData, eventLocation: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
 
@@ -282,7 +314,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             placeholder="e.g. 50, 250, or 600 guests"
             value={formData.guestCount}
             onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
 
@@ -296,7 +328,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
             placeholder="e.g. ₦3,500,000 or ₦15M"
             value={formData.budgetRange}
             onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
       </div>
@@ -311,7 +343,7 @@ export default function EnquiryForm({ initialStyle = "", onSuccess }: EnquiryFor
           placeholder="Describe your desired vibe, theme, colour palette, special requests (e.g. low fog & sparklers, traditional coordination, Gifts by Adeola souvenirs or Eru Iyawo wrapping)..."
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+          className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
         />
       </div>
 

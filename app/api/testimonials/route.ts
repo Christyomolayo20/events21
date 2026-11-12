@@ -21,9 +21,62 @@ const LEGACY_DEFAULT_IDS = new Set([
   "testi-adeleke-jubilee",
 ]);
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+};
+
 function sanitizeString(val: unknown, maxLen = 800): string {
   if (typeof val !== "string") return "";
   return val.trim().slice(0, maxLen).replace(/[<>]/g, "");
+}
+
+function sanitizeImage(val: unknown): string | undefined {
+  if (typeof val !== "string") return undefined;
+  const trimmed = val.trim();
+  if (!trimmed) return undefined;
+  if (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("data:image/")
+  ) {
+    return trimmed;
+  }
+  return undefined;
+}
+
+function normalizeRating(val: unknown): number {
+  const num = Math.round(Number(val));
+  if (Number.isNaN(num)) return 5;
+  return Math.min(5, Math.max(1, num));
+}
+
+function normalizeTestimonial(item: Testimonial): Testimonial {
+  const cleanQuote = sanitizeString(item.quote || item.text, 800);
+  const clientRole = sanitizeString(item.clientRole, 100) || undefined;
+  const eventName = sanitizeString(item.eventName, 120) || undefined;
+  const roleOrEvent =
+    sanitizeString(item.roleOrEvent, 160) ||
+    [clientRole, eventName].filter(Boolean).join(" • ") ||
+    undefined;
+
+  return {
+    ...item,
+    id: sanitizeString(item.id, 100) || `testi-${Date.now().toString(36)}`,
+    clientName: sanitizeString(item.clientName, 100),
+    clientRole,
+    eventName,
+    roleOrEvent,
+    quote: cleanQuote,
+    text: cleanQuote,
+    rating: normalizeRating(item.rating),
+    image: sanitizeImage(item.image),
+    isPublished: item.isPublished !== false,
+    createdAt:
+      typeof item.createdAt === "string" && item.createdAt.trim()
+        ? item.createdAt
+        : new Date().toISOString(),
+  };
 }
 
 function filterOutLegacy(list: unknown): Testimonial[] {
@@ -33,13 +86,7 @@ function filterOutLegacy(list: unknown): Testimonial[] {
       (item): item is Testimonial =>
         Boolean(item && typeof item === "object" && item.id && !LEGACY_DEFAULT_IDS.has(item.id))
     )
-    .map((item) => ({
-      ...item,
-      clientName: sanitizeString(item.clientName, 100),
-      quote: sanitizeString(item.quote || item.text, 800),
-      text: sanitizeString(item.text || item.quote, 800),
-      roleOrEvent: item.roleOrEvent ? sanitizeString(item.roleOrEvent, 100) : undefined,
-    }));
+    .map(normalizeTestimonial);
 }
 
 function loadStoredTestimonials(): Testimonial[] {
@@ -103,7 +150,7 @@ function persistTestimonials(list: Testimonial[]): void {
 export async function GET() {
   const testimonials = loadStoredTestimonials();
 
-  // If Supabase is available, attempt to check for Supabase stored testimonials
+  // If Supabase is available, fetch the authoritative stored testimonials list (including empty [])
   const supabase = getSupabase();
   if (supabase) {
     try {
@@ -112,34 +159,30 @@ export async function GET() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped: Testimonial[] = data
-          .map((d: any) => ({
-            id: d.id,
-            clientName: d.client_name || d.clientName || "",
-            clientRole: d.client_role || d.clientRole,
-            eventName: d.event_name || d.eventName,
-            roleOrEvent: d.role_or_event || d.roleOrEvent,
-            quote: d.quote || d.text || "",
-            text: d.text || d.quote || "",
-            rating: Number(d.rating) || 5,
-            image: d.image || undefined,
-            isPublished: d.is_published ?? d.isPublished ?? true,
-            createdAt: d.created_at || d.createdAt || new Date().toISOString(),
-          }))
+          .map((d: any) =>
+            normalizeTestimonial({
+              id: d.id,
+              clientName: d.client_name || d.clientName || "",
+              clientRole: d.client_role || d.clientRole,
+              eventName: d.event_name || d.eventName,
+              roleOrEvent: d.role_or_event || d.roleOrEvent,
+              quote: d.quote || d.text || "",
+              text: d.text || d.quote || "",
+              rating: Number(d.rating) || 5,
+              image: d.image || undefined,
+              isPublished: d.is_published ?? d.isPublished ?? true,
+              createdAt: d.created_at || d.createdAt || new Date().toISOString(),
+            })
+          )
           .filter((t) => !LEGACY_DEFAULT_IDS.has(t.id));
 
-        if (mapped.length > 0) {
-          persistTestimonials(mapped);
-          return NextResponse.json(
-            { success: true, testimonials: mapped, source: "supabase" },
-            {
-              headers: {
-                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-              },
-            }
-          );
-        }
+        persistTestimonials(mapped);
+        return NextResponse.json(
+          { success: true, testimonials: mapped, source: "supabase" },
+          { headers: NO_CACHE_HEADERS }
+        );
       }
     } catch {
       // Supabase table may not exist yet; fall back safely
@@ -148,11 +191,7 @@ export async function GET() {
 
   return NextResponse.json(
     { success: true, testimonials, source: "memory_file" },
-    {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      },
-    }
+    { headers: NO_CACHE_HEADERS }
   );
 }
 
@@ -166,7 +205,17 @@ export async function POST(req: Request) {
       current = filterOutLegacy(body.testimonials);
     } else if (body.testimonial && typeof body.testimonial === "object") {
       // Single testimonial add or update
-      const item: Testimonial = body.testimonial;
+      const rawItem = body.testimonial as Testimonial;
+      const cleanName = sanitizeString(rawItem.clientName, 100);
+      const cleanQuote = sanitizeString(rawItem.quote || rawItem.text, 800);
+      if (!cleanName || !cleanQuote) {
+        return NextResponse.json(
+          { success: false, message: "Client name and testimonial quote are required." },
+          { status: 400, headers: NO_CACHE_HEADERS }
+        );
+      }
+
+      const item = normalizeTestimonial(rawItem);
       if (!LEGACY_DEFAULT_IDS.has(item.id)) {
         const index = current.findIndex((t) => t.id === item.id);
         if (index >= 0) {
@@ -179,11 +228,21 @@ export async function POST(req: Request) {
 
     persistTestimonials(current);
 
-    // Sync to Supabase in background if configured
+    // Sync to Supabase if configured
     const supabase = getSupabase();
     if (supabase) {
       try {
         if (Array.isArray(body.testimonials)) {
+          const { data: existingRows } = await supabase.from("testimonials").select("id");
+          const currentIds = new Set(current.map((t) => t.id));
+          const idsToDelete = (existingRows || [])
+            .map((r: { id: string }) => r.id)
+            .filter((id) => id && !currentIds.has(id));
+
+          if (idsToDelete.length > 0) {
+            await supabase.from("testimonials").delete().in("id", idsToDelete);
+          }
+
           for (const item of current) {
             await supabase.from("testimonials").upsert({
               id: item.id,
@@ -200,7 +259,7 @@ export async function POST(req: Request) {
             });
           }
         } else if (body.testimonial && !LEGACY_DEFAULT_IDS.has(body.testimonial.id)) {
-          const item: Testimonial = body.testimonial;
+          const item = normalizeTestimonial(body.testimonial as Testimonial);
           await supabase.from("testimonials").upsert({
             id: item.id,
             client_name: item.clientName,
@@ -220,15 +279,18 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      count: current.length,
-      testimonials: current,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        count: current.length,
+        testimonials: current,
+      },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { success: false, message: err?.message || "Failed to save testimonials" },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
@@ -256,7 +318,7 @@ export async function DELETE(req: Request) {
     if (!idToDelete) {
       return NextResponse.json(
         { success: false, message: "ID parameter is required" },
-        { status: 400 }
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -267,22 +329,31 @@ export async function DELETE(req: Request) {
     const supabase = getSupabase();
     if (supabase) {
       try {
-        await supabase.from("testimonials").delete().eq("id", idToDelete);
+        const { error: sbError } = await supabase
+          .from("testimonials")
+          .delete()
+          .eq("id", idToDelete);
+        if (sbError) {
+          console.warn("Supabase delete notice:", sbError.message);
+        }
       } catch (err) {
         console.warn("Supabase delete notice:", err);
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      deletedId: idToDelete,
-      testimonials: updated,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        deletedId: idToDelete,
+        testimonials: updated,
+      },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (err: any) {
     console.error("Testimonial delete error:", err);
     return NextResponse.json(
       { success: false, message: err?.message || "Failed to delete testimonial" },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }

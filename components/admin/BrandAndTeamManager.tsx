@@ -16,6 +16,7 @@ import {
   Camera,
 } from "lucide-react";
 import { FounderInfo, TeamMember } from "@/lib/types";
+import { BRAND_CONFIG, DEFAULT_FOUNDER_INFO } from "@/lib/data";
 import {
   getBrandConfig,
   updateBrandConfig,
@@ -34,11 +35,11 @@ interface BrandAndTeamManagerProps {
 
 export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerProps) {
   // Brand Config (Hero Video & Poster)
-  const [config, setConfig] = useState(getBrandConfig());
+  const [config, setConfig] = useState(BRAND_CONFIG);
   const [heroSaved, setHeroSaved] = useState(false);
 
   // Founder Info
-  const [founder, setFounder] = useState<FounderInfo>(getFounderInfo());
+  const [founder, setFounder] = useState<FounderInfo>(DEFAULT_FOUNDER_INFO);
   const [founderSaved, setFounderSaved] = useState(false);
   const founderFileRef = useRef<HTMLInputElement>(null);
 
@@ -167,7 +168,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
   return (
     <div className="space-y-10">
       {/* SECTION 1: HERO BACKGROUND VIDEO */}
-      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-sm">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -262,7 +263,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
       </div>
 
       {/* SECTION 2: MEET THE FOUNDER */}
-      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-sm">
         <div className="flex items-center gap-2 mb-1">
           <User className="w-5 h-5 text-brand-purple" />
           <h3 className="font-serif text-2xl font-bold text-brand-plum">
@@ -310,7 +311,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               {founder.image && (
-                <div className="w-20 h-24 rounded-xl overflow-hidden border border-brand-warm-border bg-black/5 shrink-0 shadow-xs">
+                <div className="w-20 h-24 rounded-xl overflow-hidden border border-brand-warm-border bg-black/5 shrink-0 shadow-sm">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={founder.image}
@@ -408,7 +409,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
       </div>
 
       {/* SECTION 3: TEAM MEMBERS */}
-      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -425,7 +426,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
           <button
             type="button"
             onClick={() => setIsAddTeamOpen(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Add Team Member</span>
@@ -491,7 +492,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
 
       {/* MODAL: Add Team Member */}
       {isAddTeamOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
@@ -627,7 +628,7 @@ export default function BrandAndTeamManager({ onNotify }: BrandAndTeamManagerPro
 
       {/* MODAL: Edit Team Member */}
       {editingTeam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"

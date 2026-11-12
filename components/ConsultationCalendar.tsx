@@ -13,11 +13,28 @@ import {
   ExternalLink,
 } from "lucide-react";
 import {
-  bookConsultation,
+  submitConsultationBooking,
   getAvailableTimeSlots,
   STANDARD_CONSULTATION_SLOTS,
 } from "@/lib/store";
 import { ConsultationBooking, EventType } from "@/lib/types";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function formatLocalYMD(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function findNextWorkingDay(from: Date): Date {
+  const candidate = new Date(from.getFullYear(), from.getMonth(), from.getDate() + 1);
+  if (candidate.getDay() === 0) {
+    candidate.setDate(candidate.getDate() + 1);
+  }
+  return candidate;
+}
 
 interface ConsultationCalendarProps {
   initialService?: string;
@@ -26,20 +43,15 @@ interface ConsultationCalendarProps {
 export default function ConsultationCalendar({
   initialService = "",
 }: ConsultationCalendarProps) {
-  // Today's date YYYY-MM-DD
-  const today = useMemo(() => new Date(), []);
-  const todayStr = useMemo(() => today.toISOString().split("T")[0], [today]);
-
-  // Selected date defaults to tomorrow
-  const tomorrowStr = useMemo(() => {
-    const tm = new Date();
-    tm.setDate(tm.getDate() + 1);
-    return tm.toISOString().split("T")[0];
-  }, []);
-
-  const [selectedDate, setSelectedDate] = useState<string>(tomorrowStr);
+  // SSR-safe date state initialized on client mount to prevent hydration mismatch & UTC drift
+  const [todayDate, setTodayDate] = useState<Date | null>(null);
+  const [todayStr, setTodayStr] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [viewDate, setViewDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string>("10:30 AM");
-  const [availableSlots, setAvailableSlots] = useState<{ slot: string; available: boolean }[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<{ slot: string; available: boolean }[]>(() =>
+    STANDARD_CONSULTATION_SLOTS.map((slot) => ({ slot, available: true }))
+  );
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -66,8 +78,24 @@ export default function ConsultationCalendar({
     "Other",
   ];
 
+  // Initialize local dates & month view strictly on the client
+  useEffect(() => {
+    const now = new Date();
+    const tStr = formatLocalYMD(now);
+    const nextWork = findNextWorkingDay(now);
+    setTodayDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    setTodayStr(tStr);
+    setSelectedDate(formatLocalYMD(nextWork));
+    setViewDate(new Date(nextWork.getFullYear(), nextWork.getMonth(), 1));
+  }, []);
+
   // Refresh slots whenever selectedDate changes or consultations update
   useEffect(() => {
+    if (!selectedDate) {
+      setAvailableSlots(STANDARD_CONSULTATION_SLOTS.map((slot) => ({ slot, available: true })));
+      return;
+    }
+
     const updateSlots = () => {
       const slots = getAvailableTimeSlots(selectedDate);
       setAvailableSlots(slots);
@@ -86,22 +114,17 @@ export default function ConsultationCalendar({
     return () => window.removeEventListener("events21_consultations_updated", updateSlots);
   }, [selectedDate]);
 
-  // Month view state (defaults to current month or month of selected date)
-  const [viewDate, setViewDate] = useState<Date>(() => {
-    const tm = new Date();
-    tm.setDate(tm.getDate() + 1);
-    return new Date(tm.getFullYear(), tm.getMonth(), 1);
-  });
-
-  const currentYear = viewDate.getFullYear();
-  const currentMonth = viewDate.getMonth();
-  const monthName = viewDate.toLocaleDateString("en-US", { month: "long" });
+  const currentYear = viewDate ? viewDate.getFullYear() : 2026;
+  const currentMonth = viewDate ? viewDate.getMonth() : 0;
+  const monthName = viewDate
+    ? viewDate.toLocaleDateString("en-US", { month: "long" })
+    : "Loading calendar";
 
   const prevMonthDisabled = useMemo(() => {
+    if (!viewDate || !todayDate) return true;
     const prev = new Date(currentYear, currentMonth - 1, 1);
-    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    return prev < thisMonth;
-  }, [currentYear, currentMonth, today]);
+    return prev < todayDate;
+  }, [viewDate, todayDate, currentYear, currentMonth]);
 
   const handlePrevMonth = () => {
     if (prevMonthDisabled) return;
@@ -114,6 +137,8 @@ export default function ConsultationCalendar({
 
   // Calendar cells calculation for conventional 7-column grid
   const calendarCells = useMemo(() => {
+    if (!viewDate || !todayStr) return [];
+
     const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay(); // 0 = Sun ... 6 = Sat
     const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
 
@@ -155,15 +180,30 @@ export default function ConsultationCalendar({
     }
 
     return cells;
-  }, [currentYear, currentMonth, todayStr]);
+  }, [viewDate, currentYear, currentMonth, todayStr]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    const cleanName = formData.fullName.trim();
+    const cleanEmail = formData.email.trim();
+    const cleanPhone = formData.phone.trim();
+    const phoneDigits = cleanPhone.replace(/\D/g, "");
+
     // Validation
-    if (!formData.fullName.trim() || !formData.email.trim() || !formData.phone.trim()) {
+    if (!cleanName || !cleanEmail || !cleanPhone) {
       setError("Please fill in your name, email, and phone number.");
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(cleanEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (phoneDigits.length < 8) {
+      setError("Please enter a valid phone / WhatsApp number (at least 8 digits).");
       return;
     }
 
@@ -172,8 +212,14 @@ export default function ConsultationCalendar({
       return;
     }
 
-    if (!selectedDate || selectedDate < todayStr) {
+    if (!selectedDate || (todayStr && selectedDate < todayStr)) {
       setError("Please select a valid upcoming consultation date.");
+      return;
+    }
+
+    const chosenDay = new Date(selectedDate + "T00:00:00").getDay();
+    if (Number.isNaN(chosenDay) || chosenDay === 0) {
+      setError("Sundays are closed for consultations. Please select Monday – Saturday.");
       return;
     }
 
@@ -184,22 +230,28 @@ export default function ConsultationCalendar({
 
     setIsSubmitting(true);
 
-    const result = bookConsultation({
-      fullName: formData.fullName.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      eventType: formData.eventType,
-      date: selectedDate,
-      timeSlot: selectedSlot,
-      message: formData.message.trim(),
-    });
+    try {
+      const result = await submitConsultationBooking({
+        fullName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        eventType: formData.eventType,
+        date: selectedDate,
+        timeSlot: selectedSlot,
+        message: formData.message.trim(),
+      });
 
-    setIsSubmitting(false);
-
-    if (result.success && result.booking) {
-      setConfirmedBooking(result.booking);
-    } else {
-      setError(result.error || "Could not reserve this consultation slot. Please try another slot.");
+      if (result.success && result.booking) {
+        setConfirmedBooking(result.booking);
+      } else {
+        setError(
+          result.error || "Could not reserve this consultation slot. Please try another slot."
+        );
+      }
+    } catch {
+      setError("Unable to complete your reservation right now. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -426,9 +478,8 @@ export default function ConsultationCalendar({
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, idx) => (
               <div
                 key={day}
-                className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider font-sans py-1 ${
-                  idx === 0 ? "text-brand-plum/35" : "text-brand-plum/70"
-                }`}
+                className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider font-sans py-1 ${idx === 0 ? "text-brand-plum/35" : "text-brand-plum/70"
+                  }`}
               >
                 {day}
               </div>
@@ -436,40 +487,44 @@ export default function ConsultationCalendar({
           </div>
 
           {/* 7-Column Dates Grid */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
-            {calendarCells.map((cell, idx) => {
-              if (cell.type === "empty") {
-                return <div key={`empty-${idx}`} className="aspect-square" />;
-              }
+          {!viewDate ? (
+            <div className="py-10 text-center text-xs text-brand-plum/50 font-sans">
+              Loading consultation dates...
+            </div>
+          ) : (
+            <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+              {calendarCells.map((cell, idx) => {
+                if (cell.type === "empty") {
+                  return <div key={`empty-${idx}`} className="aspect-square" />;
+                }
 
-              const isSelected = selectedDate === cell.dateStr;
+                const isSelected = selectedDate === cell.dateStr;
 
-              return (
-                <button
-                  key={cell.dateStr}
-                  type="button"
-                  disabled={!cell.isSelectable}
-                  onClick={() => cell.dateStr && setSelectedDate(cell.dateStr)}
-                  className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center text-xs sm:text-sm font-sans transition-all relative ${
-                    !cell.isSelectable
+                return (
+                  <button
+                    key={cell.dateStr}
+                    type="button"
+                    disabled={!cell.isSelectable}
+                    onClick={() => cell.dateStr && setSelectedDate(cell.dateStr)}
+                    className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center text-xs sm:text-sm font-sans transition-all relative ${!cell.isSelectable
                       ? "text-brand-plum/25 bg-transparent cursor-not-allowed"
                       : isSelected
-                      ? "bg-brand-purple text-white font-bold shadow-xs scale-102 z-10 ring-2 ring-brand-purple/20"
-                      : "text-brand-plum hover:bg-white hover:text-brand-purple hover:shadow-2xs border border-transparent hover:border-brand-purple/30 cursor-pointer"
-                  } ${cell.isToday && !isSelected ? "border border-brand-purple/40 font-bold text-brand-purple" : ""}`}
-                >
-                  <span>{cell.dayNum}</span>
-                  {cell.isToday && (
-                    <span
-                      className={`w-1 h-1 rounded-full mt-0.5 ${
-                        isSelected ? "bg-brand-gold-light" : "bg-brand-purple"
-                      }`}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                        ? "bg-brand-purple text-white font-bold shadow-sm scale-[1.02] z-10 ring-2 ring-brand-purple/20"
+                        : "text-brand-plum hover:bg-white hover:text-brand-purple hover:shadow-sm border border-transparent hover:border-brand-purple/30 cursor-pointer"
+                      } ${cell.isToday && !isSelected ? "border border-brand-purple/40 font-bold text-brand-purple" : ""}`}
+                  >
+                    <span>{cell.dayNum}</span>
+                    {cell.isToday && (
+                      <span
+                        className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? "bg-brand-gold-light" : "bg-brand-purple"
+                          }`}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Calendar Legend */}
           <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-brand-plum/60 font-sans mt-4 pt-3 border-t border-brand-warm-border/60">
@@ -500,10 +555,10 @@ export default function ConsultationCalendar({
           <span className="text-[11px] text-brand-purple font-sans font-medium">
             {selectedDate
               ? new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })
               : "45-minute 1-on-1 session"}
           </span>
         </div>
@@ -523,13 +578,12 @@ export default function ConsultationCalendar({
                   type="button"
                   disabled={!available}
                   onClick={() => setSelectedSlot(slot)}
-                  className={`py-3 px-2 rounded-xl text-xs font-sans font-semibold tracking-wide border transition-all text-center ${
-                    !available
-                      ? "opacity-35 bg-brand-warm-gray border-transparent line-through cursor-not-allowed text-brand-plum/50"
-                      : isSelected
-                      ? "bg-brand-purple text-white border-brand-purple shadow-xs"
+                  className={`py-3 px-2 rounded-xl text-xs font-sans font-semibold tracking-wide border transition-all text-center ${!available
+                    ? "opacity-35 bg-brand-warm-gray border-transparent line-through cursor-not-allowed text-brand-plum/50"
+                    : isSelected
+                      ? "bg-brand-purple text-white border-brand-purple shadow-sm"
                       : "bg-brand-warm-white text-brand-plum border-brand-warm-border hover:border-brand-purple/40 hover:bg-white"
-                  }`}
+                    }`}
                 >
                   <span>{slot}</span>
                   {!available && (
@@ -562,7 +616,7 @@ export default function ConsultationCalendar({
               placeholder="e.g. Chief & Mrs. Adeleke"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
             />
           </div>
 
@@ -576,7 +630,7 @@ export default function ConsultationCalendar({
               placeholder="e.g. adeleke@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
             />
           </div>
         </div>
@@ -593,7 +647,7 @@ export default function ConsultationCalendar({
               placeholder="e.g. 08060549596"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
             />
           </div>
 
@@ -605,7 +659,7 @@ export default function ConsultationCalendar({
               required
               value={formData.eventType}
               onChange={(e) => setFormData({ ...formData, eventType: e.target.value as EventType })}
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
             >
               <option value="" disabled>
                 Select event category...
@@ -629,15 +683,21 @@ export default function ConsultationCalendar({
             placeholder="Tell us about your celebration city or destination, estimated guest count, or special vision..."
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden transition-all"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none transition-all"
           />
         </div>
 
         {/* Submit Button */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-brand-warm-border/60">
           <div className="text-xs text-brand-plum/70 font-sans">
-            Selected: <strong className="text-brand-purple">{selectedDate}</strong> at{" "}
-            <strong className="text-brand-purple">{selectedSlot}</strong>
+            Selected:{" "}
+            <strong className="text-brand-purple">
+              {selectedDate || "Choosing date..."}
+            </strong>{" "}
+            at{" "}
+            <strong className="text-brand-purple">
+              {selectedSlot || "Available slot"}
+            </strong>
           </div>
 
           <button

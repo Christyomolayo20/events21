@@ -32,7 +32,7 @@ export default function ConsultationCTA({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/contact"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-md hover:shadow-lg active:scale-98"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
           >
             <Calendar className="w-4 h-4" />
             <span>Book a Consultation</span>
@@ -43,7 +43,7 @@ export default function ConsultationCTA({
             href="https://wa.me/2348060549596?text=Hello%20Events%2021!%20I%20would%20like%20to%20discuss%20an%20upcoming%20celebration."
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-white hover:bg-brand-warm-gray text-brand-plum border border-brand-warm-border text-xs font-semibold uppercase tracking-wider transition-all shadow-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-white hover:bg-brand-warm-gray text-brand-plum border border-brand-warm-border text-xs font-semibold uppercase tracking-wider transition-all shadow-sm"
           >
             <MessageCircle className="w-4 h-4 text-[#25D366]" />
             <span>Chat via WhatsApp</span>

@@ -100,7 +100,7 @@ export default function FeaturedEventsCarousel() {
 
   return (
     <section
-      className="py-14 sm:py-18 md:py-24 bg-white border-b border-brand-warm-border/60 overflow-hidden"
+      className="py-14 sm:py-16 md:py-24 bg-white border-b border-brand-warm-border/60 overflow-hidden"
       aria-label="Featured Events Carousel"
       onKeyDown={onKeyDown}
       tabIndex={0}
@@ -123,7 +123,7 @@ export default function FeaturedEventsCarousel() {
               type="button"
               onClick={handlePrev}
               aria-label="Previous event"
-              className="w-11 h-11 rounded-full border border-brand-warm-border bg-white text-brand-plum hover:bg-brand-purple hover:text-white hover:border-brand-purple flex items-center justify-center transition-all shadow-xs active:scale-95 focus:outline-hidden focus:ring-2 focus:ring-brand-purple cursor-pointer"
+              className="w-11 h-11 rounded-full border border-brand-warm-border bg-white text-brand-plum hover:bg-brand-purple hover:text-white hover:border-brand-purple flex items-center justify-center transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-purple cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -131,7 +131,7 @@ export default function FeaturedEventsCarousel() {
               type="button"
               onClick={handleNext}
               aria-label="Next event"
-              className="w-11 h-11 rounded-full border border-brand-warm-border bg-white text-brand-plum hover:bg-brand-purple hover:text-white hover:border-brand-purple flex items-center justify-center transition-all shadow-xs active:scale-95 focus:outline-hidden focus:ring-2 focus:ring-brand-purple cursor-pointer"
+              className="w-11 h-11 rounded-full border border-brand-warm-border bg-white text-brand-plum hover:bg-brand-purple hover:text-white hover:border-brand-purple flex items-center justify-center transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-purple cursor-pointer"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -158,7 +158,7 @@ export default function FeaturedEventsCarousel() {
               >
                 <div
                   onClick={() => setSelectedItem(item)}
-                  className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-300 shadow-xs hover:shadow-elevated flex flex-col h-full"
+                  className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-300 shadow-sm hover:shadow-elevated flex flex-col h-full"
                 >
                   {/* Photo Container with Top-Centered Framing to Prevent Unintended Cropping */}
                   <div className="relative w-full h-[320px] sm:h-[380px] md:h-[420px] overflow-hidden bg-brand-plum shrink-0">
@@ -172,7 +172,7 @@ export default function FeaturedEventsCarousel() {
 
                     {/* Category Badge */}
                     <div className="absolute top-4 left-4 z-10">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-brand-plum shadow-xs">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-brand-plum shadow-sm">
                         {item.category}
                       </span>
                     </div>
@@ -228,11 +228,10 @@ export default function FeaturedEventsCarousel() {
               type="button"
               onClick={() => setCurrentIndex(idx)}
               aria-label={`Go to event slide ${idx + 1}`}
-              className={`transition-all rounded-full cursor-pointer ${
-                currentIndex === idx
-                  ? "w-7 h-2 bg-brand-purple shadow-xs"
-                  : "w-2 h-2 bg-brand-plum/20 hover:bg-brand-plum/40"
-              }`}
+              className={`transition-all rounded-full cursor-pointer ${currentIndex === idx
+                ? "w-7 h-2 bg-brand-purple shadow-sm"
+                : "w-2 h-2 bg-brand-plum/20 hover:bg-brand-plum/40"
+                }`}
             />
           ))}
         </div>
@@ -241,7 +240,7 @@ export default function FeaturedEventsCarousel() {
         <div className="text-center mt-10 md:mt-14">
           <Link
             href="/gallery"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-sm cursor-pointer"
           >
             <span>Explore Complete Gallery</span>
             <ArrowUpRight className="w-4 h-4" />

@@ -85,15 +85,15 @@ export async function POST(request: Request) {
     };
 
     // 1. Send confirmation to student
-    const studentSubject = `Royal Planners Academy Application Received: ${registration.fullName} (#${registration.id})`;
+    const studentSubject = `Events21 Planners Academy Application Received: ${registration.fullName} (#${registration.id})`;
     const studentHtml = `
       <div style="font-family: sans-serif; background-color: #FAF8F5; padding: 24px; color: #2A1736;">
         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; border: 1px solid #E8DFD5; padding: 28px;">
-          <h1 style="font-family: Georgia, serif; color: #4A1E4A; margin-top: 0; font-size: 22px;">Royal Planners Academy</h1>
+          <h1 style="font-family: Georgia, serif; color: #4A1E4A; margin-top: 0; font-size: 22px;">Events21 Planners Academy</h1>
           <p style="font-size: 11px; text-transform: uppercase; tracking: 0.15em; color: #C5A265; font-weight: bold;">Application Received</p>
           <p style="font-size: 15px; line-height: 1.6;">Dear <strong>${registration.fullName}</strong>,</p>
           <p style="font-size: 14px; line-height: 1.6; color: #44354C;">
-            Thank you for applying to the <strong>Royal Planners Academy</strong>. Your registration details have been received and our admissions team is reviewing your cohort application.
+            Thank you for applying to the <strong>Events21 Planners Academy</strong>. Your registration details have been received and our admissions team is reviewing your cohort application.
           </p>
           <div style="background: #F8F5F1; border-radius: 10px; padding: 16px 20px; margin: 20px 0; font-size: 13px;">
             <p style="margin: 4px 0;"><strong>Registration Ref:</strong> #${registration.id}</p>
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     const adminSubject = `🔔 New Academy Application: ${registration.fullName} (${registration.experienceLevel})`;
     const adminHtml = `
       <div style="font-family: sans-serif; padding: 20px; background: #FAF8F5;">
-        <h2>New Royal Planners Academy Student Registration</h2>
+        <h2>New Events21 Planners Academy Student Registration</h2>
         <p><strong>Ref:</strong> #${registration.id}</p>
         <p><strong>Student Name:</strong> ${registration.fullName}</p>
         <p><strong>Email:</strong> <a href="mailto:${registration.email}">${registration.email}</a></p>
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
 
     const studentPromise = sendEmail({
       to: registration.email,
-      from: `Royal Planners Academy <${OFFICIAL_EMAIL}>`,
+      from: `Events21 Planners Academy <${OFFICIAL_EMAIL}>`,
       replyTo: OFFICIAL_EMAIL,
       subject: studentSubject,
       html: studentHtml,
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: "Your registration for Royal Planners Academy has been received successfully.",
+        message: "Your registration for Events21 Planners Academy has been received successfully.",
         registration,
         studentEmailDelivered: studentRes.success,
         adminEmailDelivered: adminRes.success,

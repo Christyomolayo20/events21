@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { sendEmail, OFFICIAL_EMAIL } from "@/lib/email";
+import { sendEmail, OFFICIAL_EMAIL, OWNER_EMAIL } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -185,9 +185,22 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { fullName, email, phone, eventType, date, timeSlot, message } = body;
 
-    if (!fullName || !email || !phone || !date || !timeSlot) {
+    if (
+      !fullName ||
+      !String(fullName).trim() ||
+      !email ||
+      !String(email).trim() ||
+      !phone ||
+      !String(phone).trim() ||
+      !eventType ||
+      !String(eventType).trim() ||
+      !date ||
+      !String(date).trim() ||
+      !timeSlot ||
+      !String(timeSlot).trim()
+    ) {
       return NextResponse.json(
-        { error: "Missing required booking details (fullName, email, phone, date, timeSlot are required)." },
+        { error: "Missing required booking details (fullName, email, phone, eventType, date, and timeSlot are required)." },
         { status: 400 }
       );
     }
@@ -195,6 +208,30 @@ export async function POST(req: Request) {
     const cleanEmail = String(email).trim().toLowerCase().slice(0, 100);
     if (!EMAIL_REGEX.test(cleanEmail)) {
       return NextResponse.json({ error: "Please provide a valid email address format." }, { status: 400 });
+    }
+
+    const cleanPhoneDigits = String(phone).replace(/\D/g, "");
+    if (cleanPhoneDigits.length < 8) {
+      return NextResponse.json({ error: "Please provide a valid phone number (at least 8 digits)." }, { status: 400 });
+    }
+
+    const cleanDate = sanitize(date, 20);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+      return NextResponse.json({ error: "Please provide a valid consultation date (YYYY-MM-DD)." }, { status: 400 });
+    }
+
+    const parsedDate = new Date(`${cleanDate}T00:00:00Z`);
+    if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== cleanDate) {
+      return NextResponse.json({ error: "Invalid consultation date." }, { status: 400 });
+    }
+
+    const todayLagos = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(new Date());
+    if (cleanDate < todayLagos) {
+      return NextResponse.json({ error: "Past dates cannot be booked. Please select an upcoming date." }, { status: 400 });
+    }
+
+    if (parsedDate.getUTCDay() === 0) {
+      return NextResponse.json({ error: "Consultations are closed on Sundays. Please select a date Monday through Saturday." }, { status: 400 });
     }
 
     const bookingId = body.id || `cst-${Date.now().toString(36).toUpperCase()}`;
@@ -228,7 +265,7 @@ export async function POST(req: Request) {
     const adminSubject = `🔔 New Consultation Booked: ${booking.fullName} - ${booking.date} (${booking.timeSlot})`;
     const adminHtml = buildAdminEmailHtml(booking);
     const adminEmailPromise = sendEmail({
-      to: [OFFICIAL_EMAIL, "christianahomolayo19@gmail.com"],
+      to: [OFFICIAL_EMAIL, OWNER_EMAIL],
       from: `EVENTS21 Bookings <${OFFICIAL_EMAIL}>`,
       replyTo: booking.email,
       subject: adminSubject,
@@ -265,7 +302,9 @@ export async function POST(req: Request) {
         clientEmailDelivered: clientRes.success,
         adminEmailDelivered: adminRes.success,
         sender: OFFICIAL_EMAIL,
-        message: `Confirmation email dispatched from ${OFFICIAL_EMAIL} to ${booking.email}`,
+        message: clientRes.success
+          ? `Confirmation email dispatched from ${OFFICIAL_EMAIL} to ${booking.email}`
+          : "Consultation slot recorded.",
       },
       { status: 201 }
     );

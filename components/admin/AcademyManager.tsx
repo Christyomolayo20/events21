@@ -55,7 +55,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
   };
 
   const handleSaveNotes = (id: string) => {
-    updateAcademyRegistrationStatus(id, undefined as any, notesInput);
+    updateAcademyRegistrationStatus(id, undefined, notesInput);
     setEditingNotesId(null);
     refreshData();
     onNotify?.("Internal notes updated.");
@@ -124,7 +124,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `Royal_Planners_Academy_Registrations_${new Date().toISOString().slice(0, 10)}.csv`
+      `Events21_Planners_Academy_Registrations_${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -135,7 +135,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
     <div className="space-y-6">
       {/* Metric Counters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-brand-plum/50 font-semibold block">
             Total Registrations
           </span>
@@ -144,7 +144,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
           </span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-amber-600 font-semibold block">
             New Enquiries
           </span>
@@ -153,7 +153,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
           </span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-blue-600 font-semibold block">
             Contacted
           </span>
@@ -162,7 +162,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
           </span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold block">
             Enrolled Students
           </span>
@@ -173,7 +173,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
       </div>
 
       {/* Control Bar: Search & Filter */}
-      <div className="bg-white rounded-2xl border border-brand-warm-border p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-brand-warm-border p-5 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-brand-plum/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -213,7 +213,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
       </div>
 
       {/* Registrations List */}
-      <div className="bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-brand-warm-border shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <GraduationCap className="w-12 h-12 text-brand-plum/20 mx-auto mb-3" />
@@ -221,7 +221,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
               No Academy Registrations Found
             </h4>
             <p className="text-xs text-brand-plum/60 font-sans max-w-md mx-auto">
-              When prospective event planners register via the Royal Planners Academy registration form, their details will appear here with full contact info and experience level.
+              When prospective event planners register via the Events21 Planners Academy registration form, their details will appear here with full contact info and experience level.
             </p>
           </div>
         ) : (
@@ -231,12 +231,12 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
               const whatsappFormatted = whatsappPhone.startsWith("0")
                 ? `234${whatsappPhone.slice(1)}`
                 : whatsappPhone.startsWith("234")
-                ? whatsappPhone
-                : `234${whatsappPhone}`;
+                  ? whatsappPhone
+                  : `234${whatsappPhone}`;
 
               const waText = `Hello ${encodeURIComponent(
                 item.fullName
-              )}! This is Adeola from Events 21 regarding your interest in Royal Planners Academy.`;
+              )}! This is Adeola from Events 21 regarding your interest in Events21 Planners Academy.`;
 
               return (
                 <div
@@ -249,15 +249,14 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
                         {item.fullName}
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider ${
-                          item.status === "New Enquiry"
-                            ? "bg-amber-100 text-amber-800"
-                            : item.status === "Contacted"
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider ${item.status === "New Enquiry"
+                          ? "bg-amber-100 text-amber-800"
+                          : item.status === "Contacted"
                             ? "bg-blue-100 text-blue-800"
                             : item.status === "Enrolled"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
                       >
                         {item.status}
                       </span>
@@ -353,7 +352,7 @@ export default function AcademyManager({ onNotify }: AcademyManagerProps) {
                       href={`https://wa.me/${whatsappFormatted}?text=${waText}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-2xs"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span>WhatsApp Chat</span>

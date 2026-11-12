@@ -2,77 +2,106 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Quote, ArrowUpRight } from "lucide-react";
-import { getPublishedTestimonials } from "@/lib/store";
+import { ChevronLeft, ChevronRight, Quote, ArrowUpRight, Star } from "lucide-react";
+import { getPublishedTestimonials, reconcileTestimonialsFromServer } from "@/lib/store";
 import { Testimonial } from "@/lib/types";
 
 export default function TestimonialsCarousel() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isHoverOrFocusPaused, setIsHoverOrFocusPaused] = useState(false);
+  const [isInteractionPaused, setIsInteractionPaused] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const resumeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadData = useCallback(async () => {
-    // 1. Load from local store (only admin-managed items)
-    const localList = getPublishedTestimonials();
-    if (localList && localList.length > 0) {
-      setTestimonials(localList);
-    }
-
-    // 2. Reconcile with server API
-    try {
-      const res = await fetch("/api/testimonials", { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.testimonials) && data.testimonials.length > 0) {
-          const published = data.testimonials.filter((t: Testimonial) => t.isPublished);
-          if (published.length > 0) {
-            setTestimonials(published);
-          }
-        } else if (localList && localList.length > 0) {
-          // Push local testimonials to server so API has them
-          fetch("/api/testimonials", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ testimonials: localList }),
-          }).catch(() => {});
-        }
-      }
-    } catch {
-      // Safely retain existing state on network errors
-    }
+  const syncFromLocal = useCallback(() => {
+    const published = getPublishedTestimonials();
+    setTestimonials(published);
+    setCurrentIndex((prev) => (published.length === 0 ? 0 : prev % published.length));
   }, []);
 
-  useEffect(() => {
-    loadData();
-    window.addEventListener("events21_testimonials_updated", loadData);
-    return () => window.removeEventListener("events21_testimonials_updated", loadData);
-  }, [loadData]);
+  const syncFromServer = useCallback(async () => {
+    const res = await reconcileTestimonialsFromServer();
+    if (res.ok) {
+      const published = res.testimonials.filter((t) => t.isPublished !== false);
+      setTestimonials(published);
+      setCurrentIndex((prev) => (published.length === 0 ? 0 : prev % published.length));
+    } else {
+      syncFromLocal();
+    }
+  }, [syncFromLocal]);
 
-  const changeSlide = useCallback(
-    (newIndex: number) => {
-      if (isAnimating || testimonials.length <= 1) return;
-      setIsAnimating(true);
-      setCurrentIndex(newIndex);
-      setTimeout(() => setIsAnimating(false), 400);
+  useEffect(() => {
+    syncFromLocal();
+    syncFromServer();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncFromServer();
+      }
+    };
+
+    window.addEventListener("events21_testimonials_updated", syncFromLocal);
+    window.addEventListener("focus", syncFromServer);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("events21_testimonials_updated", syncFromLocal);
+      window.removeEventListener("focus", syncFromServer);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [syncFromLocal, syncFromServer]);
+
+  const pauseAutoplayTemporarily = useCallback((durationMs = 10000) => {
+    setIsInteractionPaused(true);
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      setIsInteractionPaused(false);
+    }, durationMs);
+  }, []);
+
+  const goToSlide = useCallback(
+    (newIndex: number, fromUserInteraction = false) => {
+      if (testimonials.length <= 1) return;
+      const safeIndex = ((newIndex % testimonials.length) + testimonials.length) % testimonials.length;
+      setCurrentIndex(safeIndex);
+      if (fromUserInteraction) {
+        pauseAutoplayTemporarily(10000);
+      }
     },
-    [testimonials.length, isAnimating]
+    [testimonials.length, pauseAutoplayTemporarily]
   );
 
-  const handleNext = useCallback(() => {
-    if (testimonials.length <= 1) return;
-    changeSlide((currentIndex + 1) % testimonials.length);
-  }, [changeSlide, currentIndex, testimonials.length]);
+  const handleNext = useCallback(
+    (fromUserInteraction = false) => {
+      if (testimonials.length <= 1) return;
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+      if (fromUserInteraction) {
+        pauseAutoplayTemporarily(10000);
+      }
+    },
+    [testimonials.length, pauseAutoplayTemporarily]
+  );
 
-  const handlePrev = useCallback(() => {
-    if (testimonials.length <= 1) return;
-    changeSlide((currentIndex - 1 + testimonials.length) % testimonials.length);
-  }, [changeSlide, currentIndex, testimonials.length]);
+  const handlePrev = useCallback(
+    (fromUserInteraction = false) => {
+      if (testimonials.length <= 1) return;
+      setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+      if (fromUserInteraction) {
+        pauseAutoplayTemporarily(10000);
+      }
+    },
+    [testimonials.length, pauseAutoplayTemporarily]
+  );
 
-  // Autoplay timer (7s)
+  const isPaused = isHoverOrFocusPaused || isInteractionPaused;
+
+  // Autoplay timer (7s) when not paused and multiple testimonials exist
   useEffect(() => {
     if (testimonials.length <= 1 || isPaused) {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -80,7 +109,7 @@ export default function TestimonialsCarousel() {
     }
 
     autoPlayRef.current = setInterval(() => {
-      handleNext();
+      handleNext(false);
     }, 7000);
 
     return () => {
@@ -88,10 +117,10 @@ export default function TestimonialsCarousel() {
     };
   }, [testimonials.length, isPaused, handleNext]);
 
-  // Touch Swipe for mobile
-  const minSwipeDistance = 45;
+  // Touch swipe handlers for mobile
+  const minSwipeDistance = 40;
   const onTouchStart = (e: React.TouchEvent) => {
-    setIsPaused(true);
+    setIsHoverOrFocusPaused(true);
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -101,17 +130,27 @@ export default function TestimonialsCarousel() {
   };
 
   const onTouchEnd = () => {
-    setIsPaused(false);
-    if (!touchStart || !touchEnd) return;
+    setIsHoverOrFocusPaused(false);
+    if (touchStart === null || touchEnd === null) return;
     const distance = touchStart - touchEnd;
     if (distance > minSwipeDistance) {
-      handleNext();
+      handleNext(true);
     } else if (distance < -minSwipeDistance) {
-      handlePrev();
+      handlePrev(true);
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      handlePrev(true);
+    } else if (e.key === "ArrowRight") {
+      handleNext(true);
     }
   };
 
-  // If no testimonials created from admin yet, render an elegant minimal anchor section
+  // Minimal fallback when no testimonials are published in Admin
   if (testimonials.length === 0) {
     return (
       <section
@@ -127,135 +166,176 @@ export default function TestimonialsCarousel() {
             Client Words of Praise
           </h2>
           <p className="text-xs sm:text-sm text-brand-gold-light/75 font-sans font-light max-w-md mx-auto">
-            Thoughtfully planned, beautifully styled celebrations. Genuine reviews from our clients appear here.
+            Thoughtfully planned, beautifully styled celebrations. Genuine reviews published from our client archive appear here.
           </p>
         </div>
       </section>
     );
   }
 
-  const current = testimonials[currentIndex % testimonials.length] || testimonials[0];
+  const safeIndex = currentIndex % testimonials.length;
+  const current = testimonials[safeIndex] || testimonials[0];
   const hasImage = Boolean(current?.image && current.image.trim());
   const reviewText = (current?.quote || current?.text || "").trim();
+  const rating = Math.min(5, Math.max(1, Math.round(Number(current?.rating) || 5)));
+  const eventLabel =
+    current?.roleOrEvent ||
+    [current?.clientRole, current?.eventName].filter(Boolean).join(" • ") ||
+    "";
 
   return (
     <section
       id="testimonials"
-      className="relative w-full min-h-[480px] sm:min-h-[520px] md:min-h-[560px] py-18 sm:py-24 md:py-28 bg-[#15051B] text-white overflow-hidden flex flex-col justify-center"
+      className="relative w-full py-16 sm:py-20 md:py-24 bg-[#15051B] text-white overflow-hidden"
       aria-label="Client Testimonials"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onMouseEnter={() => setIsHoverOrFocusPaused(true)}
+      onMouseLeave={() => setIsHoverOrFocusPaused(false)}
+      onFocus={() => setIsHoverOrFocusPaused(true)}
+      onBlur={() => setIsHoverOrFocusPaused(false)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Dynamic Background: Uses the uploaded image of the active testimonial */}
-      {hasImage ? (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            key={current.id || current.image}
-            src={current.image}
-            alt={current.clientName}
-            className={`w-full h-full object-cover object-center filter brightness-[0.7] contrast-[1.08] transition-all duration-700 ease-out transform ${
-              isAnimating ? "opacity-30 scale-105" : "opacity-100 scale-100"
-            }`}
-          />
-          {/* Luxury Scrim Overlay: Guarantees high text contrast and editorial atmosphere */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#15051B] via-[#1B0A22]/85 to-[#15051B]/90" />
-          <div className="absolute inset-0 bg-[#15051B]/55" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#24132E] via-brand-plum to-[#1B0C22] pointer-events-none" />
-      )}
-
-      {/* Foreground Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
-        {/* Section Title */}
-        <div className="mb-6 sm:mb-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {/* Section Heading */}
+        <div className="text-center mb-8 sm:mb-10">
           <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-brand-gold font-sans font-medium block mb-2">
             Words of Praise
           </span>
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-white font-normal drop-shadow-sm">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-white font-normal">
             Client Testimonials
           </h2>
         </div>
 
-        {/* Minimalist Testimonial Stage */}
-        <div className="relative min-h-[190px] sm:min-h-[210px] flex flex-col justify-center">
-          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xs border border-white/15 text-brand-gold flex items-center justify-center mx-auto mb-5 shadow-sm">
-            <Quote className="w-4 h-4 fill-current opacity-90" />
-          </div>
-
-          <div
-            className={`transition-all duration-400 ease-out ${
-              isAnimating ? "opacity-0 translate-y-2 scale-98" : "opacity-100 translate-y-0 scale-100"
+        {/* Single Source of Truth Testimonial Card with Uploaded Client Photo as Card Background */}
+        <article
+          key={current.id}
+          className={`relative rounded-3xl overflow-hidden border border-white/15 shadow-elevated min-h-[380px] sm:min-h-[430px] flex flex-col justify-between p-6 sm:p-10 md:p-12 text-left animate-fade-in ${hasImage
+            ? "bg-[#1A0822]"
+            : "bg-gradient-to-br from-[#2B1238] via-[#1E0B29] to-[#120418]"
             }`}
-          >
-            {/* ONLY the testimonial quote */}
-            <blockquote className="max-w-2xl mx-auto font-serif text-lg sm:text-xl md:text-2xl text-white font-normal leading-relaxed mb-5 px-4 drop-shadow-md">
-              &ldquo;{reviewText}&rdquo;
-            </blockquote>
+        >
+          {/* Card Background Layer: Uploaded client photo centered without excessive zoom/crop distortion */}
+          {hasImage ? (
+            <div className="absolute inset-0 z-0 pointer-events-none">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={current.image}
+                alt={`${current.clientName} celebration backdrop`}
+                className="w-full h-full object-cover object-[50%_25%]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#120418]/95 via-[#180720]/75 to-[#120418]/65" />
+              <div className="absolute inset-0 bg-[#120418]/30" />
+            </div>
+          ) : (
+            <div
+              className="absolute inset-0 z-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(circle at top right, rgba(200, 159, 86, 0.16), transparent 55%)",
+              }}
+            />
+          )}
 
-            {/* ONLY the client name */}
-            <cite className="not-italic font-serif font-medium text-base sm:text-lg text-brand-gold block drop-shadow-sm">
-              &mdash; {current.clientName}
-            </cite>
-          </div>
-        </div>
+          {/* Top Bar: Quote Emblem & Five-Star Rating */}
+          <div className="relative z-10 flex items-center justify-between gap-4 mb-6">
+            <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-brand-gold flex items-center justify-center shadow-sm shrink-0">
+              <Quote className="w-4 h-4 fill-current opacity-95" />
+            </div>
 
-        {/* Controls & Dedicated Page Link */}
-        <div className="mt-8 pt-5 border-t border-white/15 flex items-center justify-between text-xs font-sans">
-          {/* Slide counter */}
-          <div className="text-white/60 tracking-widest text-[11px]">
-            {String((currentIndex % testimonials.length) + 1).padStart(2, "0")} /{" "}
-            {String(testimonials.length).padStart(2, "0")}
-          </div>
-
-          {/* Dots */}
-          {testimonials.length > 1 && (
-            <div className="flex items-center gap-2">
-              {testimonials.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => changeSlide(idx)}
-                  aria-label={`Go to slide ${idx + 1}`}
-                  className={`transition-all rounded-full cursor-pointer ${
-                    currentIndex % testimonials.length === idx
-                      ? "w-7 h-1.5 bg-brand-gold shadow-xs"
-                      : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"
-                  }`}
+            <div
+              className="flex items-center gap-1 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/15"
+              aria-label={`${rating} out of 5 stars`}
+            >
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`w-3.5 h-3.5 ${star <= rating
+                    ? "fill-brand-gold text-brand-gold"
+                    : "text-white/25"
+                    }`}
                 />
               ))}
             </div>
+          </div>
+
+          {/* Centerpiece Quote */}
+          <blockquote className="relative z-10 my-auto font-serif text-lg sm:text-xl md:text-2xl text-white font-normal leading-relaxed drop-shadow-md">
+            &ldquo;{reviewText}&rdquo;
+          </blockquote>
+
+          {/* Bottom Client Identity & Event Type */}
+          <div className="relative z-10 pt-6 mt-6 border-t border-white/20">
+            <cite className="not-italic font-serif font-semibold text-base sm:text-lg text-brand-gold block drop-shadow-sm">
+              {current.clientName}
+            </cite>
+            {eventLabel && (
+              <span className="text-[11px] sm:text-xs font-sans text-white/80 uppercase tracking-[0.14em] block mt-1">
+                {eventLabel}
+              </span>
+            )}
+          </div>
+        </article>
+
+        {/* Controls Bar: Identical Content & Accessible Navigation on Mobile & Desktop */}
+        <div className="mt-6 pt-4 border-t border-white/15 flex flex-wrap items-center justify-between gap-3 text-xs font-sans">
+          <div className="text-white/70 tracking-widest text-[11px] font-medium">
+            {String(safeIndex + 1).padStart(2, "0")} /{" "}
+            {String(testimonials.length).padStart(2, "0")}
+          </div>
+
+          {testimonials.length > 1 && (
+            <div className="flex items-center gap-1" role="tablist" aria-label="Choose a testimonial">
+              {testimonials.map((t, idx) => {
+                const isActive = safeIndex === idx;
+                return (
+                  <button
+                    key={t.id || idx}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => goToSlide(idx, true)}
+                    aria-label={`View testimonial ${idx + 1} from ${t.clientName}`}
+                    className="p-1.5 flex items-center justify-center cursor-pointer"
+                  >
+                    <span
+                      className={`block transition-all duration-300 rounded-full ${isActive
+                        ? "w-7 h-1.5 bg-brand-gold shadow-sm"
+                        : "w-2 h-2 bg-white/35 hover:bg-white/65"
+                        }`}
+                    />
+                  </button>
+                );
+              })}
+            </div>
           )}
 
-          {/* Action links & Navigation */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto sm:ml-0">
             <Link
               href="/testimonials"
-              className="hidden sm:inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-white/70 hover:text-brand-gold transition-colors py-1"
+              className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-white/80 hover:text-brand-gold transition-colors py-1.5 px-2"
             >
               <span>View All</span>
-              <ArrowUpRight className="w-3 h-3" />
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
 
             {testimonials.length > 1 && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handlePrev}
+                  onClick={() => handlePrev(true)}
                   aria-label="Previous testimonial"
-                  className="w-8 h-8 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                  className="w-9 h-9 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
                 >
                   <ChevronLeft className="w-4 h-4 text-brand-gold" />
                 </button>
                 <button
                   type="button"
-                  onClick={handleNext}
+                  onClick={() => handleNext(true)}
                   aria-label="Next testimonial"
-                  className="w-8 h-8 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                  className="w-9 h-9 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
                 >
                   <ChevronRight className="w-4 h-4 text-brand-gold" />
                 </button>

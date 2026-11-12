@@ -132,7 +132,7 @@ export const SERVICES_DATA: ServiceItem[] = [
     suitableFor: "Milestone celebrants, retirees, and families marking landmark moments.",
   },
   {
-    id: "full-planning",
+    id: "full-service-event-management",
     title: "Full-Service Event Management",
     tagline: "From Concept to Execution",
     snippet:

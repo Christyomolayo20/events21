@@ -32,6 +32,7 @@ import {
   markAllAdminNotificationsRead,
 } from "@/lib/store";
 import { EventEnquiry, GiftRequest, PortfolioItem, GiftItem, AdminNotification } from "@/lib/types";
+import { BRAND_CONFIG } from "@/lib/data";
 import ConsultationsManager from "@/components/admin/ConsultationsManager";
 import TestimonialsManager from "@/components/admin/TestimonialsManager";
 import BrandAndTeamManager from "@/components/admin/BrandAndTeamManager";
@@ -97,7 +98,7 @@ export default function AdminPage() {
   const [gifts, setGifts] = useState<GiftRequest[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [giftCatalogue, setGiftCatalogue] = useState<GiftItem[]>([]);
-  const [config, setConfig] = useState(getBrandConfig());
+  const [config, setConfig] = useState(BRAND_CONFIG);
   const [consultationsCount, setConsultationsCount] = useState(0);
   const [testimonialsCount, setTestimonialsCount] = useState(0);
   const [academyCount, setAcademyCount] = useState(0);
@@ -151,6 +152,7 @@ export default function AdminPage() {
 
   // Supabase Live Connection State
   const [supabaseStatus, setSupabaseStatus] = useState<{
+    supabaseUrl?: string;
     serverReachable: boolean;
     authenticated: boolean;
     isKeyConfigured: boolean;
@@ -165,6 +167,15 @@ export default function AdminPage() {
   } | null>(null);
   const [showSqlSchema, setShowSqlSchema] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
+
+  // Email Gateway Diagnostics State
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{
+    success: boolean;
+    provider?: string;
+    error?: string | null;
+    target?: string;
+  } | null>(null);
 
   // Photos processing & feedback toast
   const [isProcessingPhotos, setIsProcessingPhotos] = useState(false);
@@ -575,6 +586,31 @@ export default function AdminPage() {
     }
   };
 
+  const handleSendTestEmail = async () => {
+    setIsTestingEmail(true);
+    setEmailTestResult(null);
+    try {
+      const res = await fetch("/api/admin/test-email", { method: "POST" });
+      const data = await res.json();
+      setEmailTestResult({
+        success: Boolean(data.success),
+        provider: data.provider,
+        error: data.error,
+        target: data.target || "Royaltyeventservice@gmail.com",
+      });
+      if (data.success) {
+        showToast("Test email delivered successfully!");
+      }
+    } catch (err: any) {
+      setEmailTestResult({
+        success: false,
+        error: err?.message || "Could not reach email test API endpoint.",
+      });
+    } finally {
+      setIsTestingEmail(false);
+    }
+  };
+
   const exportEnquiriesCSV = () => {
     const headers = [
       "ID",
@@ -657,7 +693,7 @@ export default function AdminPage() {
                 placeholder="Enter admin password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full px-4 py-3 pr-11 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum text-center tracking-widest placeholder:tracking-normal placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-hidden"
+                className="w-full px-4 py-3 pr-11 rounded-xl border border-brand-warm-border bg-brand-warm-white text-sm text-brand-plum text-center tracking-widest placeholder:tracking-normal placeholder:text-brand-plum/30 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple focus:outline-none"
               />
               <button
                 type="button"
@@ -712,7 +748,7 @@ export default function AdminPage() {
       )}
 
       {/* Top Admin Sub-Header */}
-      <div className="bg-brand-plum text-white py-4 px-4 sm:px-6 lg:px-8 border-b border-brand-plum-dark sticky top-0 z-30 shadow-xs">
+      <div className="bg-brand-plum text-white py-4 px-4 sm:px-6 lg:px-8 border-b border-brand-plum-dark sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
@@ -722,11 +758,11 @@ export default function AdminPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
               target="_blank"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs text-white/90 hover:text-white transition-colors"
             >
               <span>View Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -744,59 +780,81 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Live Appointment Alert Banner */}
-      {notifications.filter((n) => !n.read && n.type === "consultation").length > 0 && (
-        <div className="bg-gradient-to-r from-[#24132E] via-brand-plum to-[#3D1445] text-white px-4 sm:px-6 lg:px-8 py-3.5 border-b border-brand-gold/50 shadow-md">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-brand-gold text-brand-plum flex items-center justify-center shrink-0">
-                <Bell className="w-4 h-4 animate-bounce" />
-              </span>
-              <div>
-                <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-brand-gold block">
-                  New Appointment Booked
+      {/* Live Notifications Alert Banner */}
+      {(() => {
+        const unreadNotifications = notifications.filter((n) => !n.read);
+        const topNotification = unreadNotifications[0];
+        if (!topNotification) return null;
+
+        const targetTab: "consultations" | "enquiries" | "academy" | "gifts" =
+          topNotification.type === "consultation"
+            ? "consultations"
+            : topNotification.type === "academy"
+            ? "academy"
+            : topNotification.type === "gift_request"
+            ? "gifts"
+            : "enquiries";
+
+        return (
+          <div className="bg-gradient-to-r from-[#24132E] via-brand-plum to-[#3D1445] text-white px-4 sm:px-6 lg:px-8 py-3.5 border-b border-brand-gold/50 shadow-md">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-brand-gold text-brand-plum flex items-center justify-center shrink-0">
+                  <Bell className="w-4 h-4 animate-bounce" />
                 </span>
-                <p className="text-xs sm:text-sm font-sans text-white/95">
-                  {notifications.filter((n) => !n.read && n.type === "consultation")[0]?.message}
-                </p>
+                <div>
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-brand-gold block">
+                    {topNotification.title}
+                    {unreadNotifications.length > 1
+                      ? ` (${unreadNotifications.length} unread)`
+                      : ""}
+                  </span>
+                  <p className="text-xs sm:text-sm font-sans text-white/95">
+                    {topNotification.message}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(targetTab);
+                    if (topNotification.type === "gift_request") {
+                      setGiftsSubTab("orders");
+                    }
+                    markAdminNotificationRead(topNotification.id);
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-brand-gold text-brand-plum text-xs font-semibold uppercase tracking-wider hover:bg-brand-gold-light transition-all cursor-pointer"
+                >
+                  Open Item
+                </button>
+                <button
+                  type="button"
+                  onClick={() => markAdminNotificationRead(topNotification.id)}
+                  className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white/80 transition-all cursor-pointer"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("consultations");
-                  const top = notifications.filter((n) => !n.read && n.type === "consultation")[0];
-                  if (top) markAdminNotificationRead(top.id);
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-brand-gold text-brand-plum text-xs font-semibold uppercase tracking-wider hover:bg-brand-gold-light transition-all cursor-pointer"
-              >
-                View Appointment
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const top = notifications.filter((n) => !n.read && n.type === "consultation")[0];
-                  if (top) markAdminNotificationRead(top.id);
-                }}
-                className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white/80 transition-all cursor-pointer"
-              >
-                Dismiss
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Navigation Tabs */}
         <div className="flex flex-wrap items-center gap-2 mb-8 border-b border-brand-warm-border pb-4">
           <button
             type="button"
-            onClick={() => setActiveTab("enquiries")}
+            onClick={() => {
+              setActiveTab("enquiries");
+              notifications
+                .filter((n) => !n.read && n.type === "enquiry")
+                .forEach((n) => markAdminNotificationRead(n.id));
+            }}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "enquiries"
-                ? "bg-brand-purple text-white shadow-xs"
+                ? "bg-brand-purple text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
@@ -805,6 +863,11 @@ export default function AdminPage() {
             <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
               {enquiries.length}
             </span>
+            {notifications.filter((n) => !n.read && n.type === "enquiry").length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse">
+                {notifications.filter((n) => !n.read && n.type === "enquiry").length} NEW
+              </span>
+            )}
           </button>
 
           <button
@@ -817,7 +880,7 @@ export default function AdminPage() {
             }}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "consultations"
-                ? "bg-brand-purple text-white shadow-xs"
+                ? "bg-brand-purple text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
@@ -835,18 +898,28 @@ export default function AdminPage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab("academy")}
+            onClick={() => {
+              setActiveTab("academy");
+              notifications
+                .filter((n) => !n.read && n.type === "academy")
+                .forEach((n) => markAdminNotificationRead(n.id));
+            }}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "academy"
-                ? "bg-brand-purple text-white shadow-xs"
+                ? "bg-brand-purple text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
             <GraduationCap className="w-4 h-4" />
-            <span>Royal Planners Academy</span>
+            <span>Events21 Planners Academy</span>
             <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] ml-1">
               {academyCount}
             </span>
+            {notifications.filter((n) => !n.read && n.type === "academy").length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse">
+                {notifications.filter((n) => !n.read && n.type === "academy").length} NEW
+              </span>
+            )}
           </button>
 
           <button
@@ -854,7 +927,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab("portfolio")}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "portfolio"
-                ? "bg-brand-plum text-white shadow-xs"
+                ? "bg-brand-plum text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
@@ -867,10 +940,15 @@ export default function AdminPage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab("gifts")}
+            onClick={() => {
+              setActiveTab("gifts");
+              notifications
+                .filter((n) => !n.read && n.type === "gift_request")
+                .forEach((n) => markAdminNotificationRead(n.id));
+            }}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "gifts"
-                ? "bg-brand-pink text-white shadow-xs"
+                ? "bg-brand-pink text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
@@ -879,6 +957,11 @@ export default function AdminPage() {
             <span className="px-1.5 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink text-[10px] ml-1">
               {giftCatalogue.length + gifts.length}
             </span>
+            {notifications.filter((n) => !n.read && n.type === "gift_request").length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse">
+                {notifications.filter((n) => !n.read && n.type === "gift_request").length} NEW
+              </span>
+            )}
           </button>
 
           <button
@@ -886,7 +969,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab("testimonials")}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "testimonials"
-                ? "bg-brand-plum text-white shadow-xs"
+                ? "bg-brand-plum text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
@@ -902,7 +985,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab("settings")}
             className={`px-5 py-2.5 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "settings"
-                ? "bg-brand-plum text-white shadow-xs"
+                ? "bg-brand-plum text-white shadow-sm"
                 : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
             }`}
           >
@@ -915,7 +998,7 @@ export default function AdminPage() {
         {activeTab === "enquiries" && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
                 <span className="text-[10px] uppercase tracking-wider text-brand-plum/50 font-semibold block">
                   Total Leads
                 </span>
@@ -923,7 +1006,7 @@ export default function AdminPage() {
                   {enquiries.length}
                 </span>
               </div>
-              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
                 <span className="text-[10px] uppercase tracking-wider text-brand-purple font-semibold block">
                   New (Unanswered)
                 </span>
@@ -931,7 +1014,7 @@ export default function AdminPage() {
                   {enquiries.filter((e) => e.status === "New").length}
                 </span>
               </div>
-              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
                 <span className="text-[10px] uppercase tracking-wider text-blue-600 font-semibold block">
                   Contacted
                 </span>
@@ -939,7 +1022,7 @@ export default function AdminPage() {
                   {enquiries.filter((e) => e.status === "Contacted").length}
                 </span>
               </div>
-              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+              <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
                 <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold block">
                   Booked Events
                 </span>
@@ -949,7 +1032,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full md:w-80">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-plum/40" />
                 <input
@@ -988,7 +1071,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-hidden">
+            <div className="bg-white rounded-2xl border border-brand-warm-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-sans">
                   <thead className="bg-brand-warm-gray border-b border-brand-warm-border text-brand-plum/60 uppercase tracking-wider">
@@ -1104,7 +1187,7 @@ export default function AdminPage() {
         {/* TAB 2: PORTFOLIO SHOWCASE MANAGER (MULTIPLE IMAGE UPLOAD ENABLED) */}
         {activeTab === "portfolio" && (
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="bg-white p-6 rounded-2xl border border-brand-warm-border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-serif text-2xl font-bold text-brand-plum">
                   Portfolio Showcase Manager
@@ -1161,13 +1244,13 @@ export default function AdminPage() {
                     onClick={() => setPortfolioCategoryFilter(cat)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                       isActive
-                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        ? "bg-brand-purple text-white shadow-sm font-semibold"
                         : "bg-white text-brand-plum/70 border border-brand-warm-border hover:bg-brand-warm-gray"
                     }`}
                   >
                     <span>{cat}</span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                         isActive ? "bg-white/20 text-white" : "bg-brand-soft-lavender text-brand-purple"
                       }`}
                     >
@@ -1210,7 +1293,7 @@ export default function AdminPage() {
                     return (
                       <div
                         key={item.id}
-                        className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
+                        className="bg-white rounded-2xl border border-brand-warm-border overflow-hidden shadow-sm flex flex-col justify-between group hover:border-brand-purple/40 transition-colors"
                       >
                         <div>
                           <div className="relative aspect-[16/10] bg-brand-plum overflow-hidden">
@@ -1221,11 +1304,11 @@ export default function AdminPage() {
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                             <div className="absolute top-3 left-3 flex items-center gap-2">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-xs">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-plum shadow-sm">
                                 {item.category}
                               </span>
                               {item.featured && (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-sm">
                                   Featured
                                 </span>
                               )}
@@ -1234,12 +1317,12 @@ export default function AdminPage() {
                             {/* Multiple photos & video badge */}
                             <div className="absolute top-3 right-3 flex items-center gap-1.5">
                               {item.videoUrl && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-xs flex items-center gap-1">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-sm flex items-center gap-1">
                                   <Video className="w-3 h-3 fill-brand-plum" />
                                   <span>Video</span>
                                 </span>
                               )}
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-black/60 text-white backdrop-blur-xs shadow-xs flex items-center gap-1">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-black/60 text-white backdrop-blur-sm shadow-sm flex items-center gap-1">
                                 <Images className="w-3 h-3 text-brand-gold" />
                                 <span>{photoCount} {photoCount === 1 ? "Photo" : "Photos"}</span>
                               </span>
@@ -1298,14 +1381,14 @@ export default function AdminPage() {
         {/* TAB 3: GIFTS BY ADEOLA (CATALOGUE UPLOADS & ORDERS) */}
         {activeTab === "gifts" && (
           <div className="space-y-6">
-            <div className="bg-white p-4 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-white p-4 rounded-2xl border border-brand-warm-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setGiftsSubTab("catalogue")}
                   className={`px-4 py-2 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-colors cursor-pointer ${
                     giftsSubTab === "catalogue"
-                      ? "bg-brand-pink text-white shadow-xs"
+                      ? "bg-brand-pink text-white shadow-sm"
                       : "bg-brand-warm-gray text-brand-plum/70 hover:bg-brand-warm-border"
                   }`}
                 >
@@ -1318,7 +1401,7 @@ export default function AdminPage() {
                   onClick={() => setGiftsSubTab("orders")}
                   className={`px-4 py-2 rounded-xl text-xs font-sans uppercase tracking-wider font-semibold transition-colors cursor-pointer ${
                     giftsSubTab === "orders"
-                      ? "bg-brand-plum text-white shadow-xs"
+                      ? "bg-brand-plum text-white shadow-sm"
                       : "bg-brand-warm-gray text-brand-plum/70 hover:bg-brand-warm-border"
                   }`}
                 >
@@ -1344,7 +1427,7 @@ export default function AdminPage() {
                 {giftCatalogue.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded-2xl border border-brand-pink/20 overflow-hidden shadow-xs flex flex-col justify-between group hover:border-brand-pink/40 transition-colors"
+                    className="bg-white rounded-2xl border border-brand-pink/20 overflow-hidden shadow-sm flex flex-col justify-between group hover:border-brand-pink/40 transition-colors"
                   >
                     <div>
                       <div className="relative aspect-[16/10] bg-brand-blush-pink overflow-hidden">
@@ -1355,22 +1438,22 @@ export default function AdminPage() {
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-pink shadow-xs">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 text-brand-pink shadow-sm">
                             {item.category}
                           </span>
                           {item.inStock ? (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-emerald-500 text-white shadow-xs">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-emerald-500 text-white shadow-sm">
                               In Stock
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-gray-500 text-white shadow-xs">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-semibold uppercase tracking-wider bg-gray-500 text-white shadow-sm">
                               Sold Out
                             </span>
                           )}
                         </div>
                         {item.videoUrl && (
                           <div className="absolute top-3 right-3">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-xs flex items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-gold text-brand-plum shadow-sm flex items-center gap-1">
                               <Video className="w-3 h-3 fill-brand-plum" />
                               <span>Video</span>
                             </span>
@@ -1427,7 +1510,7 @@ export default function AdminPage() {
                   gifts.map((req) => (
                     <div
                       key={req.id}
-                      className="bg-white rounded-2xl p-6 border border-brand-pink/20 shadow-xs space-y-4"
+                      className="bg-white rounded-2xl p-6 border border-brand-pink/20 shadow-sm space-y-4"
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -1447,7 +1530,7 @@ export default function AdminPage() {
                           onChange={(e) =>
                             updateGiftStatus(req.id, e.target.value as GiftRequest["status"])
                           }
-                          className="text-xs font-sans px-2.5 py-1 rounded-full border border-brand-pink/30 bg-brand-blush-pink text-brand-pink font-semibold focus:outline-hidden"
+                          className="text-xs font-sans px-2.5 py-1 rounded-full border border-brand-pink/30 bg-brand-blush-pink text-brand-pink font-semibold focus:outline-none"
                         >
                           <option value="Pending">Pending</option>
                           <option value="Sourcing">Sourcing</option>
@@ -1537,7 +1620,7 @@ export default function AdminPage() {
         {/* TAB 4: SETTINGS */}
         {activeTab === "settings" && (
           <div className="space-y-10">
-            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-sm">
               <h3 className="font-serif text-2xl font-bold text-brand-plum mb-2">
                 Studio Contact & Social Information
               </h3>
@@ -1625,7 +1708,7 @@ export default function AdminPage() {
             </div>
 
             {/* Supabase Cloud Database Status & Connection Card */}
-            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-xs">
+            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-sm">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-sans font-semibold uppercase tracking-wider mb-2">
@@ -1659,7 +1742,9 @@ export default function AdminPage() {
                       ? "Connected & Live"
                       : supabaseStatus?.serverReachable
                       ? "Gateway Online (Key Needed)"
-                      : "Connecting..."}
+                      : supabaseStatus
+                      ? "Offline / Unreachable"
+                      : "Checking..."}
                   </span>
                 </div>
               </div>
@@ -1679,24 +1764,43 @@ export default function AdminPage() {
                     Project URL
                   </span>
                   <a
-                    href="https://kmkvhypdcsabnvwytvug.supabase.co"
+                    href={supabaseStatus?.supabaseUrl || "https://kmkvhypdcsabnvwytvug.supabase.co"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-mono text-brand-purple hover:underline truncate max-w-[280px] flex items-center gap-1"
                   >
-                    <span>https://kmkvhypdcsabnvwytvug.supabase.co</span>
+                    <span>{supabaseStatus?.supabaseUrl || "https://kmkvhypdcsabnvwytvug.supabase.co"}</span>
                     <ExternalLink className="w-3 h-3 shrink-0" />
                   </a>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
-                  <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
-                    Cloud Server Gateway
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Reachable &amp; Responding (HTTP 200/401)</span>
-                  </span>
+                <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-brand-plum/70 font-semibold uppercase tracking-wider text-[10px]">
+                      Cloud Server Gateway
+                    </span>
+                    {supabaseStatus === null ? (
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-brand-plum/60">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Checking endpoint...</span>
+                      </span>
+                    ) : supabaseStatus.serverReachable ? (
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Reachable (HTTP {supabaseStatus.httpStatus})</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-red-600">
+                        <X className="w-3.5 h-3.5 text-red-600" />
+                        <span>Unreachable (DNS NXDOMAIN / Offline)</span>
+                      </span>
+                    )}
+                  </div>
+                  {supabaseStatus && !supabaseStatus.serverReachable && supabaseStatus.details && (
+                    <p className="text-[11px] text-red-700 bg-red-50/70 p-2 rounded-lg border border-red-200/70">
+                      {supabaseStatus.details}
+                    </p>
+                  )}
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-brand-warm-white border border-brand-warm-border/60 flex items-center justify-between">
@@ -1763,7 +1867,7 @@ export default function AdminPage() {
                     <button
                       type="submit"
                       disabled={isTestingSupabase}
-                      className="px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                      className="px-5 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
                     >
                       {isTestingSupabase ? (
                         <>
@@ -1870,16 +1974,46 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS public.academy_registrations (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    experience_level TEXT NOT NULL,
+    business_name TEXT DEFAULT '',
+    reason_for_joining TEXT DEFAULT '',
+    status TEXT DEFAULT 'New Enquiry',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.testimonials (
+    id TEXT PRIMARY KEY,
+    client_name TEXT NOT NULL,
+    client_role TEXT DEFAULT '',
+    event_name TEXT DEFAULT '',
+    quote TEXT NOT NULL,
+    rating INTEGER DEFAULT 5,
+    image TEXT DEFAULT '',
+    is_published BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.academy_registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public insert consultations" ON public.consultations FOR INSERT TO public WITH CHECK (true);
 CREATE POLICY "Allow public insert enquiries" ON public.enquiries FOR INSERT TO public WITH CHECK (true);
 CREATE POLICY "Allow public insert gift_requests" ON public.gift_requests FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public insert academy_registrations" ON public.academy_registrations FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public all testimonials" ON public.testimonials FOR ALL TO public USING (true) WITH CHECK (true);
 CREATE POLICY "Allow select consultations" ON public.consultations FOR SELECT TO public USING (true);
+CREATE POLICY "Allow update consultations" ON public.consultations FOR UPDATE TO public USING (true);
 CREATE POLICY "Allow select enquiries" ON public.enquiries FOR SELECT TO public USING (true);
-CREATE POLICY "Allow select gift_requests" ON public.gift_requests FOR SELECT TO public USING (true);`;
+CREATE POLICY "Allow select gift_requests" ON public.gift_requests FOR SELECT TO public USING (true);
+CREATE POLICY "Allow select academy_registrations" ON public.academy_registrations FOR SELECT TO public USING (true);`;
                           navigator.clipboard.writeText(sqlCode);
                           setCopiedSql(true);
                           setTimeout(() => setCopiedSql(false), 2500);
@@ -1945,11 +2079,89 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
   personal_message TEXT DEFAULT '',
   status TEXT DEFAULT 'Pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 4. Academy Registrations Table
+CREATE TABLE IF NOT EXISTS public.academy_registrations (
+  id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  experience_level TEXT NOT NULL,
+  business_name TEXT DEFAULT '',
+  reason_for_joining TEXT DEFAULT '',
+  status TEXT DEFAULT 'New Enquiry',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. Testimonials Table
+CREATE TABLE IF NOT EXISTS public.testimonials (
+  id TEXT PRIMARY KEY,
+  client_name TEXT NOT NULL,
+  client_role TEXT DEFAULT '',
+  event_name TEXT DEFAULT '',
+  quote TEXT NOT NULL,
+  rating INTEGER DEFAULT 5,
+  image TEXT DEFAULT '',
+  is_published BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );`}
                     </pre>
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Email Delivery Diagnostics & Test Email Trigger */}
+            <div className="max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-brand-warm-border shadow-sm">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-soft-lavender text-brand-purple text-[11px] font-sans font-semibold uppercase tracking-wider mb-2">
+                <Mail className="w-3.5 h-3.5" />
+                <span>Automated Email Gateway</span>
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-brand-plum mb-1">
+                Notification &amp; Confirmation Delivery Test
+              </h3>
+              <p className="text-xs text-brand-plum/70 font-sans mb-5 leading-relaxed">
+                Verify live email delivery to <strong>Royaltyeventservice@gmail.com</strong> using your configured SMTP (<code>GMAIL_APP_PASSWORD</code>) or Resend (<code>RESEND_API_KEY</code>) credentials.
+              </p>
+
+              <button
+                type="button"
+                onClick={handleSendTestEmail}
+                disabled={isTestingEmail}
+                className="px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+              >
+                {isTestingEmail ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Sending Test Email...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Send Test Email to Royaltyeventservice@gmail.com</span>
+                  </>
+                )}
+              </button>
+
+              {emailTestResult && (
+                <div
+                  className={`mt-4 p-3.5 rounded-xl text-xs font-sans border ${
+                    emailTestResult.success
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-red-50 text-red-800 border-red-200"
+                  }`}
+                >
+                  <p className="font-semibold">
+                    {emailTestResult.success
+                      ? `Delivered via ${emailTestResult.provider} to ${emailTestResult.target}`
+                      : "Email delivery failed"}
+                  </p>
+                  {emailTestResult.error && (
+                    <p className="mt-1 opacity-90">{emailTestResult.error}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Hero Video, Founder Profile, and Team Profiles Management */}
@@ -1960,7 +2172,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
       {/* MODAL 1: Selected Enquiry Detail Modal */}
       {selectedEnquiry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
@@ -1991,7 +2203,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
                 onChange={(e) =>
                   handleStatusChange(selectedEnquiry.id, e.target.value as EventEnquiry["status"])
                 }
-                className="text-xs font-sans px-3 py-1.5 rounded-lg border border-brand-purple/30 bg-white font-semibold text-brand-purple focus:outline-hidden"
+                className="text-xs font-sans px-3 py-1.5 rounded-lg border border-brand-purple/30 bg-white font-semibold text-brand-purple focus:outline-none"
               >
                 <option value="New">New</option>
                 <option value="Contacted">Contacted</option>
@@ -2089,7 +2301,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
       {/* MODAL 2: Add New Portfolio Project (MULTIPLE IMAGE UPLOADS ENABLED) */}
       {isAddPortfolioOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
@@ -2223,7 +2435,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
                     type="button"
                     disabled={isProcessingPhotos}
                     onClick={() => portfolioAddFileRef.current?.click()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
                   >
                     {isProcessingPhotos ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -2370,7 +2582,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
                   <button
                     type="button"
                     onClick={() => portfolioAddVideoRef.current?.click()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
                   >
                     <Video className="w-3.5 h-3.5" />
                     <span>Upload Video File (No Limit)</span>
@@ -2455,7 +2667,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
       {/* MODAL 3: Edit Existing Portfolio Project (MULTIPLE IMAGE UPLOADS ENABLED) */}
       {editingProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
@@ -2598,7 +2810,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
                     type="button"
                     disabled={isProcessingPhotos}
                     onClick={() => portfolioEditFileRef.current?.click()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
                   >
                     {isProcessingPhotos ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -2749,7 +2961,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
                   <button
                     type="button"
                     onClick={() => portfolioEditVideoRef.current?.click()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                    className="px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
                   >
                     <Video className="w-3.5 h-3.5" />
                     <span>Upload New Video (No Limit)</span>
@@ -2839,7 +3051,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
       {/* MODAL 4: Add New Gift Catalogue Item (Image Upload Enabled) */}
       {isAddGiftOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
@@ -3094,7 +3306,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
 
       {/* MODAL 5: Edit Existing Gift Catalogue Item */}
       {editingGift && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-plum-dark/60 backdrop-blur-sm">
           <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-modal border border-brand-warm-border relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"

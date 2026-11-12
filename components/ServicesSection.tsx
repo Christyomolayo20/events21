@@ -24,7 +24,7 @@ export default function ServicesSection() {
           {SERVICES_DATA.map((service) => (
             <div
               key={service.id}
-              className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
+              className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-subtle transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
             >
               <div>
                 {/* Photo with fixed height & width, top-centered to prevent clipping */}
@@ -73,10 +73,10 @@ export default function ServicesSection() {
             </div>
           ))}
 
-          {/* Service Card 6: Royal Planners Academy */}
+          {/* Service Card 6: Events21 Planners Academy */}
           <div
-            id="service-royal-planners-academy"
-            className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
+            id="service-events21-planners-academy"
+            className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-subtle transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
           >
             <div>
               {/* Photo */}
@@ -84,13 +84,13 @@ export default function ServicesSection() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/images/about-team-seated.jpg"
-                  alt="Royal Planners Academy by Events 21"
+                  alt="Events21 Planners Academy by Events 21"
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   style={{ objectPosition: "center center" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity" />
                 <div className="absolute top-4 left-4 z-10">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-purple shadow-xs">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-brand-purple shadow-sm">
                     New Service
                   </span>
                 </div>
@@ -102,7 +102,7 @@ export default function ServicesSection() {
                   Professional Event Planning Training
                 </span>
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-plum mb-2.5 group-hover:text-brand-purple transition-colors">
-                  Royal Planners Academy
+                  Events21 Planners Academy
                 </h3>
                 <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed">
                   Practical event planning training designed to equip aspiring and emerging planners with the skills, knowledge, and professional confidence to thrive in the event industry.
@@ -113,7 +113,7 @@ export default function ServicesSection() {
             {/* Bottom Action */}
             <div className="px-6 pb-6 pt-3 border-t border-brand-warm-border/40 mt-auto flex items-center justify-between">
               <Link
-                href="/services/royal-planners-academy"
+                href="/services/events21-planners-academy"
                 className="text-xs font-semibold uppercase tracking-wider text-brand-purple hover:text-brand-purple-hover font-sans inline-flex items-center gap-1 group/link transition-colors"
               >
                 <span>Explore the Academy</span>
@@ -121,7 +121,7 @@ export default function ServicesSection() {
               </Link>
 
               <Link
-                href="/services/royal-planners-academy#register"
+                href="/services/events21-planners-academy#register"
                 className="text-xs text-brand-plum/80 font-sans font-medium hover:text-brand-purple hover:underline"
               >
                 Register
@@ -142,7 +142,7 @@ export default function ServicesSection() {
 
           <Link
             href="/services"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-sm"
           >
             <span>View All Services</span>
             <ArrowUpRight className="w-4 h-4" />

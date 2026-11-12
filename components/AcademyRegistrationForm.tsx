@@ -82,6 +82,8 @@ export default function AcademyRegistrationForm() {
 
       // 2. Persist locally to store & IndexedDB for admin visibility
       const saved = saveAcademyRegistration({
+        id: result.registration?.id,
+        createdAt: result.registration?.createdAt,
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
@@ -97,13 +99,13 @@ export default function AcademyRegistrationForm() {
       setIsSubmitting(false);
       setError(
         err?.message ||
-          "Unable to save registration at this time. Please check your internet connection or register directly with our admissions coordinator via WhatsApp."
+        "Unable to save registration at this time. Please check your internet connection or register directly with our admissions coordinator via WhatsApp."
       );
     }
   };
 
   const getWhatsAppRegistrationLink = () => {
-    const text = `Hello Royal Planners Academy! I would like to register my interest.%0A%0A*Name:* ${encodeURIComponent(
+    const text = `Hello Events21 Planners Academy! I would like to register my interest.%0A%0A*Name:* ${encodeURIComponent(
       formData.fullName || "Prospective Student"
     )}%0A*Experience Level:* ${encodeURIComponent(
       formData.experienceLevel || "Aspiring Planner"
@@ -121,7 +123,7 @@ export default function AcademyRegistrationForm() {
       <div className="bg-white rounded-3xl p-8 sm:p-12 border border-brand-gold/30 shadow-elevated text-center animate-fade-in relative overflow-hidden max-w-2xl mx-auto">
         <div className="absolute top-0 right-0 w-48 h-48 bg-brand-soft-lavender/50 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="w-16 h-16 bg-brand-soft-lavender text-brand-purple rounded-full flex items-center justify-center mx-auto mb-5 border border-brand-purple/20 shadow-xs">
+        <div className="w-16 h-16 bg-brand-soft-lavender text-brand-purple rounded-full flex items-center justify-center mx-auto mb-5 border border-brand-purple/20 shadow-sm">
           <CheckCircle2 className="w-9 h-9" />
         </div>
 
@@ -134,7 +136,7 @@ export default function AcademyRegistrationForm() {
         </h3>
 
         <p className="text-sm text-brand-plum/75 font-sans leading-relaxed mb-4">
-          Your interest in Royal Planners Academy has been recorded successfully.
+          Your interest in Events21 Planners Academy has been recorded successfully.
         </p>
 
         <div className="p-4 rounded-xl bg-brand-soft-lavender/40 border border-brand-purple/15 text-xs text-brand-plum/80 font-sans mb-8">
@@ -149,7 +151,7 @@ export default function AcademyRegistrationForm() {
             href={getWhatsAppRegistrationLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Chat on WhatsApp for Immediate Enquiries</span>
@@ -213,7 +215,7 @@ export default function AcademyRegistrationForm() {
             placeholder="e.g. Oluwaseun Adeleke"
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-2xs"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-sm"
           />
         </div>
 
@@ -234,7 +236,7 @@ export default function AcademyRegistrationForm() {
               placeholder="e.g. seun@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-2xs"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-sm"
             />
           </div>
 
@@ -253,7 +255,7 @@ export default function AcademyRegistrationForm() {
               placeholder="e.g. 08060549596 or +234..."
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-2xs"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-sm"
             />
           </div>
         </div>
@@ -277,7 +279,7 @@ export default function AcademyRegistrationForm() {
                   experienceLevel: e.target.value as AcademyExperienceLevel,
                 })
               }
-              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all appearance-none cursor-pointer shadow-2xs"
+              className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all appearance-none cursor-pointer shadow-sm"
             >
               <option value="" disabled>
                 Select your experience level...
@@ -310,7 +312,7 @@ export default function AcademyRegistrationForm() {
             placeholder="e.g. Royal Events Studio (if registered or trading)"
             value={formData.businessName}
             onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-2xs"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-sm"
           />
         </div>
 
@@ -328,7 +330,7 @@ export default function AcademyRegistrationForm() {
             placeholder="Share your goals, what you hope to achieve, or specific questions you have about the training programme..."
             value={formData.reasonForJoining}
             onChange={(e) => setFormData({ ...formData, reasonForJoining: e.target.value })}
-            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-2xs resize-y"
+            className="w-full px-4 py-3.5 rounded-xl border border-brand-warm-border bg-white text-brand-plum text-sm font-sans placeholder:text-brand-plum/40 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all shadow-sm resize-y"
           />
         </div>
 
@@ -338,11 +340,10 @@ export default function AcademyRegistrationForm() {
             type="submit"
             id="btn-register-academy"
             disabled={isSubmitting}
-            className={`w-full inline-flex items-center justify-center gap-2 py-4 px-8 rounded-full text-xs font-semibold uppercase tracking-widest text-white transition-all shadow-elevated ${
-              isSubmitting
+            className={`w-full inline-flex items-center justify-center gap-2 py-4 px-8 rounded-full text-xs font-semibold uppercase tracking-widest text-white transition-all shadow-elevated ${isSubmitting
                 ? "bg-brand-purple/70 cursor-not-allowed"
                 : "bg-brand-purple hover:bg-brand-purple-hover hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <>
@@ -351,7 +352,7 @@ export default function AcademyRegistrationForm() {
               </>
             ) : (
               <>
-                <span>Register for Royal Planners Academy</span>
+                <span>Register for Events21 Planners Academy</span>
                 <ArrowRight className="w-4 h-4 text-brand-gold-light" />
               </>
             )}

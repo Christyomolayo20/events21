@@ -32,7 +32,7 @@ export default function ServicesPage() {
         <div className="flex flex-wrap items-center justify-center gap-2 mt-8 max-w-4xl mx-auto">
           <a
             href="#packages"
-            className="px-4 py-2 rounded-full text-xs font-sans font-semibold bg-brand-purple text-white hover:bg-brand-purple-hover transition-all shadow-2xs"
+            className="px-4 py-2 rounded-full text-xs font-sans font-semibold bg-brand-purple text-white hover:bg-brand-purple-hover transition-all shadow-sm"
           >
             Planning Packages ★
           </a>
@@ -40,7 +40,7 @@ export default function ServicesPage() {
             <a
               key={pkg.id}
               href={`#${pkg.id}`}
-              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-white border border-brand-warm-border text-brand-plum/80 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-soft-lavender/30 transition-all shadow-2xs"
+              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-white border border-brand-warm-border text-brand-plum/80 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-soft-lavender/30 transition-all shadow-sm"
             >
               {pkg.title}
             </a>
@@ -49,16 +49,16 @@ export default function ServicesPage() {
             <a
               key={service.id}
               href={`#${service.id}`}
-              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-white border border-brand-warm-border text-brand-plum/80 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-soft-lavender/30 transition-all shadow-2xs"
+              className="px-4 py-2 rounded-full text-xs font-sans font-medium bg-white border border-brand-warm-border text-brand-plum/80 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-soft-lavender/30 transition-all shadow-sm"
             >
               {service.title.split("&")[0].trim()}
             </a>
           ))}
           <Link
-            href="/services/royal-planners-academy"
-            className="px-4 py-2 rounded-full text-xs font-sans font-semibold bg-brand-soft-lavender/70 border border-brand-purple/30 text-brand-purple hover:bg-brand-purple hover:text-white transition-all shadow-2xs"
+            href="/services/events21-planners-academy"
+            className="px-4 py-2 rounded-full text-xs font-sans font-semibold bg-brand-soft-lavender/70 border border-brand-purple/30 text-brand-purple hover:bg-brand-purple hover:text-white transition-all shadow-sm"
           >
-            Royal Planners Academy ★
+            Events21 Planners Academy ★
           </Link>
         </div>
       </section>
@@ -69,7 +69,7 @@ export default function ServicesPage() {
       ========================================================================= */}
       <section id="packages" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24 scroll-mt-28">
         <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-gold/15 text-brand-gold-dark text-[11px] font-sans font-semibold uppercase tracking-wider mb-2.5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-gold/15 text-[#8C6A28] text-[11px] font-sans font-semibold uppercase tracking-wider mb-2.5">
             <Crown className="w-3.5 h-3.5 text-brand-gold" />
             <span>Signature Packages</span>
           </div>
@@ -87,7 +87,7 @@ export default function ServicesPage() {
             <article
               key={pkg.id}
               id={pkg.id}
-              className="scroll-mt-28 bg-white rounded-3xl overflow-hidden border border-brand-warm-border/90 hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all duration-300 flex flex-col justify-between"
+              className="scroll-mt-28 bg-white rounded-3xl overflow-hidden border border-brand-warm-border/90 hover:border-brand-purple/40 shadow-sm hover:shadow-subtle transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 {/* Visual Media with proportional scaling */}
@@ -103,7 +103,7 @@ export default function ServicesPage() {
 
                   {/* Badge */}
                   <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3.5 py-1 rounded-full bg-white/95 backdrop-blur-xs text-[10px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-sm">
+                    <span className="px-3.5 py-1 rounded-full bg-white/95 backdrop-blur-sm text-[10px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-sm">
                       Package 0{idx + 1}
                     </span>
                   </div>
@@ -182,7 +182,7 @@ export default function ServicesPage() {
             <article
               key={service.id}
               id={service.id}
-              className="scroll-mt-28 md:scroll-mt-36 bg-white rounded-3xl overflow-hidden border border-brand-warm-border/80 shadow-xs hover:shadow-subtle transition-all duration-300"
+              className="scroll-mt-28 md:scroll-mt-36 bg-white rounded-3xl overflow-hidden border border-brand-warm-border/80 shadow-sm hover:shadow-subtle transition-all duration-300"
             >
               <div
                 className={`flex flex-col ${
@@ -202,7 +202,7 @@ export default function ServicesPage() {
 
                   {/* Service Category Badge */}
                   <div className="absolute top-5 left-5 z-10">
-                    <span className="px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-xs text-[11px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-md">
+                    <span className="px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-[11px] font-sans font-bold tracking-widest uppercase text-brand-plum shadow-md">
                       Specialisation 0{index + 1}
                     </span>
                   </div>
@@ -255,7 +255,7 @@ export default function ServicesPage() {
                   <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-brand-warm-border/60">
                     <Link
                       href={`/contact?service=${encodeURIComponent(service.title)}`}
-                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <span>Book Consultation</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -274,9 +274,9 @@ export default function ServicesPage() {
           );
         })}
 
-        {/* Feature Spotlight: Royal Planners Academy */}
+        {/* Feature Spotlight: Events21 Planners Academy */}
         <article
-          id="royal-planners-academy"
+          id="events21-planners-academy"
           className="scroll-mt-28 md:scroll-mt-36 bg-gradient-to-br from-white via-[#FAF7F5] to-brand-soft-lavender/30 rounded-3xl overflow-hidden border-2 border-brand-purple/30 shadow-subtle hover:shadow-elevated transition-all duration-300"
         >
           <div className="flex flex-col lg:flex-row items-stretch">
@@ -285,7 +285,7 @@ export default function ServicesPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/about-team-seated.jpg"
-                alt="Royal Planners Academy Training by Events 21"
+                alt="Events21 Planners Academy Training by Events 21"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                 style={{ objectPosition: "center center" }}
               />
@@ -300,13 +300,13 @@ export default function ServicesPage() {
             {/* Content Details Column */}
             <div className="lg:w-7/12 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/15 text-brand-gold-dark text-[11px] font-sans font-semibold uppercase tracking-wider mb-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/15 text-[#8C6A28] text-[11px] font-sans font-semibold uppercase tracking-wider mb-3">
                   <Crown className="w-3.5 h-3.5 text-brand-gold" />
                   <span>Academy &amp; Mentorship</span>
                 </div>
 
                 <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-plum leading-snug mb-4">
-                  Royal Planners Academy
+                  Events21 Planners Academy
                 </h2>
 
                 <p className="text-sm sm:text-base text-brand-plum/80 font-sans leading-relaxed mb-6">
@@ -350,16 +350,16 @@ export default function ServicesPage() {
               {/* Actions Bar */}
               <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-brand-warm-border/60">
                 <Link
-                  href="/services/royal-planners-academy"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-xs"
+                  href="/services/events21-planners-academy"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm"
                 >
                   <span>Explore the Academy</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
 
                 <Link
-                  href="/services/royal-planners-academy#register"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs font-semibold uppercase tracking-widest transition-colors bg-white shadow-2xs"
+                  href="/services/events21-planners-academy#register"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs font-semibold uppercase tracking-widest transition-colors bg-white shadow-sm"
                 >
                   <span>Register Your Interest</span>
                 </Link>

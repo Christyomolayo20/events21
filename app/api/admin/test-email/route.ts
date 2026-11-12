@@ -3,6 +3,17 @@ import { sendEmail, OFFICIAL_EMAIL } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
+export async function GET() {
+  return NextResponse.json({
+    target: OFFICIAL_EMAIL,
+    configuredProviders: {
+      smtp: Boolean(process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS),
+      resend: Boolean(process.env.RESEND_API_KEY),
+      brevo: Boolean(process.env.BREVO_API_KEY),
+    },
+  });
+}
+
 export async function POST() {
   try {
     const result = await sendEmail({
@@ -22,12 +33,19 @@ export async function POST() {
 
     return NextResponse.json({
       success: result.success,
+      target: OFFICIAL_EMAIL,
       provider: result.provider,
-      error: result.error,
+      messageId: result.messageId || null,
+      error: result.error || null,
+      configuredProviders: {
+        smtp: Boolean(process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS),
+        resend: Boolean(process.env.RESEND_API_KEY),
+        brevo: Boolean(process.env.BREVO_API_KEY),
+      },
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || "Failed to test email" },
+      { success: false, target: OFFICIAL_EMAIL, error: error?.message || "Failed to test email" },
       { status: 500 }
     );
   }

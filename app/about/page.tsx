@@ -18,21 +18,31 @@ import {
   Clock,
   Compass,
 } from "lucide-react";
-import { getFounderInfo } from "@/lib/store";
-import { FounderInfo } from "@/lib/types";
+import { DEFAULT_FOUNDER_INFO, DEFAULT_TEAM_MEMBERS } from "@/lib/data";
+import { getFounderInfo, getTeamMembers } from "@/lib/store";
+import { FounderInfo, TeamMember } from "@/lib/types";
 import ConsultationCTA from "@/components/ConsultationCTA";
 
 export default function AboutPage() {
-  const [founder, setFounder] = useState<FounderInfo>(getFounderInfo());
+  const [founder, setFounder] = useState<FounderInfo>(DEFAULT_FOUNDER_INFO);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(DEFAULT_TEAM_MEMBERS);
 
   useEffect(() => {
-    const handleUpdate = () => {
+    setFounder(getFounderInfo());
+    setTeamMembers(getTeamMembers());
+
+    const handleFounderUpdate = () => {
       setFounder(getFounderInfo());
     };
+    const handleTeamUpdate = () => {
+      setTeamMembers(getTeamMembers());
+    };
 
-    window.addEventListener("events21_founder_updated", handleUpdate);
+    window.addEventListener("events21_founder_updated", handleFounderUpdate);
+    window.addEventListener("events21_team_updated", handleTeamUpdate);
     return () => {
-      window.removeEventListener("events21_founder_updated", handleUpdate);
+      window.removeEventListener("events21_founder_updated", handleFounderUpdate);
+      window.removeEventListener("events21_team_updated", handleTeamUpdate);
     };
   }, []);
 
@@ -297,9 +307,8 @@ export default function AboutPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={founder.image || "/images/adeola-oyeyode-founder.jpg"}
-                  alt="Adeola Oyeyode - Founder & Creative Director EVENTS21"
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: "center 20%" }}
+                  alt={`${founder.name} - ${founder.title}`}
+                  className="w-full h-full object-cover object-[50%_20%]"
                 />
               </div>
             </div>
@@ -310,40 +319,33 @@ export default function AboutPage() {
                 Meet the Founder
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-brand-plum font-normal">
-                Adeola Oyeyode
+                {founder.name}
               </h2>
               <p className="text-xs uppercase tracking-widest text-brand-gold font-semibold -mt-2">
-                Founder &amp; Creative Director EVENTS21
+                {founder.title}
               </p>
 
               <div className="space-y-3 text-sm text-brand-plum/80 font-sans leading-relaxed font-light pt-2">
-                <p>
-                  Adeola Oyeyode is an experienced event planning professional, creative director and
-                  entrepreneur with over 10 years of experience in event planning, programme coordination,
-                  event management and production.
-                </p>
-                <p>
-                  Her journey began at Covenant University, where she worked as a Programme Coordinator at
-                  the University&apos;s Entrepreneurial Centre for over five years, directing workshops,
-                  conferences, institutional programmes and corporate engagements before establishing EVENTS21
-                  in 2021.
-                </p>
-                <p>
-                  With an academic background in Agricultural Economics and a Master&apos;s degree in Business
-                  Administration (MBA), Adeola combines business strategy with creative thinking, operational
-                  efficiency, and a strong understanding of client expectations.
-                </p>
+                {(founder.bio || DEFAULT_FOUNDER_INFO.bio)
+                  .split(/\n\s*\n/)
+                  .map((p) => p.trim())
+                  .filter(Boolean)
+                  .map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
+                  ))}
               </div>
 
               {/* Founder Philosophy Quote */}
-              <div className="p-4 rounded-xl bg-brand-warm-gray border border-brand-warm-border">
-                <span className="text-[11px] uppercase tracking-wider text-brand-purple font-medium block mb-0.5">
-                  Her Guiding Philosophy
-                </span>
-                <p className="font-serif italic text-base sm:text-lg text-brand-plum">
-                  &ldquo;Adding Value Through Seamless Event Planning.&rdquo;
-                </p>
-              </div>
+              {founder.vision && (
+                <div className="p-4 rounded-xl bg-brand-warm-gray border border-brand-warm-border">
+                  <span className="text-[11px] uppercase tracking-wider text-brand-purple font-medium block mb-0.5">
+                    Her Guiding Philosophy
+                  </span>
+                  <p className="font-serif italic text-base sm:text-lg text-brand-plum">
+                    &ldquo;{founder.vision}&rdquo;
+                  </p>
+                </div>
+              )}
 
               <div className="pt-2">
                 <Link
@@ -358,6 +360,62 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* 5B. MEET THE TEAM - Admin-Managed Profiles */}
+      {teamMembers.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 md:mb-24">
+          <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
+            <span className="text-xs uppercase tracking-[0.2em] text-brand-purple font-medium block mb-2">
+              The People Behind the Celebrations
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-brand-plum">
+              Meet the EVENTS21 Team
+            </h2>
+            <p className="text-sm text-brand-plum/70 font-sans mt-2">
+              Dedicated coordinators, stylists, and logistics specialists orchestrating every detail on site.
+            </p>
+          </div>
+
+          <div
+            className={`grid grid-cols-1 gap-6 ${
+              teamMembers.length === 1
+                ? "max-w-md mx-auto"
+                : teamMembers.length === 2
+                ? "md:grid-cols-2 max-w-4xl mx-auto"
+                : "md:grid-cols-2 lg:grid-cols-3"
+            }`}
+          >
+            {teamMembers.map((member) => (
+              <div
+                key={member.id}
+                className="bg-white rounded-2xl overflow-hidden border border-brand-warm-border flex flex-col"
+              >
+                <div className="relative aspect-[4/3] bg-brand-plum overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={member.image || "/images/about-team-portrait.jpg"}
+                    alt={`${member.name} - ${member.role}`}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="font-serif text-xl font-bold text-brand-plum">
+                    {member.name}
+                  </h3>
+                  <p className="text-xs uppercase tracking-wider text-brand-purple font-semibold mt-1 mb-3">
+                    {member.role}
+                  </p>
+                  {member.bio && (
+                    <p className="text-xs sm:text-sm text-brand-plum/75 font-sans leading-relaxed">
+                      {member.bio}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 6. CONSULTATION CTA */}
       <ConsultationCTA

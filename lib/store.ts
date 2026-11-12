@@ -37,6 +37,8 @@ const FOUNDER_KEY = "events21_founder";
 const TEAM_KEY = "events21_team";
 const ACADEMY_REGISTRATIONS_KEY = "events21_academy_registrations";
 const NOTIFICATIONS_KEY = "events21_admin_notifications";
+const DELETED_PORTFOLIO_IDS_KEY = "events21_deleted_portfolio_ids";
+const DELETED_GIFT_IDS_KEY = "events21_deleted_gift_ids";
 
 export const LEGACY_TESTIMONIAL_IDS = [
   "testi-bukola-dara",
@@ -195,32 +197,100 @@ let cacheFounder: FounderInfo | null = null;
 let cacheTeam: TeamMember[] | null = null;
 let cacheAcademy: AcademyRegistration[] | null = null;
 let cacheNotifications: AdminNotification[] | null = null;
+let testimonialsServerSynced = false;
 
-// Background hydration from IndexedDB on startup
+function getDeletedIds(storageKey: string): Set<string> {
+  const arr = safeLocalStorageGet<string[]>(storageKey, []);
+  return new Set(Array.isArray(arr) ? arr.filter((id) => typeof id === "string") : []);
+}
+
+function recordDeletedId(storageKey: string, id: string): void {
+  const existing = getDeletedIds(storageKey);
+  existing.add(id);
+  safeLocalStorageSet(storageKey, Array.from(existing));
+}
+
+function normalizeTestimonialsList(raw: Testimonial[]): Testimonial[] {
+  return raw
+    .filter((s) => s && typeof s === "object" && Boolean(s.id) && !LEGACY_TESTIMONIAL_IDS.includes(s.id))
+    .map((s) => {
+      const q = (s.quote || s.text || "").trim();
+      const ratingNum = Math.round(Number(s.rating));
+      const rating = Number.isFinite(ratingNum) ? Math.min(5, Math.max(1, ratingNum)) : 5;
+      const clientRole = s.clientRole?.trim() || undefined;
+      const eventName = s.eventName?.trim() || undefined;
+      const roleOrEvent =
+        s.roleOrEvent?.trim() || [clientRole, eventName].filter(Boolean).join(" • ") || undefined;
+      return {
+        ...s,
+        clientName: (s.clientName || "").trim(),
+        clientRole,
+        eventName,
+        roleOrEvent,
+        quote: q,
+        text: q,
+        rating,
+        image: s.image?.trim() || undefined,
+        isPublished: s.isPublished !== false,
+      };
+    });
+}
+
+// Background hydration from IndexedDB & cross-tab storage synchronization
 if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === TESTIMONIALS_KEY) {
+      cacheTestimonials = null;
+      window.dispatchEvent(new Event("events21_testimonials_updated"));
+    } else if (e.key === PORTFOLIO_KEY) {
+      cachePortfolio = null;
+      window.dispatchEvent(new Event("events21_portfolio_updated"));
+    } else if (e.key === GIFT_CATALOGUE_KEY) {
+      cacheGifts = null;
+      window.dispatchEvent(new Event("events21_gift_catalogue_updated"));
+    } else if (e.key === SETTINGS_KEY) {
+      cacheConfig = null;
+      window.dispatchEvent(new Event("events21_settings_updated"));
+    } else if (e.key === CONSULTATIONS_KEY) {
+      cacheConsultations = null;
+      window.dispatchEvent(new Event("events21_consultations_updated"));
+    } else if (e.key === NOTIFICATIONS_KEY) {
+      cacheNotifications = null;
+      window.dispatchEvent(new Event("events21_notification_received"));
+    }
+  });
+
   (async () => {
     try {
       const idbPortfolio = await idbGet<PortfolioItem[]>(PORTFOLIO_KEY);
       if (idbPortfolio && Array.isArray(idbPortfolio) && idbPortfolio.length > 0) {
-        cachePortfolio = idbPortfolio;
-        safeLocalStorageSet(PORTFOLIO_KEY, idbPortfolio);
+        const deletedPortIds = getDeletedIds(DELETED_PORTFOLIO_IDS_KEY);
+        const cleanedPortfolio = idbPortfolio.filter((p) => !deletedPortIds.has(p.id));
+        cachePortfolio = cleanedPortfolio;
+        safeLocalStorageSet(PORTFOLIO_KEY, cleanedPortfolio);
         window.dispatchEvent(new Event("events21_portfolio_updated"));
       }
 
       const idbGifts = await idbGet<GiftItem[]>(GIFT_CATALOGUE_KEY);
       if (idbGifts && Array.isArray(idbGifts) && idbGifts.length > 0) {
-        cacheGifts = idbGifts;
-        safeLocalStorageSet(GIFT_CATALOGUE_KEY, idbGifts);
+        const deletedGiftIds = getDeletedIds(DELETED_GIFT_IDS_KEY);
+        const cleanedGifts = idbGifts.filter((g) => !deletedGiftIds.has(g.id));
+        cacheGifts = cleanedGifts;
+        safeLocalStorageSet(GIFT_CATALOGUE_KEY, cleanedGifts);
         window.dispatchEvent(new Event("events21_gift_catalogue_updated"));
       }
 
       const idbTestimonials = await idbGet<Testimonial[]>(TESTIMONIALS_KEY);
-      if (idbTestimonials && Array.isArray(idbTestimonials)) {
-        const cleaned = idbTestimonials.filter((s) => !LEGACY_TESTIMONIAL_IDS.includes(s.id));
-        cacheTestimonials = cleaned;
-        safeLocalStorageSet(TESTIMONIALS_KEY, cleaned);
-        idbSet(TESTIMONIALS_KEY, cleaned);
-        window.dispatchEvent(new Event("events21_testimonials_updated"));
+      if (!testimonialsServerSynced && idbTestimonials && Array.isArray(idbTestimonials)) {
+        const cleaned = normalizeTestimonialsList(idbTestimonials);
+        if (!testimonialsServerSynced) {
+          cacheTestimonials = cleaned;
+          safeLocalStorageSet(TESTIMONIALS_KEY, cleaned);
+          if (cleaned.length !== idbTestimonials.length) {
+            idbSet(TESTIMONIALS_KEY, cleaned);
+          }
+          window.dispatchEvent(new Event("events21_testimonials_updated"));
+        }
       }
 
       const idbConsultations = await idbGet<ConsultationBooking[]>(CONSULTATIONS_KEY);
@@ -259,12 +329,17 @@ export function getEnquiries(): EventEnquiry[] {
   return stored;
 }
 
-export function saveEnquiry(enquiry: Omit<EventEnquiry, "id" | "status" | "createdAt">): EventEnquiry {
+export function saveEnquiry(
+  enquiry: Omit<EventEnquiry, "id" | "status" | "createdAt"> & {
+    id?: string;
+    createdAt?: string;
+  }
+): EventEnquiry {
   const newEnquiry: EventEnquiry = {
     ...enquiry,
-    id: `enq-${Date.now().toString(36).toUpperCase()}`,
+    id: enquiry.id || `enq-${Date.now().toString(36).toUpperCase()}`,
     status: "New",
-    createdAt: new Date().toISOString(),
+    createdAt: enquiry.createdAt || new Date().toISOString(),
   };
 
   const existing = getEnquiries();
@@ -273,12 +348,26 @@ export function saveEnquiry(enquiry: Omit<EventEnquiry, "id" | "status" | "creat
   safeLocalStorageSet(ENQUIRIES_KEY, updated);
   idbSet(ENQUIRIES_KEY, updated);
 
+  addAdminNotification({
+    type: "enquiry",
+    title: "New Event Enquiry",
+    message: `${newEnquiry.fullName} submitted an event brief for ${newEnquiry.eventType}${newEnquiry.eventDate ? ` (${newEnquiry.eventDate})` : ""
+      }.`,
+    details: {
+      enquiryId: newEnquiry.id,
+      fullName: newEnquiry.fullName,
+      email: newEnquiry.email,
+      phone: newEnquiry.phone,
+      eventType: newEnquiry.eventType,
+    },
+  });
+
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_enquiries_updated"));
   }
 
   // Sync to Supabase in background
-  pushEnquiryToSupabase(newEnquiry).catch(() => {});
+  pushEnquiryToSupabase(newEnquiry).catch(() => { });
 
   return newEnquiry;
 }
@@ -325,12 +414,17 @@ export function getGiftRequests(): GiftRequest[] {
   return stored;
 }
 
-export function saveGiftRequest(req: Omit<GiftRequest, "id" | "status" | "createdAt">): GiftRequest {
+export function saveGiftRequest(
+  req: Omit<GiftRequest, "id" | "status" | "createdAt"> & {
+    id?: string;
+    createdAt?: string;
+  }
+): GiftRequest {
   const newReq: GiftRequest = {
     ...req,
-    id: `gft-${Date.now().toString(36).toUpperCase()}`,
+    id: req.id || `gft-${Date.now().toString(36).toUpperCase()}`,
     status: "Pending",
-    createdAt: new Date().toISOString(),
+    createdAt: req.createdAt || new Date().toISOString(),
   };
 
   const existing = getGiftRequests();
@@ -338,6 +432,18 @@ export function saveGiftRequest(req: Omit<GiftRequest, "id" | "status" | "create
   cacheGiftRequests = updated;
   safeLocalStorageSet(GIFT_REQUESTS_KEY, updated);
   idbSet(GIFT_REQUESTS_KEY, updated);
+
+  addAdminNotification({
+    type: "gift_request",
+    title: "New Custom Gift Request",
+    message: `${newReq.fullName} submitted a custom gifting brief for ${newReq.occasion || "a celebration"}.`,
+    details: {
+      giftRequestId: newReq.id,
+      fullName: newReq.fullName,
+      phone: newReq.phone,
+      occasion: newReq.occasion,
+    },
+  });
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_gifts_updated"));
@@ -373,9 +479,12 @@ export function deleteGiftRequest(id: string): void {
 export function getGiftCatalogue(): GiftItem[] {
   if (typeof window === "undefined") return GIFTS_CATALOGUE;
   if (cacheGifts) return cacheGifts;
+  const deletedGiftIds = getDeletedIds(DELETED_GIFT_IDS_KEY);
   const stored = safeLocalStorageGet<GiftItem[]>(GIFT_CATALOGUE_KEY, GIFTS_CATALOGUE);
-  const missingDefaults = GIFTS_CATALOGUE.filter((d) => !stored.some((s) => s.id === d.id));
-  const combined = [...stored, ...missingDefaults];
+  const missingDefaults = GIFTS_CATALOGUE.filter(
+    (d) => !deletedGiftIds.has(d.id) && !stored.some((s) => s.id === d.id)
+  );
+  const combined = [...stored, ...missingDefaults].filter((item) => !deletedGiftIds.has(item.id));
   // Merge any new default videoUrl or updated images
   const merged = combined.map((item) => {
     const defaultMatch = GIFTS_CATALOGUE.find((d) => d.id === item.id);
@@ -429,6 +538,7 @@ export function updateGiftItem(id: string, updates: Partial<GiftItem>): void {
 }
 
 export function deleteGiftItem(id: string): void {
+  recordDeletedId(DELETED_GIFT_IDS_KEY, id);
   const existing = getGiftCatalogue();
   const updated = existing.filter((item) => item.id !== id);
   cacheGifts = updated;
@@ -449,6 +559,8 @@ export function getPortfolio(): PortfolioItem[] {
   if (typeof window === "undefined") return PORTFOLIO_DATA;
   if (cachePortfolio) return cachePortfolio;
 
+  const deletedIds = getDeletedIds(DELETED_PORTFOLIO_IDS_KEY);
+
   // Check if store version is outdated to ensure mobile and web always see the latest curated showcases
   const storedVersion = safeLocalStorageGet<string | null>(DATA_VERSION_KEY, null);
   const isVersionOutdated = storedVersion !== CURRENT_DATA_VERSION;
@@ -457,29 +569,31 @@ export function getPortfolio(): PortfolioItem[] {
 
   // Separate genuinely custom admin projects from default canonical showcases
   const customAdminItems = stored.filter(
-    (s) => !PORTFOLIO_DATA.some((d) => d.id === s.id)
+    (s) => !PORTFOLIO_DATA.some((d) => d.id === s.id) && !deletedIds.has(s.id)
   );
 
   // Map canonical items with latest verified imagery & text while allowing admin modifications
-  const canonicalItems = PORTFOLIO_DATA.map((defaultItem) => {
-    const adminSaved = stored.find((s) => s.id === defaultItem.id);
-    if (!adminSaved || isVersionOutdated) {
-      return defaultItem;
-    }
-    return {
-      ...defaultItem,
-      ...adminSaved,
-      // Ensure authentic high-res images are retained if admin hasn't replaced with a new custom photo
-      image:
-        adminSaved.image && !adminSaved.image.includes("landing-couple-traditional.jpg")
-          ? adminSaved.image
-          : defaultItem.image,
-      gallery:
-        adminSaved.gallery && adminSaved.gallery.length >= (defaultItem.gallery?.length || 0)
-          ? adminSaved.gallery
-          : (defaultItem.gallery || []),
-    };
-  });
+  const canonicalItems = PORTFOLIO_DATA
+    .filter((defaultItem) => !deletedIds.has(defaultItem.id))
+    .map((defaultItem) => {
+      const adminSaved = stored.find((s) => s.id === defaultItem.id);
+      if (!adminSaved || isVersionOutdated) {
+        return defaultItem;
+      }
+      return {
+        ...defaultItem,
+        ...adminSaved,
+        // Ensure authentic high-res images are retained if admin hasn't replaced with a new custom photo
+        image:
+          adminSaved.image && !adminSaved.image.includes("landing-couple-traditional.jpg")
+            ? adminSaved.image
+            : defaultItem.image,
+        gallery:
+          adminSaved.gallery && adminSaved.gallery.length >= (defaultItem.gallery?.length || 0)
+            ? adminSaved.gallery
+            : (defaultItem.gallery || []),
+      };
+    });
 
   const merged = [...canonicalItems, ...customAdminItems];
   cachePortfolio = merged;
@@ -490,7 +604,7 @@ export function getPortfolio(): PortfolioItem[] {
     safeLocalStorageSet(PORTFOLIO_KEY, merged);
     const existingTestimonials = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
     if (existingTestimonials && Array.isArray(existingTestimonials)) {
-      const cleaned = existingTestimonials.filter((s) => !LEGACY_TESTIMONIAL_IDS.includes(s.id));
+      const cleaned = normalizeTestimonialsList(existingTestimonials);
       safeLocalStorageSet(TESTIMONIALS_KEY, cleaned);
       idbSet(TESTIMONIALS_KEY, cleaned);
       cacheTestimonials = cleaned;
@@ -530,6 +644,7 @@ export function updatePortfolioItem(id: string, updates: Partial<PortfolioItem>)
 }
 
 export function deletePortfolioItem(id: string): void {
+  recordDeletedId(DELETED_PORTFOLIO_IDS_KEY, id);
   const existing = getPortfolio();
   const updated = existing.filter((item) => item.id !== id);
   cachePortfolio = updated;
@@ -588,13 +703,25 @@ export function logoutAdmin(): void {
 }
 
 // --- TESTIMONIALS (ADMIN MANAGED ONLY - NO HARDCODED CONTENT) ---
+function commitTestimonials(rawList: Testimonial[], dispatch = true): Testimonial[] {
+  const cleaned = normalizeTestimonialsList(rawList);
+  cacheTestimonials = cleaned;
+  safeLocalStorageSet(TESTIMONIALS_KEY, cleaned);
+  idbSet(TESTIMONIALS_KEY, cleaned);
+
+  if (dispatch && typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_testimonials_updated"));
+  }
+  return cleaned;
+}
+
 export function getTestimonials(): Testimonial[] {
   if (typeof window === "undefined") return [];
   if (cacheTestimonials) return cacheTestimonials;
 
   const stored = safeLocalStorageGet<Testimonial[] | null>(TESTIMONIALS_KEY, null);
   if (stored && Array.isArray(stored)) {
-    const cleaned = stored.filter((s) => !LEGACY_TESTIMONIAL_IDS.includes(s.id));
+    const cleaned = normalizeTestimonialsList(stored);
     cacheTestimonials = cleaned;
     return cleaned;
   }
@@ -605,69 +732,234 @@ export function getTestimonials(): Testimonial[] {
 
 export function getPublishedTestimonials(): Testimonial[] {
   const all = getTestimonials();
-  return all.filter((t) => t.isPublished);
+  return all.filter((t) => t.isPublished !== false);
 }
 
-export async function syncTestimonialsToServer(list: Testimonial[]): Promise<boolean> {
+export async function reconcileTestimonialsFromServer(): Promise<{
+  ok: boolean;
+  testimonials: Testimonial[];
+  error?: string;
+}> {
+  if (typeof window === "undefined") {
+    return { ok: false, testimonials: [], error: "Unavailable on server" };
+  }
+  try {
+    const res = await fetch("/api/testimonials", { cache: "no-store" });
+    if (!res.ok) {
+      return { ok: false, testimonials: getTestimonials(), error: `HTTP ${res.status}` };
+    }
+    const data = await res.json();
+    if (!Array.isArray(data.testimonials)) {
+      return { ok: false, testimonials: getTestimonials(), error: "Invalid server response" };
+    }
+    testimonialsServerSynced = true;
+    const normalized = normalizeTestimonialsList(data.testimonials);
+    const prevJson = JSON.stringify(getTestimonials());
+    const nextJson = JSON.stringify(normalized);
+    const committed = commitTestimonials(normalized, prevJson !== nextJson);
+    return { ok: true, testimonials: committed };
+  } catch (err: any) {
+    return {
+      ok: false,
+      testimonials: getTestimonials(),
+      error: err?.message || "Network error fetching testimonials",
+    };
+  }
+}
+
+export async function syncTestimonialsToServer(list: Testimonial[]): Promise<{
+  ok: boolean;
+  testimonials: Testimonial[];
+  error?: string;
+}> {
+  try {
+    const normalizedInput = normalizeTestimonialsList(list);
+    const res = await fetch("/api/testimonials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ testimonials: normalizedInput }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      return {
+        ok: false,
+        testimonials: getTestimonials(),
+        error: data?.message || data?.error || `Failed to sync testimonials (HTTP ${res.status})`,
+      };
+    }
+    testimonialsServerSynced = true;
+    const nextList = Array.isArray(data.testimonials) ? data.testimonials : normalizedInput;
+    const committed = commitTestimonials(nextList);
+    return { ok: true, testimonials: committed };
+  } catch (err: any) {
+    console.warn("Could not sync testimonials to server:", err);
+    return {
+      ok: false,
+      testimonials: getTestimonials(),
+      error: err?.message || "Could not connect to server to sync testimonials.",
+    };
+  }
+}
+
+export async function addTestimonial(
+  item: Omit<Testimonial, "id" | "createdAt">
+): Promise<{
+  ok: boolean;
+  error?: string;
+  testimonials: Testimonial[];
+  item?: Testimonial;
+}> {
+  const cleanQuote = (item.quote || item.text || "").trim();
+  const roleOrEvent =
+    item.roleOrEvent?.trim() ||
+    [item.clientRole?.trim(), item.eventName?.trim()].filter(Boolean).join(" • ") ||
+    undefined;
+
+  const newTestimonial: Testimonial = {
+    ...item,
+    id: `testi-${Date.now().toString(36)}`,
+    clientName: item.clientName.trim(),
+    clientRole: item.clientRole?.trim() || undefined,
+    eventName: item.eventName?.trim() || undefined,
+    roleOrEvent,
+    quote: cleanQuote,
+    text: cleanQuote,
+    rating: Math.min(5, Math.max(1, Math.round(Number(item.rating) || 5))),
+    image: item.image?.trim() || undefined,
+    isPublished: item.isPublished !== false,
+    createdAt: new Date().toISOString(),
+  };
+
   try {
     const res = await fetch("/api/testimonials", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ testimonials: list }),
+      body: JSON.stringify({ testimonial: newTestimonial }),
     });
-    return res.ok;
-  } catch (err) {
-    console.warn("Could not sync testimonials to server:", err);
-    return false;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      return {
+        ok: false,
+        error: data?.message || data?.error || "Failed to save testimonial to server.",
+        testimonials: getTestimonials(),
+      };
+    }
+    testimonialsServerSynced = true;
+    const serverList = Array.isArray(data.testimonials)
+      ? data.testimonials
+      : [newTestimonial, ...getTestimonials()];
+    const committed = commitTestimonials(serverList);
+    const saved = committed.find((t) => t.id === newTestimonial.id) || newTestimonial;
+    return { ok: true, testimonials: committed, item: saved };
+  } catch (err: any) {
+    return {
+      ok: false,
+      error: err?.message || "Network error while saving testimonial.",
+      testimonials: getTestimonials(),
+    };
   }
 }
 
-export function addTestimonial(item: Omit<Testimonial, "id" | "createdAt">): Testimonial {
-  const newTestimonial: Testimonial = {
-    ...item,
-    id: `testi-${Date.now().toString(36)}`,
-    createdAt: new Date().toISOString(),
+export async function updateTestimonial(
+  id: string,
+  updates: Partial<Testimonial>
+): Promise<{
+  ok: boolean;
+  error?: string;
+  testimonials: Testimonial[];
+}> {
+  const existing = getTestimonials();
+  const current = existing.find((item) => item.id === id);
+  if (!current) {
+    return { ok: false, error: "Testimonial not found.", testimonials: existing };
+  }
+
+  const nextQuote = (updates.quote ?? updates.text ?? current.quote ?? current.text ?? "").trim();
+  const nextRole =
+    updates.clientRole !== undefined ? updates.clientRole?.trim() || undefined : current.clientRole;
+  const nextEvent =
+    updates.eventName !== undefined ? updates.eventName?.trim() || undefined : current.eventName;
+  const nextRoleOrEvent =
+    updates.roleOrEvent !== undefined
+      ? updates.roleOrEvent?.trim() || undefined
+      : [nextRole, nextEvent].filter(Boolean).join(" • ") || undefined;
+
+  const updatedItem: Testimonial = {
+    ...current,
+    ...updates,
+    clientName: (updates.clientName ?? current.clientName).trim(),
+    clientRole: nextRole,
+    eventName: nextEvent,
+    roleOrEvent: nextRoleOrEvent,
+    quote: nextQuote,
+    text: nextQuote,
+    rating: Math.min(5, Math.max(1, Math.round(Number(updates.rating ?? current.rating) || 5))),
+    image:
+      updates.image !== undefined
+        ? updates.image?.trim() || undefined
+        : current.image?.trim() || undefined,
+    isPublished: updates.isPublished !== undefined ? updates.isPublished : current.isPublished,
   };
-  const existing = getTestimonials();
-  const updated = [newTestimonial, ...existing];
-  cacheTestimonials = updated;
-  safeLocalStorageSet(TESTIMONIALS_KEY, updated);
-  idbSet(TESTIMONIALS_KEY, updated);
 
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("events21_testimonials_updated"));
-    // Sync with server in background
-    syncTestimonialsToServer(updated).catch(() => {});
-  }
-  return newTestimonial;
-}
-
-export function updateTestimonial(id: string, updates: Partial<Testimonial>): void {
-  const existing = getTestimonials();
-  const updated = existing.map((item) => (item.id === id ? { ...item, ...updates } : item));
-  cacheTestimonials = updated;
-  safeLocalStorageSet(TESTIMONIALS_KEY, updated);
-  idbSet(TESTIMONIALS_KEY, updated);
-
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("events21_testimonials_updated"));
-    // Sync with server in background
-    syncTestimonialsToServer(updated).catch(() => {});
-  }
-}
-
-export function deleteTestimonial(id: string): void {
-  const existing = getTestimonials();
-  const updated = existing.filter((item) => item.id !== id);
-  cacheTestimonials = updated;
-  safeLocalStorageSet(TESTIMONIALS_KEY, updated);
-  idbSet(TESTIMONIALS_KEY, updated);
-
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("events21_testimonials_updated"));
-    fetch(`/api/testimonials?id=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {
-      syncTestimonialsToServer(updated).catch(() => {});
+  try {
+    const res = await fetch("/api/testimonials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ testimonial: updatedItem }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      return {
+        ok: false,
+        error: data?.message || data?.error || "Failed to update testimonial on server.",
+        testimonials: existing,
+      };
+    }
+    testimonialsServerSynced = true;
+    const serverList = Array.isArray(data.testimonials)
+      ? data.testimonials
+      : existing.map((item) => (item.id === id ? updatedItem : item));
+    const committed = commitTestimonials(serverList);
+    return { ok: true, testimonials: committed };
+  } catch (err: any) {
+    return {
+      ok: false,
+      error: err?.message || "Network error while updating testimonial.",
+      testimonials: existing,
+    };
+  }
+}
+
+export async function deleteTestimonial(id: string): Promise<{
+  ok: boolean;
+  error?: string;
+  testimonials: Testimonial[];
+}> {
+  const existing = getTestimonials();
+  try {
+    const res = await fetch(`/api/testimonials?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      return {
+        ok: false,
+        error: data?.message || data?.error || `Failed to delete testimonial (HTTP ${res.status}).`,
+        testimonials: existing,
+      };
+    }
+    testimonialsServerSynced = true;
+    const nextList = Array.isArray(data.testimonials)
+      ? data.testimonials
+      : existing.filter((item) => item.id !== id);
+    const committed = commitTestimonials(nextList);
+    return { ok: true, testimonials: committed };
+  } catch (err: any) {
+    return {
+      ok: false,
+      error: err?.message || "Network error while deleting testimonial.",
+      testimonials: existing,
+    };
   }
 }
 
@@ -703,12 +995,99 @@ export function getAvailableTimeSlots(dateString: string): { slot: string; avail
   }));
 }
 
+export async function submitConsultationBooking(
+  bookingData: Omit<ConsultationBooking, "id" | "status" | "createdAt">
+): Promise<{ success: boolean; booking?: ConsultationBooking; error?: string }> {
+  const existing = getConsultations();
+
+  // Check local slot collision
+  const collision = existing.find(
+    (c) =>
+      c.date === bookingData.date &&
+      c.timeSlot === bookingData.timeSlot &&
+      c.status !== "Cancelled"
+  );
+
+  if (collision) {
+    return {
+      success: false,
+      error: `The ${bookingData.timeSlot} slot on ${bookingData.date} is already reserved. Please select another time slot.`,
+    };
+  }
+
+  const candidateBooking: ConsultationBooking = {
+    ...bookingData,
+    id: `cst-${Date.now().toString(36).toUpperCase()}`,
+    status: "Confirmed",
+    createdAt: new Date().toISOString(),
+  };
+
+  let savedBooking = candidateBooking;
+
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/consultations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(candidateBooking),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return {
+          success: false,
+          error: data?.error || "Could not process consultation booking. Please check your details and try again.",
+        };
+      }
+      if (data?.booking && typeof data.booking === "object") {
+        savedBooking = {
+          ...candidateBooking,
+          ...data.booking,
+        };
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err?.message || "Unable to reach booking server. Please check your connection and try again.",
+      };
+    }
+  }
+
+  const updated = [savedBooking, ...existing];
+  cacheConsultations = updated;
+  safeLocalStorageSet(CONSULTATIONS_KEY, updated);
+  idbSet(CONSULTATIONS_KEY, updated);
+
+  // Record In-App Admin Notification
+  addAdminNotification({
+    type: "consultation",
+    title: "New Appointment Booked",
+    message: `${savedBooking.fullName} booked a consultation for ${savedBooking.date} at ${savedBooking.timeSlot} (${savedBooking.eventType}).`,
+    details: {
+      bookingId: savedBooking.id,
+      fullName: savedBooking.fullName,
+      email: savedBooking.email,
+      phone: savedBooking.phone,
+      date: savedBooking.date,
+      timeSlot: savedBooking.timeSlot,
+      eventType: savedBooking.eventType,
+    },
+  });
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("events21_consultations_updated"));
+  }
+
+  // Fallback Supabase sync in background
+  pushConsultationToSupabase(savedBooking).catch(() => { });
+
+  return { success: true, booking: savedBooking };
+}
+
 export function bookConsultation(
   bookingData: Omit<ConsultationBooking, "id" | "status" | "createdAt">
 ): { success: boolean; booking?: ConsultationBooking; error?: string } {
   const existing = getConsultations();
 
-  // Check collision
   const collision = existing.find(
     (c) =>
       c.date === bookingData.date &&
@@ -735,7 +1114,6 @@ export function bookConsultation(
   safeLocalStorageSet(CONSULTATIONS_KEY, updated);
   idbSet(CONSULTATIONS_KEY, updated);
 
-  // 1. Record In-App Admin Notification
   addAdminNotification({
     type: "consultation",
     title: "New Appointment Booked",
@@ -753,8 +1131,6 @@ export function bookConsultation(
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_consultations_updated"));
-
-    // 2. Dispatch Confirmation Email to Client & Alert Email to Admin from Royaltyeventservice@gmail.com
     fetch("/api/consultations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -762,8 +1138,7 @@ export function bookConsultation(
     }).catch((err) => console.warn("Consultation email API trigger:", err));
   }
 
-  // 3. Sync to Supabase in background
-  pushConsultationToSupabase(newBooking).catch(() => {});
+  pushConsultationToSupabase(newBooking).catch(() => { });
 
   return { success: true, booking: newBooking };
 }
@@ -877,7 +1252,7 @@ export function deleteTeamMember(id: string): void {
   }
 }
 
-// --- ROYAL PLANNERS ACADEMY REGISTRATIONS ---
+// --- EVENTS21 PLANNERS ACADEMY REGISTRATIONS ---
 export function getAcademyRegistrations(): AcademyRegistration[] {
   if (typeof window === "undefined") return [];
   if (cacheAcademy) return cacheAcademy;
@@ -887,13 +1262,16 @@ export function getAcademyRegistrations(): AcademyRegistration[] {
 }
 
 export function saveAcademyRegistration(
-  reg: Omit<AcademyRegistration, "id" | "status" | "createdAt">
+  reg: Omit<AcademyRegistration, "id" | "status" | "createdAt"> & {
+    id?: string;
+    createdAt?: string;
+  }
 ): AcademyRegistration {
   const newReg: AcademyRegistration = {
     ...reg,
-    id: `rpa-${Date.now().toString(36).toUpperCase()}`,
+    id: reg.id || `rpa-${Date.now().toString(36).toUpperCase()}`,
     status: "New Enquiry",
-    createdAt: new Date().toISOString(),
+    createdAt: reg.createdAt || new Date().toISOString(),
   };
 
   const existing = getAcademyRegistrations();
@@ -902,19 +1280,32 @@ export function saveAcademyRegistration(
   safeLocalStorageSet(ACADEMY_REGISTRATIONS_KEY, updated);
   idbSet(ACADEMY_REGISTRATIONS_KEY, updated);
 
+  addAdminNotification({
+    type: "academy",
+    title: "New Academy Registration",
+    message: `${newReg.fullName} applied to Events21 Planners Academy (${newReg.experienceLevel}).`,
+    details: {
+      registrationId: newReg.id,
+      fullName: newReg.fullName,
+      email: newReg.email,
+      phone: newReg.phone,
+      experienceLevel: newReg.experienceLevel,
+    },
+  });
+
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("events21_academy_updated"));
   }
 
   // Push to Supabase in background if configured
-  pushAcademyRegistrationToSupabase(newReg).catch(() => {});
+  pushAcademyRegistrationToSupabase(newReg).catch(() => { });
 
   return newReg;
 }
 
 export function updateAcademyRegistrationStatus(
   id: string,
-  status: AcademyRegistration["status"],
+  status?: AcademyRegistration["status"],
   notes?: string
 ): void {
   const existing = getAcademyRegistrations();
@@ -922,7 +1313,7 @@ export function updateAcademyRegistrationStatus(
     if (item.id === id) {
       return {
         ...item,
-        status,
+        ...(status !== undefined ? { status } : {}),
         ...(notes !== undefined ? { notes } : {}),
       };
     }

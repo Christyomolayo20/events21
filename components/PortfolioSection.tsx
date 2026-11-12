@@ -58,9 +58,9 @@ export default function PortfolioSection() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-sans tracking-wide transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-sans tracking-wide transition-all cursor-pointer ${
                   activeCategory === cat
-                    ? "bg-brand-plum text-white font-semibold shadow-xs"
+                    ? "bg-brand-plum text-white font-semibold shadow-sm"
                     : "bg-brand-warm-gray text-brand-plum/70 hover:text-brand-plum hover:bg-brand-warm-border/60"
                 }`}
               >
@@ -71,13 +71,30 @@ export default function PortfolioSection() {
         </div>
 
         {/* Portfolio Masonry / Editorial Grid */}
+        {filteredItems.length === 0 ? (
+          <div className="bg-brand-warm-white rounded-3xl border border-brand-warm-border p-10 text-center max-w-xl mx-auto">
+            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-2">
+              No Celebrations Listed Under &ldquo;{activeCategory}&rdquo; Yet
+            </h3>
+            <p className="text-xs sm:text-sm text-brand-plum/70 font-sans mb-6">
+              Browse all categories to explore our curated weddings, traditional ceremonies, decor transformations, and corporate galas.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveCategory("All")}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+            >
+              <span>Show All Projects</span>
+            </button>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map((item) => {
             return (
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-500 shadow-xs hover:shadow-elevated flex flex-col justify-between w-full max-w-full sm:max-w-[420px] mx-auto"
+                className="group cursor-pointer rounded-2xl overflow-hidden bg-brand-warm-white border border-brand-warm-border/80 hover:border-brand-purple/40 transition-all duration-500 shadow-sm hover:shadow-elevated flex flex-col justify-between w-full max-w-full sm:max-w-[420px] mx-auto"
               >
                 {/* Photo Container with Responsive Height & Top-Center Alignment */}
                 <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
@@ -107,7 +124,7 @@ export default function PortfolioSection() {
 
                   {/* Category Badge */}
                   <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-brand-plum shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-brand-plum shadow-sm">
                       {item.category}
                     </span>
                   </div>
@@ -115,7 +132,7 @@ export default function PortfolioSection() {
                   {/* Video Badge */}
                   {item.videoUrl && (
                     <div className="absolute top-4 right-4 z-10">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-sm">
                         <Play className="w-3 h-3 fill-white" />
                         <span>Video Reel</span>
                       </span>
@@ -141,6 +158,7 @@ export default function PortfolioSection() {
             );
           })}
         </div>
+        )}
 
         {/* View All Work Action */}
         <div className="text-center mt-12 md:mt-16">

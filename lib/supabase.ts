@@ -124,7 +124,7 @@ export async function pushEnquiryToSupabase(enquiry: Record<string, any>) {
 }
 
 /**
- * Safe Supabase push for Royal Planners Academy Registrations
+ * Safe Supabase push for Events21 Planners Academy Registrations
  */
 export async function pushAcademyRegistrationToSupabase(registration: Record<string, any>) {
   const client = getSupabase();

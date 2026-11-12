@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendEmail, OFFICIAL_EMAIL } from "@/lib/email";
+import { sendEmail, OFFICIAL_EMAIL, OWNER_EMAIL } from "@/lib/email";
 import { getSupabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +118,8 @@ export async function POST(req: Request) {
 
     const clientRes = await sendEmail({
       to: clientEmail,
+      from: `EVENTS21 <${OFFICIAL_EMAIL}>`,
+      replyTo: OFFICIAL_EMAIL,
       subject: clientSubject,
       html: clientHtml,
     });
@@ -135,7 +137,9 @@ export async function POST(req: Request) {
     `;
 
     const adminRes = await sendEmail({
-      to: [OFFICIAL_EMAIL, "christianahomolayo19@gmail.com"],
+      to: [OFFICIAL_EMAIL, OWNER_EMAIL],
+      from: `EVENTS21 Bookings <${OFFICIAL_EMAIL}>`,
+      replyTo: clientEmail,
       subject: adminSubject,
       html: adminHtml,
     });

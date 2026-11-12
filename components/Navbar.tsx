@@ -99,12 +99,12 @@ export default function Navbar() {
                             </span>
                           </Link>
                           <Link
-                            href="/services/royal-planners-academy"
+                            href="/services/events21-planners-academy"
                             className="block px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-plum hover:bg-brand-soft-lavender/50 hover:text-brand-purple transition-colors border-t border-brand-warm-border/40"
                           >
                             <div className="flex items-center justify-between">
                               <span className="block text-brand-purple font-serif text-sm font-bold">
-                                Royal Planners Academy
+                                Events21 Planners Academy
                               </span>
                               <span className="text-[9px] uppercase tracking-wider font-sans font-bold px-1.5 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold">
                                 Training
@@ -157,7 +157,7 @@ export default function Navbar() {
               <Link
                 href="/contact"
                 id="nav-cta-plan-mobile"
-                className="inline-flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-xs border border-brand-gold/30 active:scale-95 transition-all whitespace-nowrap"
+                className="inline-flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-sm border border-brand-gold/30 active:scale-95 transition-all whitespace-nowrap"
               >
                 <span>Plan Your Event</span>
                 <ArrowUpRight className="w-3 h-3 text-brand-gold-light shrink-0" />
@@ -185,7 +185,7 @@ export default function Navbar() {
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden animate-fade-in"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in"
           onClick={() => setMobileMenuOpen(false)}
           aria-hidden="true"
         />
@@ -219,7 +219,9 @@ export default function Navbar() {
               (link.href === "/services" && pathname.startsWith("/services"));
 
             if (link.name === "Services") {
-              const isAcademyActive = pathname === "/services/royal-planners-academy";
+              const isAcademyActive =
+                pathname === "/services/events21-planners-academy" ||
+                pathname === "/services/royal-planners-academy";
 
               return (
                 <div key={link.name} className="space-y-1">
@@ -235,9 +237,9 @@ export default function Navbar() {
                     {link.name}
                   </Link>
 
-                  {/* Sublink for Royal Planners Academy */}
+                  {/* Sublink for Events21 Planners Academy */}
                   <Link
-                    href="/services/royal-planners-academy"
+                    href="/services/events21-planners-academy"
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center justify-between ml-3 px-3 py-2 rounded-lg text-sm font-sans transition-colors ${
                       isAcademyActive
@@ -245,7 +247,7 @@ export default function Navbar() {
                         : "text-brand-plum/80 hover:text-brand-purple hover:bg-brand-warm-gray"
                     }`}
                   >
-                    <span>Royal Planners Academy</span>
+                    <span>Events21 Planners Academy</span>
                     <span className="text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold">
                       Academy
                     </span>
@@ -280,11 +282,11 @@ export default function Navbar() {
               <ArrowUpRight className="w-4 h-4 text-brand-gold-light" />
             </Link>
             <Link
-              href="/services/royal-planners-academy#register"
+              href="/services/events21-planners-academy#register"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-full bg-white border border-brand-purple/20 text-brand-purple text-xs uppercase tracking-widest font-semibold hover:bg-brand-soft-lavender/50 transition-colors"
             >
-              <span>Royal Planners Academy</span>
+              <span>Events21 Planners Academy</span>
             </Link>
           </div>
         </div>

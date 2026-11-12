@@ -78,13 +78,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/images/royalty-logo-transparent.png", type: "image/png" },
+      { url: "/images/events21-brand-logo.png", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },
     ],
     apple: [
-      { url: "/images/royalty-logo-transparent.png", sizes: "180x180", type: "image/png" },
+      { url: "/images/events21-brand-logo.png", sizes: "180x180", type: "image/png" },
     ],
-    shortcut: "/images/royalty-logo-transparent.png",
+    shortcut: "/images/events21-brand-logo.png",
   },
 };
 

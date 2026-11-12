@@ -135,13 +135,34 @@ function buildAdminEnquiryEmailHtml(enquiry: {
   `;
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { fullName, email, phone, eventType, eventDate, eventLocation, guestCount, budgetRange, message } = body;
 
-    if (!fullName || !email || !phone || !eventType) {
+    if (
+      !fullName ||
+      !String(fullName).trim() ||
+      !email ||
+      !String(email).trim() ||
+      !phone ||
+      !String(phone).trim() ||
+      !eventType ||
+      !String(eventType).trim()
+    ) {
       return NextResponse.json({ error: "Missing required fields (fullName, email, phone, eventType are required)." }, { status: 400 });
+    }
+
+    const cleanEmail = sanitize(email, 100).toLowerCase();
+    if (!EMAIL_REGEX.test(cleanEmail)) {
+      return NextResponse.json({ error: "Please provide a valid email address format." }, { status: 400 });
+    }
+
+    const cleanPhoneDigits = String(phone).replace(/\D/g, "");
+    if (cleanPhoneDigits.length < 8) {
+      return NextResponse.json({ error: "Please provide a valid phone number (at least 8 digits)." }, { status: 400 });
     }
 
     const enquiryId = `enq-${Date.now().toString(36).toUpperCase()}`;
@@ -150,7 +171,7 @@ export async function POST(request: Request) {
     const enquiry = {
       id: enquiryId,
       fullName: sanitize(fullName, 100),
-      email: sanitize(email, 100).toLowerCase(),
+      email: cleanEmail,
       phone: sanitize(phone, 30),
       eventType: sanitize(eventType, 80),
       eventDate: sanitize(eventDate || "TBD", 40),

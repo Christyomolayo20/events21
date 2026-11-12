@@ -39,7 +39,7 @@ export default function ContactSection() {
             href="https://wa.me/2348060549596?text=Hello%20Event%2021!%20I%20would%20like%20to%20enquire%20about%20your%20services."
             target="_blank"
             rel="noopener noreferrer"
-            className="p-6 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all group"
+            className="p-6 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-subtle transition-all group"
           >
             <div className="w-10 h-10 rounded-full bg-[#E8F8EE] text-[#25D366] flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <MessageCircle className="w-5 h-5" />
@@ -51,7 +51,7 @@ export default function ContactSection() {
 
           <a
             href="mailto:Royaltyeventservice@gmail.com"
-            className="p-6 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-subtle transition-all group"
+            className="p-6 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-subtle transition-all group"
           >
             <div className="w-10 h-10 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <Mail className="w-5 h-5" />
@@ -63,7 +63,7 @@ export default function ContactSection() {
             <span className="text-[11px] text-brand-plum/50 block mt-1">Written proposals & decks</span>
           </a>
 
-          <div className="p-6 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+          <div className="p-6 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
             <div className="w-10 h-10 rounded-full bg-brand-warm-gray text-brand-gold flex items-center justify-center mx-auto mb-3">
               <MapPin className="w-5 h-5" />
             </div>

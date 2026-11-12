@@ -1,18 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Logo from "./Logo";
 import { Instagram, ArrowUpRight } from "lucide-react";
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(2026);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
-    { name: "Royal Planners Academy", href: "/services/royal-planners-academy" },
+    { name: "Events21 Planners Academy", href: "/services/events21-planners-academy" },
     { name: "Gallery", href: "/gallery" },
     { name: "Testimonials", href: "/testimonials" },
     { name: "Gifts by Adeola", href: "/gifts-by-adeola" },

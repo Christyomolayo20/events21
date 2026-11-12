@@ -22,17 +22,17 @@ export default function GalleryPage() {
     return () => window.removeEventListener("events21_portfolio_updated", handleUpdate);
   }, []);
 
-  const categories = ["All", "Weddings", "Decor", "Celebrations", "Corporate Events", "Proposals"];
+  const categories = ["All", "Weddings", "Traditional", "Decor", "Celebrations", "Corporate Events", "Proposals"];
 
   const filteredItems =
     activeCategory === "All"
       ? items
       : items.filter((item) => {
-          if (activeCategory === "Decor") {
-            return item.category === "Decor" || (item.category as string) === "Ballrooms & Decor";
-          }
-          return item.category === activeCategory;
-        });
+        if (activeCategory === "Decor") {
+          return item.category === "Decor" || (item.category as string) === "Ballrooms & Decor";
+        }
+        return item.category === activeCategory;
+      });
 
   return (
     <div className="pt-24 pb-16 md:pt-32 md:pb-20">
@@ -59,11 +59,10 @@ export default function GalleryPage() {
               key={cat}
               type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-full text-xs font-sans tracking-wide transition-all ${
-                activeCategory === cat
-                  ? "bg-brand-plum text-white font-semibold shadow-xs"
-                  : "bg-white text-brand-plum/70 border border-brand-warm-border hover:border-brand-purple hover:text-brand-purple"
-              }`}
+              className={`px-5 py-2.5 rounded-full text-xs font-sans tracking-wide transition-all cursor-pointer ${activeCategory === cat
+                ? "bg-brand-plum text-white font-semibold shadow-sm"
+                : "bg-white text-brand-plum/70 border border-brand-warm-border hover:border-brand-purple hover:text-brand-purple"
+                }`}
             >
               {cat}
             </button>
@@ -73,78 +72,96 @@ export default function GalleryPage() {
 
       {/* Gallery Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map((item) => {
-            return (
-              <div
-                key={item.id}
-                onClick={() => setSelectedItem(item)}
-                className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-full sm:max-w-[420px] mx-auto"
-              >
-                {/* Photo with Responsive Height & Top-Center Alignment */}
-                <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    style={{ objectPosition: "top center" }}
-                  />
-                  <div className="absolute inset-0 bg-brand-plum-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-brand-plum text-xs font-sans font-semibold uppercase tracking-wider transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
-                      {item.videoUrl ? (
-                        <>
-                          <Play className="w-4 h-4 text-brand-purple fill-brand-purple" />
-                          <span>Watch Video</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-4 h-4 text-brand-purple" />
-                          <span>View Story</span>
-                        </>
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Category Badge */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-plum shadow-xs">
-                      {item.category}
-                    </span>
-                  </div>
-
-                  {/* Video Badge */}
-                  {item.videoUrl && (
-                    <div className="absolute top-4 right-4 z-10">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-xs">
-                        <Play className="w-3 h-3 fill-white" />
-                        <span>Video Reel</span>
+        {filteredItems.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-brand-warm-border p-12 text-center max-w-xl mx-auto shadow-sm">
+            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-2">
+              No Celebrations Listed Under &ldquo;{activeCategory}&rdquo; Yet
+            </h3>
+            <p className="text-xs sm:text-sm text-brand-plum/70 font-sans mb-6">
+              Browse our complete portfolio to see all weddings, traditional ceremonies, decor showcases, and proposals.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveCategory("All")}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+            >
+              <span>Show All Projects</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredItems.map((item) => {
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => setSelectedItem(item)}
+                  className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-full sm:max-w-[420px] mx-auto"
+                >
+                  {/* Photo with Responsive Height & Top-Center Alignment */}
+                  <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden bg-brand-plum shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      style={{ objectPosition: "top center" }}
+                    />
+                    <div className="absolute inset-0 bg-brand-plum-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-brand-plum text-xs font-sans font-semibold uppercase tracking-wider transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
+                        {item.videoUrl ? (
+                          <>
+                            <Play className="w-4 h-4 text-brand-purple fill-brand-purple" />
+                            <span>Watch Video</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-4 h-4 text-brand-purple" />
+                            <span>View Story</span>
+                          </>
+                        )}
                       </span>
                     </div>
-                  )}
-                </div>
 
-                {/* Details */}
-                <div className="p-5 sm:p-6 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-plum group-hover:text-brand-purple transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
-                      {item.subtitle}
-                    </p>
-                    <span className="text-[11px] text-brand-gold font-sans font-medium mt-2 block">
-                      {item.location} • {item.year}
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-brand-plum shadow-sm">
+                        {item.category}
+                      </span>
+                    </div>
+
+                    {/* Video Badge */}
+                    {item.videoUrl && (
+                      <div className="absolute top-4 right-4 z-10">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-purple text-white shadow-sm">
+                          <Play className="w-3 h-3 fill-white" />
+                          <span>Video Reel</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="p-5 sm:p-6 flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-plum group-hover:text-brand-purple transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs text-brand-plum/60 font-sans mt-1 line-clamp-2">
+                        {item.subtitle}
+                      </p>
+                      <span className="text-[11px] text-brand-gold font-sans font-medium mt-2 block">
+                        {item.location} • {item.year}
+                      </span>
+                    </div>
+                    <span className="w-8 h-8 rounded-full bg-brand-warm-gray text-brand-plum/60 group-hover:bg-brand-purple group-hover:text-white flex items-center justify-center shrink-0 transition-colors mt-0.5">
+                      <ArrowUpRight className="w-4 h-4" />
                     </span>
                   </div>
-                  <span className="w-8 h-8 rounded-full bg-brand-warm-gray text-brand-plum/60 group-hover:bg-brand-purple group-hover:text-white flex items-center justify-center shrink-0 transition-colors mt-0.5">
-                    <ArrowUpRight className="w-4 h-4" />
-                  </span>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Footer CTA */}
         <div className="mt-16 text-center max-w-xl mx-auto p-8 rounded-3xl bg-brand-warm-white border border-brand-warm-border">

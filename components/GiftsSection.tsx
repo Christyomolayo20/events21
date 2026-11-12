@@ -58,7 +58,7 @@ export default function GiftsSection() {
               href="https://www.instagram.com/giftsbyadeola/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-brand-plum hover:text-white text-brand-plum border border-brand-warm-border text-xs font-sans font-semibold tracking-wide transition-all shadow-xs group"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-brand-plum hover:text-white text-brand-plum border border-brand-warm-border text-xs font-sans font-semibold tracking-wide transition-all shadow-sm group"
             >
               <Instagram className="w-4 h-4 text-brand-pink group-hover:text-white transition-colors" />
               <span>Follow @giftsbyadeola on Instagram</span>
@@ -69,19 +69,19 @@ export default function GiftsSection() {
 
         {/* 4 Core Pillars Pills */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 max-w-4xl mx-auto mb-12 text-center text-xs font-sans">
-          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-subtle transition-all">
+          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-subtle transition-all">
             <span className="font-bold text-brand-plum block">Wrapping of Eru Iyawo</span>
             <span className="text-[11px] text-brand-plum/65 mt-0.5 block">Traditional Yoruba Trunks</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-subtle transition-all">
+          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-subtle transition-all">
             <span className="font-bold text-brand-plum block">Corporate Gifts</span>
             <span className="text-[11px] text-brand-plum/65 mt-0.5 block">Executive Appreciation</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-subtle transition-all">
+          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-subtle transition-all">
             <span className="font-bold text-brand-plum block">Thoughtful Hampers</span>
             <span className="text-[11px] text-brand-plum/65 mt-0.5 block">Celebration &amp; Milestones</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-subtle transition-all">
+          <div className="p-4 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-subtle transition-all">
             <span className="font-bold text-brand-plum block">Guest Souvenirs</span>
             <span className="text-[11px] text-brand-plum/65 mt-0.5 block">Custom VIP Keepsakes</span>
           </div>
@@ -92,7 +92,7 @@ export default function GiftsSection() {
           {featuredGifts.map((gift) => (
             <div
               key={gift.id}
-              className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
+              className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
             >
               <div>
                 {/* Photo with fixed height, centered */}
@@ -106,7 +106,7 @@ export default function GiftsSection() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
                   <div className="absolute top-3.5 right-3.5 z-10">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-plum border border-brand-warm-border/60 shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-brand-plum border border-brand-warm-border/60 shadow-sm">
                       {gift.category}
                     </span>
                   </div>
@@ -155,7 +155,7 @@ export default function GiftsSection() {
                   href={getWhatsAppOrderLink(gift)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs group/btn"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-sm group/btn"
                 >
                   <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
                   <span>Order on WhatsApp</span>
@@ -192,7 +192,7 @@ export default function GiftsSection() {
 
             <Link
               href="/contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs uppercase tracking-widest font-semibold transition-colors bg-white shadow-sm"
             >
               <span>Book a Consultation</span>
               <ArrowUpRight className="w-4 h-4" />

@@ -24,11 +24,14 @@ import {
 import { getGiftCatalogue, saveGiftRequest } from "@/lib/store";
 import { GiftItem } from "@/lib/types";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function GiftsByAdeolaPage() {
   const [catalogue, setCatalogue] = useState<GiftItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customSubmitted, setCustomSubmitted] = useState(false);
+  const [customError, setCustomError] = useState<string | null>(null);
   const [activeGiftVideo, setActiveGiftVideo] = useState<{ title: string; url: string } | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
@@ -58,6 +61,8 @@ export default function GiftsByAdeolaPage() {
     "Corporate Gifts",
     "Hampers",
     "Souvenirs",
+    "Bespoke",
+    "Celebration",
   ];
 
   const filteredItems =
@@ -75,7 +80,37 @@ export default function GiftsByAdeolaPage() {
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveGiftRequest(customForm);
+    setCustomError(null);
+
+    const cleanName = customForm.fullName.trim();
+    const cleanPhone = customForm.phone.trim();
+    const cleanEmail = customForm.email.trim();
+    const cleanOccasion = customForm.occasion.trim();
+    const cleanBudget = customForm.budget.trim();
+
+    if (!cleanName || !cleanOccasion || !cleanBudget) {
+      setCustomError("Please provide your full name, occasion, and target budget.");
+      return;
+    }
+
+    if (cleanPhone.replace(/\D/g, "").length < 8) {
+      setCustomError("Please provide a valid WhatsApp / phone number (at least 8 digits).");
+      return;
+    }
+
+    if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
+      setCustomError("Please enter a valid email address or leave it blank.");
+      return;
+    }
+
+    saveGiftRequest({
+      ...customForm,
+      fullName: cleanName,
+      phone: cleanPhone,
+      email: cleanEmail,
+      occasion: cleanOccasion,
+      budget: cleanBudget,
+    });
     setCustomSubmitted(true);
   };
 
@@ -141,7 +176,7 @@ export default function GiftsByAdeolaPage() {
               href="https://www.instagram.com/giftsbyadeola/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-brand-plum hover:text-white text-brand-plum border border-brand-warm-border text-xs font-sans font-semibold tracking-wide transition-all shadow-xs group"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-brand-plum hover:text-white text-brand-plum border border-brand-warm-border text-xs font-sans font-semibold tracking-wide transition-all shadow-sm group"
             >
               <Instagram className="w-4 h-4 text-brand-pink group-hover:text-white transition-colors" />
               <span>Visit Official Instagram: @giftsbyadeola</span>
@@ -153,7 +188,11 @@ export default function GiftsByAdeolaPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto">
             <button
               type="button"
-              onClick={() => setIsCustomModalOpen(true)}
+              onClick={() => {
+                setCustomError(null);
+                setCustomSubmitted(false);
+                setIsCustomModalOpen(true);
+              }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm hover:shadow-md cursor-pointer"
             >
               <Gift className="w-4 h-4 text-brand-gold" />
@@ -164,7 +203,7 @@ export default function GiftsByAdeolaPage() {
               href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20am%20interested%20in%20wrapping%20of%20Eru%20Iyawo%20or%20curated%20gifting%20on%20a%20budget."
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple bg-white text-xs font-semibold uppercase tracking-widest transition-colors shadow-2xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple bg-white text-xs font-semibold uppercase tracking-widest transition-colors shadow-sm"
             >
               <MessageSquare className="w-4 h-4 text-brand-gold" />
               <span>Chat on WhatsApp</span>
@@ -174,19 +213,19 @@ export default function GiftsByAdeolaPage() {
 
         {/* Trust Badges Strip */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 max-w-4xl mx-auto mt-10 pt-8 border-t border-brand-warm-border/60">
-          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-xs text-xs text-brand-plum font-sans">
+          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-sm text-xs text-brand-plum font-sans">
             <ShieldCheck className="w-4 h-4 text-brand-gold shrink-0" />
             <span>Budget Friendly Tiering</span>
           </div>
-          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-xs text-xs text-brand-plum font-sans">
+          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-sm text-xs text-brand-plum font-sans">
             <Truck className="w-4 h-4 text-brand-purple shrink-0" />
             <span>Lagos &amp; Nationwide Delivery</span>
           </div>
-          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-xs text-xs text-brand-plum font-sans">
+          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-sm text-xs text-brand-plum font-sans">
             <Sparkle className="w-4 h-4 text-brand-gold shrink-0" />
             <span>Bespoke Hand Finishing</span>
           </div>
-          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-xs text-xs text-brand-plum font-sans">
+          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-brand-warm-border shadow-sm text-xs text-brand-plum font-sans">
             <Clock className="w-4 h-4 text-brand-purple shrink-0" />
             <span>Reliable Event Timelines</span>
           </div>
@@ -200,7 +239,7 @@ export default function GiftsByAdeolaPage() {
             className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
               activeCategory === "Wrapping of Eru Iyawo"
                 ? "border-brand-purple shadow-md bg-brand-soft-lavender/30 ring-1 ring-brand-purple/30"
-                : "border-brand-warm-border hover:border-brand-purple/40 shadow-2xs hover:shadow-xs"
+                : "border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-sm"
             }`}
           >
             <div className="w-11 h-11 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center mx-auto mb-2.5">
@@ -220,7 +259,7 @@ export default function GiftsByAdeolaPage() {
             className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
               activeCategory === "Corporate Gifts"
                 ? "border-brand-purple shadow-md bg-brand-soft-lavender/30 ring-1 ring-brand-purple/30"
-                : "border-brand-warm-border hover:border-brand-purple/40 shadow-2xs hover:shadow-xs"
+                : "border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-sm"
             }`}
           >
             <div className="w-11 h-11 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center mx-auto mb-2.5">
@@ -240,7 +279,7 @@ export default function GiftsByAdeolaPage() {
             className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
               activeCategory === "Hampers"
                 ? "border-brand-purple shadow-md bg-brand-soft-lavender/30 ring-1 ring-brand-purple/30"
-                : "border-brand-warm-border hover:border-brand-purple/40 shadow-2xs hover:shadow-xs"
+                : "border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-sm"
             }`}
           >
             <div className="w-11 h-11 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center mx-auto mb-2.5">
@@ -260,7 +299,7 @@ export default function GiftsByAdeolaPage() {
             className={`p-5 rounded-2xl bg-white border text-center transition-all cursor-pointer ${
               activeCategory === "Souvenirs"
                 ? "border-brand-purple shadow-md bg-brand-soft-lavender/30 ring-1 ring-brand-purple/30"
-                : "border-brand-warm-border hover:border-brand-purple/40 shadow-2xs hover:shadow-xs"
+                : "border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-sm"
             }`}
           >
             <div className="w-11 h-11 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center mx-auto mb-2.5">
@@ -295,7 +334,7 @@ export default function GiftsByAdeolaPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
             {/* Eru Iyawo Traditional Bridal Presentation */}
-            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
+            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-elevated transition-all flex flex-col justify-between">
               <div>
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -307,7 +346,7 @@ export default function GiftsByAdeolaPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
                   <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-plum shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-brand-plum shadow-sm">
                       Traditional Staging
                     </span>
                   </div>
@@ -357,7 +396,7 @@ export default function GiftsByAdeolaPage() {
                   href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20order%20the%20Traditional%20Eru%20Iyawo%20Wrapping%20(Starting%20from%20%E2%82%A675,000).%20Please%20provide%20ordering%20and%20delivery%20instructions."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-sm"
                 >
                   <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
                   <span>Order Eru Iyawo Wrapping</span>
@@ -380,7 +419,7 @@ export default function GiftsByAdeolaPage() {
             </div>
 
             {/* Eru Iyawo Presentation & Staging */}
-            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-xs hover:shadow-elevated transition-all flex flex-col justify-between">
+            <div className="group bg-white rounded-2xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/30 shadow-sm hover:shadow-elevated transition-all flex flex-col justify-between">
               <div>
                 <div className="relative w-full h-[300px] sm:h-[340px] bg-brand-plum overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -392,7 +431,7 @@ export default function GiftsByAdeolaPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
                   <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-plum shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-brand-plum shadow-sm">
                       Ceremonial Presentation
                     </span>
                   </div>
@@ -442,7 +481,7 @@ export default function GiftsByAdeolaPage() {
                   href="https://wa.me/2348060549596?text=Hello%20Adeola!%20I%20would%20like%20to%20order%20the%20Traditional%20Eru%20Iyawo%20Presentation%20%26%20Staging.%20Please%20share%20booking%20and%20pricing%20details."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-sm"
                 >
                   <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
                   <span>Order Eru Iyawo Staging</span>
@@ -488,7 +527,7 @@ export default function GiftsByAdeolaPage() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-2 rounded-full text-xs font-sans tracking-wide transition-all cursor-pointer ${
                   activeCategory === cat
-                    ? "bg-brand-plum text-white font-semibold shadow-xs"
+                    ? "bg-brand-plum text-white font-semibold shadow-sm"
                     : "bg-white text-brand-plum/80 border border-brand-warm-border hover:border-brand-purple/40 hover:text-brand-purple"
                 }`}
               >
@@ -499,11 +538,40 @@ export default function GiftsByAdeolaPage() {
         </div>
 
         {/* Product Cards Grid with Fixed Heights, No Prices & Well-Centered Images */}
+        {filteredItems.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-brand-warm-border p-12 text-center max-w-xl mx-auto shadow-sm">
+            <h3 className="font-serif text-2xl font-bold text-brand-plum mb-2">
+              No Gift Packages Found Under &ldquo;{activeCategory}&rdquo; Yet
+            </h3>
+            <p className="text-xs sm:text-sm text-brand-plum/70 font-sans mb-6">
+              Browse the full catalogue or request a custom curation tailored to your budget and celebration theme.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveCategory("All")}
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+              >
+                <span>Show All Gift Packages</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomError(null);
+                  setIsCustomModalOpen(true);
+                }}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-brand-plum/20 hover:border-brand-purple text-brand-plum hover:text-brand-purple text-xs font-semibold uppercase tracking-widest transition-colors bg-white cursor-pointer"
+              >
+                <span>Request Custom Curation</span>
+              </button>
+            </div>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map((gift) => (
             <div
               key={gift.id}
-              className="group bg-white rounded-3xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/35 shadow-xs hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
+              className="group bg-white rounded-3xl overflow-hidden border border-brand-warm-border hover:border-brand-purple/35 shadow-sm hover:shadow-elevated transition-all duration-300 flex flex-col justify-between w-full max-w-[400px] mx-auto"
             >
               <div>
                 {/* Photo with fixed height & centered */}
@@ -517,13 +585,13 @@ export default function GiftsByAdeolaPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
                   <div className="absolute top-3.5 right-3.5 z-10">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-xs text-brand-plum border border-brand-warm-border/60 shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-brand-plum border border-brand-warm-border/60 shadow-sm">
                       {gift.category}
                     </span>
                   </div>
                   {gift.popular && (
                     <div className="absolute top-3.5 left-3.5 z-10">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-plum text-white shadow-xs inline-flex items-center gap-1">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-brand-plum text-white shadow-sm inline-flex items-center gap-1">
                         <Sparkle className="w-2.5 h-2.5 text-brand-gold" />
                         <span>Most Requested</span>
                       </span>
@@ -594,7 +662,7 @@ export default function GiftsByAdeolaPage() {
                   href={getWhatsAppOrderLink(gift)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs group/btn"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-brand-plum hover:bg-brand-purple text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-sm group/btn"
                 >
                   <ShoppingBag className="w-3.5 h-3.5 text-brand-gold" />
                   <span>Order on WhatsApp</span>
@@ -603,6 +671,8 @@ export default function GiftsByAdeolaPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    setCustomError(null);
+                    setCustomSubmitted(false);
                     setCustomForm((prev) => ({
                       ...prev,
                       itemsRequested: `Custom order based on: ${gift.name}`,
@@ -617,6 +687,7 @@ export default function GiftsByAdeolaPage() {
             </div>
           ))}
         </div>
+        )}
       </section>
 
       {/* Interactive Bespoke Curation Banner */}
@@ -636,7 +707,11 @@ export default function GiftsByAdeolaPage() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={() => setIsCustomModalOpen(true)}
+                onClick={() => {
+                  setCustomError(null);
+                  setCustomSubmitted(false);
+                  setIsCustomModalOpen(true);
+                }}
                 className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-semibold uppercase tracking-widest transition-all shadow-md cursor-pointer"
               >
                 <Gift className="w-4 h-4 text-brand-gold" />
@@ -673,7 +748,7 @@ export default function GiftsByAdeolaPage() {
             return (
               <div
                 key={idx}
-                className="rounded-2xl bg-white border border-brand-warm-border overflow-hidden shadow-2xs transition-all"
+                className="rounded-2xl bg-white border border-brand-warm-border overflow-hidden shadow-sm transition-all"
               >
                 <button
                   type="button"
@@ -707,6 +782,7 @@ export default function GiftsByAdeolaPage() {
               onClick={() => {
                 setIsCustomModalOpen(false);
                 setCustomSubmitted(false);
+                setCustomError(null);
               }}
               className="absolute top-5 right-5 text-brand-plum/50 hover:text-brand-plum p-1.5 rounded-full hover:bg-brand-soft-lavender transition-colors"
             >
@@ -750,7 +826,16 @@ export default function GiftsByAdeolaPage() {
                   </p>
                 </div>
 
-                <form onSubmit={handleCustomSubmit} className="space-y-4 text-xs font-sans">
+                {customError && (
+                  <div
+                    role="alert"
+                    className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-sans"
+                  >
+                    {customError}
+                  </div>
+                )}
+
+                <form onSubmit={handleCustomSubmit} noValidate className="space-y-4 text-xs font-sans">
                   <div>
                     <label className="block uppercase font-semibold text-brand-plum/80 mb-1">
                       Your Full Name *
@@ -761,7 +846,7 @@ export default function GiftsByAdeolaPage() {
                       placeholder="e.g. Bukola Adeleke"
                       value={customForm.fullName}
                       onChange={(e) => setCustomForm({ ...customForm, fullName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                     />
                   </div>
 
@@ -776,7 +861,7 @@ export default function GiftsByAdeolaPage() {
                         placeholder="e.g. 08012345678"
                         value={customForm.phone}
                         onChange={(e) => setCustomForm({ ...customForm, phone: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                       />
                     </div>
                     <div>
@@ -788,7 +873,7 @@ export default function GiftsByAdeolaPage() {
                         placeholder="e.g. buki@gmail.com"
                         value={customForm.email}
                         onChange={(e) => setCustomForm({ ...customForm, email: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                       />
                     </div>
                   </div>
@@ -804,7 +889,7 @@ export default function GiftsByAdeolaPage() {
                         placeholder="e.g. Wrapping of Eru Iyawo, Corporate, Birthday"
                         value={customForm.occasion}
                         onChange={(e) => setCustomForm({ ...customForm, occasion: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                       />
                     </div>
                     <div>
@@ -817,7 +902,7 @@ export default function GiftsByAdeolaPage() {
                         placeholder="e.g. Flexible / Open to suggestions"
                         value={customForm.budget}
                         onChange={(e) => setCustomForm({ ...customForm, budget: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                       />
                     </div>
                   </div>
@@ -831,7 +916,7 @@ export default function GiftsByAdeolaPage() {
                       placeholder="e.g. The Bride, Board of Directors, Dad"
                       value={customForm.recipientName}
                       onChange={(e) => setCustomForm({ ...customForm, recipientName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                     />
                   </div>
 
@@ -844,7 +929,7 @@ export default function GiftsByAdeolaPage() {
                         type="date"
                         value={customForm.deliveryDate}
                         onChange={(e) => setCustomForm({ ...customForm, deliveryDate: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                       />
                     </div>
                     <div>
@@ -856,7 +941,7 @@ export default function GiftsByAdeolaPage() {
                         placeholder="e.g. Ikeja, Lagos"
                         value={customForm.deliveryAddress}
                         onChange={(e) => setCustomForm({ ...customForm, deliveryAddress: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                       />
                     </div>
                   </div>
@@ -870,7 +955,7 @@ export default function GiftsByAdeolaPage() {
                       placeholder="List any preferred items, colors, themes, number of boxes/luggage for Eru Iyawo, or specific requests..."
                       value={customForm.itemsRequested}
                       onChange={(e) => setCustomForm({ ...customForm, itemsRequested: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-hidden text-brand-plum"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border focus:border-brand-purple focus:outline-none text-brand-plum"
                     />
                   </div>
 

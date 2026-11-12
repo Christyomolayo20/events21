@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { BRAND_CONFIG } from "@/lib/data";
 import { getBrandConfig } from "@/lib/store";
 
 // Three specific highlight segments from the master wedding footage requested by user:
@@ -16,7 +17,7 @@ const HIGHLIGHT_SEGMENTS = [
 ] as const;
 
 export default function Hero() {
-  const [config, setConfig] = useState(getBrandConfig());
+  const [config, setConfig] = useState(BRAND_CONFIG);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 

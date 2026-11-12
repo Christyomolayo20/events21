@@ -45,7 +45,7 @@ function ContactContent() {
               onClick={() => setActiveMode("calendar")}
               className={`flex items-center justify-center gap-2 px-5 py-2.5 sm:py-2 rounded-xl sm:rounded-full text-xs font-sans font-semibold tracking-wide transition-all w-full sm:w-auto ${
                 activeMode === "calendar"
-                  ? "bg-brand-purple text-white shadow-xs"
+                  ? "bg-brand-purple text-white shadow-sm"
                   : "text-brand-plum/70 hover:text-brand-plum"
               }`}
             >
@@ -57,7 +57,7 @@ function ContactContent() {
               onClick={() => setActiveMode("brief")}
               className={`flex items-center justify-center gap-2 px-5 py-2.5 sm:py-2 rounded-xl sm:rounded-full text-xs font-sans font-semibold tracking-wide transition-all w-full sm:w-auto ${
                 activeMode === "brief"
-                  ? "bg-brand-purple text-white shadow-xs"
+                  ? "bg-brand-purple text-white shadow-sm"
                   : "text-brand-plum/70 hover:text-brand-plum"
               }`}
             >
@@ -71,7 +71,7 @@ function ContactContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* Official Business Contact Information (4 cols) */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-xs space-y-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-sm space-y-6">
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-brand-gold font-semibold font-sans block mb-1">
                   Events 21 Studio

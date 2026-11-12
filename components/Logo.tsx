@@ -14,8 +14,6 @@ export default function Logo({
   variant = "full",
   size = "md",
   className = "",
-  showSubtitle = true,
-  hideTextOnMobile = false,
 }: LogoProps) {
   const isLarge = size === "lg";
   const isSmall = size === "sm";
@@ -23,53 +21,29 @@ export default function Logo({
   return (
     <Link
       href="/"
-      className={`inline-flex items-center gap-3 group transition-opacity hover:opacity-90 ${className}`}
-      aria-label="Events 21 - Home"
+      className={`inline-flex items-center group transition-opacity hover:opacity-95 shrink-0 ${className}`}
+      aria-label="Events 21 - All Your Event Needs"
     >
-      {/* Brand Logo Emblem - Transparent, No White Box, Bigger & Clearly Visible */}
       <div
-        className={`relative flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+        className={`relative shrink-0 rounded-xl overflow-hidden shadow-sm transition-transform duration-200 group-hover:scale-[1.03] ${
+          variant === "white"
+            ? "border border-brand-gold/45"
+            : "border border-brand-gold/30"
+        } ${
           isSmall
-            ? "w-16 h-12 sm:w-20 sm:h-14"
+            ? "w-[110px] h-[44px]"
             : isLarge
-            ? "w-32 h-22 sm:w-40 sm:h-28"
-            : "w-20 h-14 sm:w-22 sm:h-15 md:w-24 md:h-15 lg:w-26 lg:h-14"
+            ? "w-[175px] h-[70px] sm:w-[195px] sm:h-[78px]"
+            : "w-[120px] h-[48px] sm:w-[135px] sm:h-[54px]"
         }`}
       >
         <Image
-          src={
-            variant === "white"
-              ? "/images/royalty-logo-white.png"
-              : "/images/royalty-logo-transparent.png"
-          }
-          alt="Royalty Twenty One Events"
+          src="/images/events21-brand-logo.png"
+          alt="Events 21 — All Your Event Needs"
           fill
-          className="object-contain"
+          className="object-cover object-center"
           priority
         />
-      </div>
-
-      {/* Brand Wordmark (Strictly Events 21) - hidden on mobile when hideTextOnMobile is true */}
-      <div className={`flex-col ${hideTextOnMobile ? "hidden lg:flex" : "flex"}`}>
-        <span
-          className={`font-serif tracking-wider font-bold leading-none ${
-            variant === "white"
-              ? "text-white"
-              : "text-brand-plum group-hover:text-brand-purple transition-colors"
-          } ${isSmall ? "text-lg" : isLarge ? "text-2xl md:text-3xl" : "text-xl"}`}
-        >
-          EVENTS 21
-        </span>
-
-        {showSubtitle && (
-          <span
-            className={`font-sans tracking-[0.2em] uppercase font-semibold text-[9px] md:text-[10px] mt-1 ${
-              variant === "white" ? "text-amber-200" : "text-brand-gold"
-            }`}
-          >
-            All Your Event Needs
-          </span>
-        )}
       </div>
     </Link>
   );

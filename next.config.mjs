@@ -58,12 +58,17 @@ const nextConfig = {
       },
       {
         source: "/academy",
-        destination: "/services/royal-planners-academy",
+        destination: "/services/events21-planners-academy",
         permanent: false,
       },
       {
         source: "/training",
-        destination: "/services/royal-planners-academy",
+        destination: "/services/events21-planners-academy",
+        permanent: false,
+      },
+      {
+        source: "/services/royal-planners-academy",
+        destination: "/services/events21-planners-academy",
         permanent: false,
       },
     ];

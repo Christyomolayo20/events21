@@ -119,7 +119,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
     <div className="space-y-6">
       {/* Metric Counters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-brand-plum/50 font-semibold block">
             Total Sessions
           </span>
@@ -127,7 +127,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
             {consultations.length}
           </span>
         </div>
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold block">
             Confirmed Slots
           </span>
@@ -135,7 +135,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
             {confirmedCount}
           </span>
         </div>
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-blue-600 font-semibold block">
             Completed
           </span>
@@ -143,7 +143,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
             {completedCount}
           </span>
         </div>
-        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-xs">
+        <div className="p-5 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
           <span className="text-[10px] uppercase tracking-wider text-brand-plum/40 font-semibold block">
             Cancelled
           </span>
@@ -154,7 +154,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
       </div>
 
       {/* Email Integration Status & Verification Card */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-brand-warm-border shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-brand-warm-border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-brand-purple" />
@@ -183,7 +183,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-brand-warm-border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-plum/40" />
           <input
@@ -214,7 +214,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
       </div>
 
       {/* Consultations List */}
-      <div className="bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-brand-warm-border shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <Calendar className="w-10 h-10 text-brand-plum/30 mx-auto mb-3" />
@@ -314,7 +314,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
                           onChange={(e) =>
                             handleStatus(booking.id, e.target.value as ConsultationBooking["status"])
                           }
-                          className={`text-xs px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-hidden ${
+                          className={`text-xs px-2.5 py-1.5 rounded-lg border font-semibold focus:outline-none ${
                             booking.status === "Confirmed"
                               ? "bg-emerald-50 border-emerald-300 text-emerald-800"
                               : booking.status === "Completed"
