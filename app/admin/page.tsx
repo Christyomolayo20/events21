@@ -196,10 +196,26 @@ export default function AdminPage() {
   const giftEditVideoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const authed = checkAdminAuth();
-    setIsAuthenticated(authed);
-    if (authed) {
-      loadData();
+    let active = true;
+    const clientAuthed = checkAdminAuth();
+    if (clientAuthed) {
+      fetch("/api/admin/login", { cache: "no-store" })
+        .then((res) => {
+          if (!active) return;
+          if (res.ok) {
+            setIsAuthenticated(true);
+            loadData();
+          } else {
+            logoutAdmin();
+            setIsAuthenticated(false);
+          }
+        })
+        .catch(() => {
+          if (!active) return;
+          setIsAuthenticated(false);
+        });
+    } else {
+      setIsAuthenticated(false);
     }
 
     const handleUpdate = () => {
@@ -217,6 +233,7 @@ export default function AdminPage() {
     window.addEventListener("events21_notification_received", handleUpdate);
 
     return () => {
+      active = false;
       window.removeEventListener("events21_enquiries_updated", handleUpdate);
       window.removeEventListener("events21_gifts_updated", handleUpdate);
       window.removeEventListener("events21_portfolio_updated", handleUpdate);
@@ -242,18 +259,34 @@ export default function AdminPage() {
     checkSupabaseStatus();
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
-    if (loginAdmin(passwordInput)) {
-      setIsAuthenticated(true);
-      loadData();
-    } else {
-      setLoginError("Incorrect admin password. Please try again.");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: passwordInput }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        loginAdmin(passwordInput);
+        setIsAuthenticated(true);
+        loadData();
+      } else {
+        setLoginError(data.error || "Incorrect admin password. Please try again.");
+      }
+    } catch {
+      setLoginError("Unable to reach authentication service. Please try again.");
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/login", { method: "DELETE" });
+    } catch {
+      // Clear local session regardless
+    }
     logoutAdmin();
     setIsAuthenticated(false);
     setPasswordInput("");
@@ -596,7 +629,7 @@ export default function AdminPage() {
         success: Boolean(data.success),
         provider: data.provider,
         error: data.error,
-        target: data.target || "Royaltyeventservice@gmail.com",
+        target: data.target || "royaltyeventservices@gmail.com",
       });
       if (data.success) {
         showToast("Test email delivered successfully!");
@@ -2122,7 +2155,7 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
                 Notification &amp; Confirmation Delivery Test
               </h3>
               <p className="text-xs text-brand-plum/70 font-sans mb-5 leading-relaxed">
-                Verify live email delivery to <strong>Royaltyeventservice@gmail.com</strong> using your configured SMTP (<code>GMAIL_APP_PASSWORD</code>) or Resend (<code>RESEND_API_KEY</code>) credentials.
+                Verify live Resend email delivery to <strong>royaltyeventservices@gmail.com</strong> from <code>Events 21 &lt;notifications@events21.com&gt;</code> using your server-side <code>RESEND_API_KEY</code>, <code>EMAIL_FROM</code>, and <code>ADMIN_EMAIL</code> configuration.
               </p>
 
               <button
@@ -2139,7 +2172,7 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
                 ) : (
                   <>
                     <Mail className="w-3.5 h-3.5" />
-                    <span>Send Test Email to Royaltyeventservice@gmail.com</span>
+                    <span>Send Test Email to royaltyeventservices@gmail.com</span>
                   </>
                 )}
               </button>

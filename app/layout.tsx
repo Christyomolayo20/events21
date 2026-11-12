@@ -1,27 +1,93 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
+const playfair = localFont({
+  src: [
+    {
+      path: "./fonts/playfair-display-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/playfair-display-400-italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "./fonts/playfair-display-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/playfair-display-500-italic.woff2",
+      weight: "500",
+      style: "italic",
+    },
+    {
+      path: "./fonts/playfair-display-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/playfair-display-600-italic.woff2",
+      weight: "600",
+      style: "italic",
+    },
+    {
+      path: "./fonts/playfair-display-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/playfair-display-700-italic.woff2",
+      weight: "700",
+      style: "italic",
+    },
+  ],
   variable: "--font-playfair",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   display: "swap",
+  fallback: ["Georgia", "serif"],
 });
 
-const inter = Inter({
-  subsets: ["latin"],
+const inter = localFont({
+  src: [
+    {
+      path: "./fonts/inter-300.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "./fonts/inter-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/inter-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/inter-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/inter-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-inter",
-  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
+  fallback: ["-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://events21.ng"),
+  metadataBase: new URL("https://events21.com"),
   title: {
     default: "Events 21 | Luxury Event Planning, Styling & Celebrations | Serving Nationwide & Travel",
     template: "%s | Events 21",
@@ -50,13 +116,13 @@ export const metadata: Metadata = {
     "Executive corporate event planner",
   ],
   alternates: {
-    canonical: "https://events21.ng",
+    canonical: "https://events21.com",
   },
   openGraph: {
     title: "Events 21 | Thoughtfully Planned. Beautifully Styled.",
     description:
       "Events 21 creates thoughtfully planned, beautifully styled celebrations that turn meaningful moments into lasting memories.",
-    url: "https://events21.ng",
+    url: "https://events21.com",
     siteName: "Events 21",
     images: [
       {
@@ -94,9 +160,9 @@ const jsonLd = {
   name: "Events 21 (Royalty Twenty One Events)",
   description:
     "Professional event planning, luxury wedding styling, birthday celebrations, and coordination studio based in Nigeria.",
-  url: "https://events21.ng",
+  url: "https://events21.com",
   telephone: "+2348060549596",
-  email: "Royaltyeventservice@gmail.com",
+  email: "royaltyeventservices@gmail.com",
   address: {
     "@type": "PostalAddress",
     streetAddress: "No 12, Johnson Estate, Ojodu Berger",

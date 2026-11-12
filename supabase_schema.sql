@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.gift_requests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. Royal Planners Academy Registrations Table
+-- 4. Events21 Planners Academy Registrations Table
 CREATE TABLE IF NOT EXISTS public.academy_registrations (
     id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
@@ -64,11 +64,27 @@ CREATE TABLE IF NOT EXISTS public.academy_registrations (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 5. Client Testimonials Table
+CREATE TABLE IF NOT EXISTS public.testimonials (
+    id TEXT PRIMARY KEY,
+    client_name TEXT NOT NULL,
+    client_role TEXT DEFAULT '',
+    event_name TEXT DEFAULT '',
+    role_or_event TEXT DEFAULT '',
+    quote TEXT NOT NULL,
+    text TEXT NOT NULL,
+    rating INTEGER DEFAULT 5,
+    image TEXT DEFAULT '',
+    is_published BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.academy_registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist to allow clean re-runs
 DROP POLICY IF EXISTS "Allow public insert consultations" ON public.consultations;
@@ -107,4 +123,18 @@ CREATE POLICY "Allow select gift_requests" ON public.gift_requests
 -- Prevent unauthorized public visitors from reading prospective students' registration details
 CREATE POLICY "Allow authenticated select academy_registrations" ON public.academy_registrations
     FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Allow public select testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "Allow public insert testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "Allow public update testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "Allow public delete testimonials" ON public.testimonials;
+
+CREATE POLICY "Allow public select testimonials" ON public.testimonials
+    FOR SELECT TO public USING (true);
+CREATE POLICY "Allow public insert testimonials" ON public.testimonials
+    FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Allow public update testimonials" ON public.testimonials
+    FOR UPDATE TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public delete testimonials" ON public.testimonials
+    FOR DELETE TO public USING (true);
 

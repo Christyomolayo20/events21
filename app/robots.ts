@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin"],
     },
-    sitemap: "https://events21.ng/sitemap.xml",
+    sitemap: "https://events21.com/sitemap.xml",
   };
 }

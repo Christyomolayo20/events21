@@ -8,17 +8,19 @@ export const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
 
 export function getSupabaseAnonKey(): string {
+  // Server-only secret/service key takes precedence during API execution
+  if (
+    typeof window === "undefined" &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY.trim()
+  ) {
+    return process.env.SUPABASE_SERVICE_ROLE_KEY.trim();
+  }
   if (
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim()
   ) {
     return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim();
-  }
-  if (
-    process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY.trim()
-  ) {
-    return process.env.SUPABASE_SERVICE_ROLE_KEY.trim();
   }
   if (typeof window !== "undefined") {
     try {
@@ -34,7 +36,7 @@ export function getSupabaseAnonKey(): string {
 export const supabaseAnonKey = getSupabaseAnonKey();
 
 let cachedClient: SupabaseClient | null = null;
-let lastKeyUsed: string = "";
+let lastKeyUsed = "";
 
 export function getSupabase(): SupabaseClient | null {
   const currentKey = getSupabaseAnonKey();
@@ -47,24 +49,17 @@ export function getSupabase(): SupabaseClient | null {
   return cachedClient;
 }
 
-// Fallback exported singleton client
 export const supabase = getSupabase();
 
-/**
- * Check if active connection to Supabase is configured
- */
 export function isSupabaseConfigured(): boolean {
   return Boolean(getSupabaseAnonKey());
 }
 
-/**
- * Safe Supabase push for Consultation Bookings
- */
 export async function pushConsultationToSupabase(booking: Record<string, any>) {
   const client = getSupabase();
   if (!client) return { success: false, reason: "Supabase key not set in environment" };
   try {
-    const { data, error } = await client.from("consultations").insert([
+    const { data, error } = await client.from("consultations").upsert([
       {
         id: booking.id,
         full_name: booking.fullName,
@@ -73,7 +68,7 @@ export async function pushConsultationToSupabase(booking: Record<string, any>) {
         event_type: booking.eventType,
         consultation_date: booking.date,
         time_slot: booking.timeSlot,
-        message: booking.message,
+        message: booking.message || "",
         status: booking.status,
         created_at: booking.createdAt,
       },
@@ -89,14 +84,11 @@ export async function pushConsultationToSupabase(booking: Record<string, any>) {
   }
 }
 
-/**
- * Safe Supabase push for Event Enquiries
- */
 export async function pushEnquiryToSupabase(enquiry: Record<string, any>) {
   const client = getSupabase();
   if (!client) return { success: false, reason: "Supabase key not set in environment" };
   try {
-    const { data, error } = await client.from("enquiries").insert([
+    const { data, error } = await client.from("enquiries").upsert([
       {
         id: enquiry.id,
         full_name: enquiry.fullName,
@@ -107,7 +99,7 @@ export async function pushEnquiryToSupabase(enquiry: Record<string, any>) {
         event_location: enquiry.eventLocation,
         guest_count: enquiry.guestCount,
         budget_range: enquiry.budgetRange,
-        message: enquiry.message,
+        message: enquiry.message || "",
         status: enquiry.status,
         created_at: enquiry.createdAt,
       },
@@ -123,14 +115,11 @@ export async function pushEnquiryToSupabase(enquiry: Record<string, any>) {
   }
 }
 
-/**
- * Safe Supabase push for Events21 Planners Academy Registrations
- */
 export async function pushAcademyRegistrationToSupabase(registration: Record<string, any>) {
   const client = getSupabase();
   if (!client) return { success: false, reason: "Supabase key not set in environment" };
   try {
-    const { data, error } = await client.from("academy_registrations").insert([
+    const { data, error } = await client.from("academy_registrations").upsert([
       {
         id: registration.id,
         full_name: registration.fullName,
@@ -153,4 +142,3 @@ export async function pushAcademyRegistrationToSupabase(registration: Record<str
     return { success: false, err };
   }
 }
-

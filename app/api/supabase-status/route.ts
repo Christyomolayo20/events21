@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -10,24 +11,30 @@ declare global {
 const PROJECT_ID = "kmkvhypdcsabnvwytvug";
 const DEFAULT_SUPABASE_URL = `https://${PROJECT_ID}.supabase.co`;
 
-function getStoredAnonKey(): string {
+function getStoredKey(): string {
   if (global.__events21_runtime_supabase?.key) {
     return global.__events21_runtime_supabase.key;
-  }
-  if (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim()) {
-    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim();
   }
   if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY.trim()) {
     return process.env.SUPABASE_SERVICE_ROLE_KEY.trim();
   }
+  if (
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim()
+  ) {
+    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim();
+  }
 
-  // Fallback: check .env.local file
   try {
     const envPath = path.join(process.cwd(), ".env.local");
     if (fs.existsSync(envPath)) {
       const content = fs.readFileSync(envPath, "utf-8");
+      const secretMatch = content.match(/^SUPABASE_SERVICE_ROLE_KEY=(.*)$/m);
+      if (secretMatch && secretMatch[1]?.trim()) {
+        return secretMatch[1].trim().replace(/^["']|["']$/g, "");
+      }
       const match = content.match(/^NEXT_PUBLIC_SUPABASE_ANON_KEY=(.*)$/m);
-      if (match && match[1]) {
+      if (match && match[1]?.trim()) {
         return match[1].trim().replace(/^["']|["']$/g, "");
       }
     }
@@ -68,6 +75,36 @@ function updateLocalEnvPreservingOthers(urlValue: string, apiKeyValue: string) {
   fs.writeFileSync(envPath, nextLines.join("\n").replace(/\n+$/, "\n"), "utf-8");
 }
 
+async function probeSupabaseEndpoint(supabaseUrl: string, apiKey: string) {
+  const endpoint = `${supabaseUrl}/rest/v1/testimonials?select=id&limit=1`;
+
+  const res = await fetch(endpoint, {
+    method: "GET",
+    headers: apiKey
+      ? {
+        apikey: apiKey,
+        Authorization: `Bearer ${apiKey}`,
+      }
+      : {},
+    cache: "no-store",
+    signal: AbortSignal.timeout(4000),
+  });
+
+  const text = await res.text();
+  // Publishable keys querying a table before supabase_schema.sql is applied return 404 PGRST205
+  const isMissingTableButAuthed = res.status === 404 && text.includes("PGRST205");
+  const authenticated = res.status === 200 || isMissingTableButAuthed;
+  const schemaReady = res.status === 200 && (!text.includes("PGRST205"));
+
+  return {
+    httpStatus: res.status,
+    serverReachable: res.status === 200 || res.status === 401 || isMissingTableButAuthed,
+    authenticated,
+    schemaReady,
+    details: text,
+  };
+}
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -76,28 +113,21 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     DEFAULT_SUPABASE_URL
   ).trim();
-  const anonKey = getStoredAnonKey();
+  const apiKey = getStoredKey();
 
   let serverReachable = false;
   let serverResponseCode: number | null = null;
+  let authenticated = false;
+  let schemaReady = false;
   let serverMessage = "";
 
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
-      method: "GET",
-      headers: anonKey
-        ? {
-            apikey: anonKey,
-            Authorization: `Bearer ${anonKey}`,
-          }
-        : {},
-      cache: "no-store",
-      signal: AbortSignal.timeout(4000),
-    });
-
-    serverResponseCode = res.status;
-    serverReachable = res.status === 200 || res.status === 401;
-    serverMessage = await res.text();
+    const probe = await probeSupabaseEndpoint(supabaseUrl, apiKey);
+    serverResponseCode = probe.httpStatus;
+    serverReachable = probe.serverReachable;
+    authenticated = probe.authenticated;
+    schemaReady = probe.schemaReady;
+    serverMessage = probe.details;
   } catch (err: any) {
     serverReachable = false;
     const causeCode = err?.cause?.code || err?.code || "";
@@ -110,8 +140,9 @@ export async function GET() {
   return NextResponse.json({
     projectId: PROJECT_ID,
     supabaseUrl,
-    isKeyConfigured: Boolean(anonKey && anonKey.length > 10),
-    authenticated: serverResponseCode === 200,
+    isKeyConfigured: Boolean(apiKey && apiKey.length > 10),
+    authenticated,
+    schemaReady,
     serverReachable,
     httpStatus: serverResponseCode,
     details: serverMessage,
@@ -122,6 +153,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (!isAdminAuthenticated(req)) {
+    return NextResponse.json(
+      { success: false, message: "Admin authentication required." },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await req.json();
     const apiKey = (body?.apiKey || "").trim();
@@ -129,12 +167,16 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { success: false, message: "Please provide a valid Supabase anon key." },
+        { success: false, message: "Please provide a valid Supabase API key." },
         { status: 400 }
       );
     }
 
-    const supabaseUrl = (requestedUrl || process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL).trim();
+    const supabaseUrl = (
+      requestedUrl ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      DEFAULT_SUPABASE_URL
+    ).trim();
     if (!supabaseUrl.startsWith("https://")) {
       return NextResponse.json(
         { success: false, message: "Supabase URL must start with https://" },
@@ -142,60 +184,45 @@ export async function POST(req: Request) {
       );
     }
 
-    // Test the key against Supabase REST endpoint
-    const testRes = await fetch(`${supabaseUrl}/rest/v1/`, {
-      method: "GET",
-      headers: {
-        apikey: apiKey,
-        Authorization: `Bearer ${apiKey}`,
-      },
-      cache: "no-store",
-      signal: AbortSignal.timeout(4000),
-    });
+    const probe = await probeSupabaseEndpoint(supabaseUrl, apiKey);
 
-    if (testRes.status === 200) {
-      // Key is authenticated! Update .env.local without overwriting RESEND_API_KEY or other vars
+    if (probe.authenticated) {
       try {
         updateLocalEnvPreservingOthers(supabaseUrl, apiKey);
       } catch {
-        // Read-only filesystem in production serverless (e.g., Vercel); update runtime env
+        // Read-only filesystem in serverless production
       }
 
-      // Store runtime override without mutating Webpack DefinePlugin compile-time constants
       global.__events21_runtime_supabase = { url: supabaseUrl, key: apiKey };
 
       return NextResponse.json({
         success: true,
         authenticated: true,
-        message: `Successfully connected to Supabase (${supabaseUrl})!`,
+        schemaReady: probe.schemaReady,
+        message: probe.schemaReady
+          ? `Successfully connected to Supabase (${supabaseUrl})!`
+          : `Connected to Supabase (${supabaseUrl})! Note: run supabase_schema.sql in Supabase SQL Editor if tables are not created yet.`,
       });
-    } else {
-      const errorText = await testRes.text();
-      return NextResponse.json(
-        {
-          success: false,
-          authenticated: false,
-          httpStatus: testRes.status,
-          message:
-            testRes.status === 401
-              ? "Invalid anon key. Please check your Supabase Dashboard -> Project Settings -> API."
-              : `Connection returned HTTP ${testRes.status}: ${errorText}`,
-        },
-        { status: 400 }
-      );
     }
+
+    return NextResponse.json(
+      {
+        success: false,
+        authenticated: false,
+        httpStatus: probe.httpStatus,
+        message:
+          probe.httpStatus === 401
+            ? "Invalid API key. Please check your Supabase Dashboard -> Project Settings -> API Keys."
+            : `Connection returned HTTP ${probe.httpStatus}: ${probe.details}`,
+      },
+      { status: 400 }
+    );
   } catch (err: any) {
     const causeCode = err?.cause?.code || err?.code || "";
     const msg =
       causeCode === "ENOTFOUND"
         ? "Supabase project domain does not resolve (DNS ENOTFOUND). Restore/recreate the Supabase project and set NEXT_PUBLIC_SUPABASE_URL & NEXT_PUBLIC_SUPABASE_ANON_KEY."
         : err?.message || "Failed to test Supabase connection";
-    return NextResponse.json(
-      {
-        success: false,
-        message: msg,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: msg }, { status: 500 });
   }
 }

@@ -1,177 +1,13 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { sendEmail, OFFICIAL_EMAIL, OWNER_EMAIL } from "@/lib/email";
+import { getAdminEmail, getEmailFrom, sendEmail } from "@/lib/email";
+import {
+  buildConsultationAdminEmail,
+  buildConsultationClientEmail,
+} from "@/lib/emailTemplates";
+import { checkRateLimit, getClientIp, isDuplicateSubmission } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
-
-const STUDIO_PHONE = "+234 806 054 9596";
-const STUDIO_WHATSAPP = "2348060549596";
-
-// Client Confirmation HTML Template
-function buildClientEmailHtml(booking: {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  eventType: string;
-  date: string;
-  timeSlot: string;
-  message?: string;
-}) {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Your EVENTS21 Consultation is Confirmed</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FBF8F5; margin: 0; padding: 24px; color: #2A1736; }
-    .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #E8DFD5; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-    .header { background: linear-gradient(135deg, #2A1736 0%, #4A1E4A 100%); padding: 36px 32px; text-align: center; color: #ffffff; }
-    .header h1 { margin: 0; font-size: 26px; font-family: 'Playfair Display', Georgia, serif; letter-spacing: 0.05em; color: #C5A265; }
-    .header p { margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em; color: #F5EFEB; }
-    .content { padding: 32px; }
-    .greeting { font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #2A1736; }
-    .badge { display: inline-block; background-color: #F5EFEB; color: #2A1736; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; border: 1px solid #C5A265; }
-    .details-box { background: #FAF7F4; border-radius: 12px; border: 1px solid #E8DFD5; padding: 20px 24px; margin: 24px 0; }
-    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #ECE4DA; font-size: 14px; }
-    .detail-row:last-child { border-bottom: none; }
-    .detail-label { color: #6B5B73; font-weight: 500; }
-    .detail-value { color: #2A1736; font-weight: 600; text-align: right; }
-    .note-box { background: #FFF9ED; border-left: 4px solid #C5A265; padding: 14px 18px; border-radius: 4px; font-size: 13px; color: #6B5B73; margin: 20px 0; }
-    .footer { background: #FAF7F4; padding: 24px 32px; text-align: center; border-top: 1px solid #E8DFD5; font-size: 12px; color: #6B5B73; }
-    .cta-button { display: inline-block; background: #C5A265; color: #ffffff !important; padding: 12px 28px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; margin-top: 16px; text-transform: uppercase; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="header">
-      <h1>EVENTS21</h1>
-      <p>Appointment Confirmation</p>
-    </div>
-    <div class="content">
-      <div class="badge">Confirmed Appointment</div>
-      <p class="greeting">
-        Dear <strong>${booking.fullName}</strong>,<br><br>
-        Thank you for reserving a consultation with <strong>EVENTS21</strong>. Your appointment has been received and confirmed.
-      </p>
-
-      <div class="details-box">
-        <div class="detail-row">
-          <span class="detail-label">Reference ID</span>
-          <span class="detail-value">#${booking.id}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Consultation Date</span>
-          <span class="detail-value">${booking.date}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Time Slot</span>
-          <span class="detail-value">${booking.timeSlot}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Event Category</span>
-          <span class="detail-value">${booking.eventType}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Client Phone</span>
-          <span class="detail-value">${booking.phone}</span>
-        </div>
-        ${
-          booking.message
-            ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${booking.message}</span></div>`
-            : ""
-        }
-      </div>
-
-      <div class="note-box">
-        <strong>What to prepare:</strong> To help us make the most of our session, please feel free to have any mood boards, venue ideas, or guest count estimates on hand.
-      </div>
-
-      <p style="font-size: 14px; line-height: 1.6; color: #2A1736;">
-        If you have any questions or need to reschedule, reach out directly via WhatsApp or reply to this email:
-      </p>
-      <center>
-        <a href="https://wa.me/${STUDIO_WHATSAPP}?text=Hello%20Events%2021,%20I%20have%20an%20appointment%20booked%20(Ref:%20${booking.id})" class="cta-button">
-          Chat on WhatsApp
-        </a>
-      </center>
-    </div>
-    <div class="footer">
-      <p style="margin: 0 0 6px;"><strong>EVENTS21 — All Your Event Needs.</strong></p>
-      <p style="margin: 0 0 4px;">Studio: No 12, Johnson Estate, Ojodu Berger, Lagos, Nigeria</p>
-      <p style="margin: 0;">Email: <a href="mailto:${OFFICIAL_EMAIL}" style="color: #2A1736; text-decoration: underline;">${OFFICIAL_EMAIL}</a> | Phone: ${STUDIO_PHONE}</p>
-    </div>
-  </div>
-</body>
-</html>
-  `;
-}
-
-// Admin Notification HTML Template
-function buildAdminEmailHtml(booking: {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  eventType: string;
-  date: string;
-  timeSlot: string;
-  message?: string;
-  createdAt: string;
-}) {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>New Appointment Notification</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F4F1EA; margin: 0; padding: 24px; color: #2A1736; }
-    .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; border: 1px solid #E2D9CF; }
-    .header { background: #2A1736; padding: 24px 30px; color: #ffffff; }
-    .header h2 { margin: 0; font-size: 20px; color: #C5A265; }
-    .header p { margin: 6px 0 0; font-size: 12px; color: #E0D3C5; text-transform: uppercase; letter-spacing: 0.1em; }
-    .content { padding: 28px 30px; }
-    .info-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    .info-table td { padding: 10px 12px; border-bottom: 1px solid #EFEAE3; font-size: 14px; }
-    .info-table td.lbl { color: #6B5B73; font-weight: 500; width: 35%; }
-    .info-table td.val { color: #2A1736; font-weight: 600; }
-    .btn { display: inline-block; background: #2A1736; color: #ffffff !important; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="header">
-      <h2>🔔 New Consultation Booked</h2>
-      <p>EVENTS21 Live Appointment Alert</p>
-    </div>
-    <div class="content">
-      <p style="font-size: 15px; margin-top: 0;">A client has just booked a consultation slot on the website.</p>
-      
-      <table class="info-table">
-        <tr><td class="lbl">Booking ID</td><td class="val">#${booking.id}</td></tr>
-        <tr><td class="lbl">Client Name</td><td class="val">${booking.fullName}</td></tr>
-        <tr><td class="lbl">Email</td><td class="val"><a href="mailto:${booking.email}">${booking.email}</a></td></tr>
-        <tr><td class="lbl">Phone</td><td class="val"><a href="tel:${booking.phone}">${booking.phone}</a></td></tr>
-        <tr><td class="lbl">Date</td><td class="val"><strong>${booking.date}</strong></td></tr>
-        <tr><td class="lbl">Time Slot</td><td class="val"><strong>${booking.timeSlot}</strong></td></tr>
-        <tr><td class="lbl">Event Category</td><td class="val">${booking.eventType}</td></tr>
-        <tr><td class="lbl">Message / Brief</td><td class="val">${booking.message || "None"}</td></tr>
-        <tr><td class="lbl">Booked At</td><td class="val">${new Date(booking.createdAt).toLocaleString()}</td></tr>
-      </table>
-
-      <center>
-        <a href="https://events21.vercel.app/admin" class="btn">
-          Open Admin Control Room
-        </a>
-      </center>
-    </div>
-  </div>
-</body>
-</html>
-  `;
-}
 
 function sanitize(input: unknown, maxLen = 300): string {
   if (typeof input !== "string") return "";
@@ -182,6 +18,17 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
   try {
+    const clientIp = getClientIp(req);
+    const limit = checkRateLimit("consultations", clientIp, 10, 10 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many booking attempts. Please wait ${limit.retryAfterSeconds} seconds and try again.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { fullName, email, phone, eventType, date, timeSlot, message } = body;
 
@@ -200,24 +47,36 @@ export async function POST(req: Request) {
       !String(timeSlot).trim()
     ) {
       return NextResponse.json(
-        { error: "Missing required booking details (fullName, email, phone, eventType, date, and timeSlot are required)." },
+        {
+          error:
+            "Missing required booking details (fullName, email, phone, eventType, date, and timeSlot are required).",
+        },
         { status: 400 }
       );
     }
 
-    const cleanEmail = String(email).trim().toLowerCase().slice(0, 100);
+    const cleanEmail = String(email).trim().toLowerCase().slice(0, 120);
     if (!EMAIL_REGEX.test(cleanEmail)) {
-      return NextResponse.json({ error: "Please provide a valid email address format." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Please provide a valid email address format." },
+        { status: 400 }
+      );
     }
 
     const cleanPhoneDigits = String(phone).replace(/\D/g, "");
     if (cleanPhoneDigits.length < 8) {
-      return NextResponse.json({ error: "Please provide a valid phone number (at least 8 digits)." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Please provide a valid phone number (at least 8 digits)." },
+        { status: 400 }
+      );
     }
 
     const cleanDate = sanitize(date, 20);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
-      return NextResponse.json({ error: "Please provide a valid consultation date (YYYY-MM-DD)." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Please provide a valid consultation date (YYYY-MM-DD)." },
+        { status: 400 }
+      );
     }
 
     const parsedDate = new Date(`${cleanDate}T00:00:00Z`);
@@ -225,17 +84,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid consultation date." }, { status: 400 });
     }
 
-    const todayLagos = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(new Date());
+    const todayLagos = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(
+      new Date()
+    );
     if (cleanDate < todayLagos) {
-      return NextResponse.json({ error: "Past dates cannot be booked. Please select an upcoming date." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Past dates cannot be booked. Please select an upcoming date." },
+        { status: 400 }
+      );
     }
 
     if (parsedDate.getUTCDay() === 0) {
-      return NextResponse.json({ error: "Consultations are closed on Sundays. Please select a date Monday through Saturday." }, { status: 400 });
+      return NextResponse.json(
+        {
+          error:
+            "Consultations are closed on Sundays. Please select a date Monday through Saturday.",
+        },
+        { status: 400 }
+      );
     }
 
-    const bookingId = body.id || `cst-${Date.now().toString(36).toUpperCase()}`;
-    const createdAt = body.createdAt || new Date().toISOString();
+    const cleanTimeSlot = sanitize(timeSlot, 20);
+
+    if (isDuplicateSubmission("consultations", [cleanEmail, cleanDate, cleanTimeSlot], 60_000)) {
+      return NextResponse.json(
+        {
+          error:
+            "A consultation request for this exact date and time slot was just submitted. Please check your confirmation or choose another slot.",
+        },
+        { status: 409 }
+      );
+    }
+
+    const bookingId =
+      typeof body.id === "string" && body.id.trim()
+        ? sanitize(body.id, 40)
+        : `cst-${Date.now().toString(36).toUpperCase()}`;
+    const createdAt =
+      typeof body.createdAt === "string" && body.createdAt.trim()
+        ? body.createdAt
+        : new Date().toISOString();
 
     const booking = {
       id: bookingId,
@@ -243,42 +131,36 @@ export async function POST(req: Request) {
       email: cleanEmail,
       phone: sanitize(phone, 30),
       eventType: sanitize(eventType || "Event Planning", 80),
-      date: sanitize(date, 20),
-      timeSlot: sanitize(timeSlot, 20),
+      date: cleanDate,
+      timeSlot: cleanTimeSlot,
       message: message ? sanitize(message, 1000) : undefined,
       status: "Confirmed",
       createdAt,
     };
 
-    // 1. Send confirmation email to client from Royaltyeventservice@gmail.com
-    const clientSubject = `Appointment Confirmed: Your EVENTS21 Consultation (#${booking.id})`;
-    const clientHtml = buildClientEmailHtml(booking);
-    const clientEmailPromise = sendEmail({
-      to: booking.email,
-      from: `EVENTS21 <${OFFICIAL_EMAIL}>`,
-      replyTo: OFFICIAL_EMAIL,
-      subject: clientSubject,
-      html: clientHtml,
-    });
-
-    // 2. Send notification email to admin at Royaltyeventservice@gmail.com
-    const adminSubject = `🔔 New Consultation Booked: ${booking.fullName} - ${booking.date} (${booking.timeSlot})`;
-    const adminHtml = buildAdminEmailHtml(booking);
-    const adminEmailPromise = sendEmail({
-      to: [OFFICIAL_EMAIL, OWNER_EMAIL],
-      from: `EVENTS21 Bookings <${OFFICIAL_EMAIL}>`,
-      replyTo: booking.email,
-      subject: adminSubject,
-      html: adminHtml,
-    });
-
-    const [clientRes, adminRes] = await Promise.all([clientEmailPromise, adminEmailPromise]);
-
-    // 3. Sync to Supabase in background if available
+    // 1. Check Supabase slot availability and save booking BEFORE dispatching emails
+    let savedToDatabase = false;
     const supabase = getSupabase();
     if (supabase) {
       try {
-        await supabase.from("consultations").upsert({
+        const { data: existingSlot } = await supabase
+          .from("consultations")
+          .select("id")
+          .eq("consultation_date", booking.date)
+          .eq("time_slot", booking.timeSlot)
+          .neq("status", "Cancelled")
+          .limit(1);
+
+        if (Array.isArray(existingSlot) && existingSlot.length > 0) {
+          return NextResponse.json(
+            {
+              error: `The ${booking.timeSlot} slot on ${booking.date} is already reserved. Please select another time slot.`,
+            },
+            { status: 409 }
+          );
+        }
+
+        const { error: upsertErr } = await supabase.from("consultations").upsert({
           id: booking.id,
           full_name: booking.fullName,
           email: booking.email,
@@ -286,24 +168,70 @@ export async function POST(req: Request) {
           event_type: booking.eventType,
           consultation_date: booking.date,
           time_slot: booking.timeSlot,
-          message: booking.message || null,
+          message: booking.message || "",
           status: booking.status,
           created_at: booking.createdAt,
         });
+
+        if (!upsertErr) {
+          savedToDatabase = true;
+        } else {
+          console.warn("Supabase consultation upsert notice:", upsertErr.message);
+        }
       } catch (err) {
         console.warn("Supabase consultation sync warning:", err);
       }
     }
 
+    // 2. Dispatch confirmation to customer & notification to admin via Resend
+    const adminEmail = getAdminEmail();
+    const sender = getEmailFrom();
+    const clientTemplate = buildConsultationClientEmail(booking, adminEmail);
+    const adminTemplate = buildConsultationAdminEmail(booking, adminEmail);
+
+    const [clientOutcome, adminOutcome] = await Promise.allSettled([
+      sendEmail({
+        to: booking.email,
+        from: sender,
+        replyTo: adminEmail,
+        subject: clientTemplate.subject,
+        html: clientTemplate.html,
+        text: clientTemplate.text,
+      }),
+      sendEmail({
+        to: adminEmail,
+        from: sender,
+        replyTo: booking.email,
+        subject: adminTemplate.subject,
+        html: adminTemplate.html,
+        text: adminTemplate.text,
+      }),
+    ]);
+
+    const clientRes =
+      clientOutcome.status === "fulfilled"
+        ? clientOutcome.value
+        : { success: false, provider: "resend", error: "Client email dispatch error" };
+    const adminRes =
+      adminOutcome.status === "fulfilled"
+        ? adminOutcome.value
+        : { success: false, provider: "resend", error: "Admin email dispatch error" };
+
     return NextResponse.json(
       {
         success: true,
         booking,
+        savedToDatabase,
         clientEmailDelivered: clientRes.success,
         adminEmailDelivered: adminRes.success,
-        sender: OFFICIAL_EMAIL,
+        clientMessageId: clientRes.messageId || null,
+        adminMessageId: adminRes.messageId || null,
+        emailWarning:
+          !clientRes.success || !adminRes.success
+            ? "Your appointment is saved, though automated email confirmation could not be sent right now."
+            : null,
         message: clientRes.success
-          ? `Confirmation email dispatched from ${OFFICIAL_EMAIL} to ${booking.email}`
+          ? `Consultation booked and confirmation sent to ${booking.email}.`
           : "Consultation slot recorded.",
       },
       { status: 201 }
@@ -316,4 +244,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

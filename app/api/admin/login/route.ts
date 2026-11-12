@@ -1,41 +1,73 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
+import {
+  ADMIN_SESSION_COOKIE,
+  SESSION_TTL_SECONDS,
+  createAdminSessionToken,
+  isAdminAuthenticated,
+  verifyAdminPassword,
+} from "@/lib/adminAuth";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
-const ADMIN_SECRET = "Event$21";
-let failedAttempts = 0;
-let lastFailedTime = 0;
+export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
+  const authenticated = isAdminAuthenticated(request);
+  return NextResponse.json(
+    { authenticated },
+    { status: authenticated ? 200 : 401 }
+  );
+}
 
 export async function POST(request: Request) {
   try {
-    const now = Date.now();
-    // Brute-force throttle: if > 5 consecutive failed attempts within 15 seconds
-    if (failedAttempts >= 5 && now - lastFailedTime < 15000) {
+    const clientIp = getClientIp(request);
+    const limit = checkRateLimit("admin-login", clientIp, 8, 60 * 1000);
+    if (!limit.allowed) {
       return NextResponse.json(
-        { success: false, error: "Too many login attempts. Please wait 15 seconds and try again." },
+        {
+          success: false,
+          error: `Too many login attempts. Please wait ${limit.retryAfterSeconds} seconds and try again.`,
+        },
         { status: 429 }
       );
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const password = typeof body.password === "string" ? body.password : "";
 
-    // Timing-safe constant-time comparison
-    const passwordBuf = Buffer.from(password);
-    const targetBuf = Buffer.from(ADMIN_SECRET);
-
-    const isMatch =
-      passwordBuf.length === targetBuf.length &&
-      crypto.timingSafeEqual(passwordBuf, targetBuf);
-
-    if (isMatch) {
-      failedAttempts = 0;
-      return NextResponse.json({ success: true, message: "Authenticated successfully" });
+    if (verifyAdminPassword(password)) {
+      const token = createAdminSessionToken();
+      const response = NextResponse.json({
+        success: true,
+        message: "Authenticated successfully",
+      });
+      response.cookies.set(ADMIN_SESSION_COOKIE, token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: SESSION_TTL_SECONDS,
+      });
+      return response;
     }
 
-    failedAttempts++;
-    lastFailedTime = now;
-    return NextResponse.json({ success: false, error: "Invalid admin password" }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: "Invalid admin password" },
+      { status: 401 }
+    );
   } catch {
     return NextResponse.json({ error: "Authentication error" }, { status: 500 });
   }
+}
+
+export async function DELETE() {
+  const response = NextResponse.json({ success: true });
+  response.cookies.set(ADMIN_SESSION_COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
 }

@@ -16,7 +16,7 @@ export const BRAND_CONFIG = {
   phone: "08060549596",
   phoneFormatted: "+234 806 054 9596",
   whatsappNumber: "2348060549596", // International format for wa.me
-  email: "Royaltyeventservice@gmail.com",
+  email: "royaltyeventservices@gmail.com",
   address: "No 12, Johnson Estate, Ojodu Berger, Lagos, Nigeria",
   serviceAreas: "Serving clients nationwide and available to travel",
   openingHours: "Mon – Sat: 9:00 AM – 6:00 PM (By Appointment)",

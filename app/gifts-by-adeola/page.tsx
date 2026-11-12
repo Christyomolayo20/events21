@@ -31,6 +31,7 @@ export default function GiftsByAdeolaPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customSubmitted, setCustomSubmitted] = useState(false);
+  const [isCustomSubmitting, setIsCustomSubmitting] = useState(false);
   const [customError, setCustomError] = useState<string | null>(null);
   const [activeGiftVideo, setActiveGiftVideo] = useState<{ title: string; url: string } | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
@@ -78,8 +79,9 @@ export default function GiftsByAdeolaPage() {
     return `https://wa.me/2348060549596?text=${text}`;
   };
 
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCustomSubmitting) return;
     setCustomError(null);
 
     const cleanName = customForm.fullName.trim();
@@ -103,15 +105,43 @@ export default function GiftsByAdeolaPage() {
       return;
     }
 
-    saveGiftRequest({
-      ...customForm,
-      fullName: cleanName,
-      phone: cleanPhone,
-      email: cleanEmail,
-      occasion: cleanOccasion,
-      budget: cleanBudget,
-    });
-    setCustomSubmitted(true);
+    setIsCustomSubmitting(true);
+    try {
+      const response = await fetch("/api/gift-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...customForm,
+          fullName: cleanName,
+          phone: cleanPhone,
+          email: cleanEmail,
+          occasion: cleanOccasion,
+          budget: cleanBudget,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data?.success === false) {
+        setCustomError(data?.error || "Could not submit your gift request. Please check your details.");
+        setIsCustomSubmitting(false);
+        return;
+      }
+
+      saveGiftRequest({
+        id: data?.giftRequest?.id,
+        createdAt: data?.giftRequest?.createdAt,
+        ...customForm,
+        fullName: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail,
+        occasion: cleanOccasion,
+        budget: cleanBudget,
+      });
+      setCustomSubmitted(true);
+    } catch {
+      setCustomError("Unable to reach our server right now. Please try again or reach us on WhatsApp.");
+    } finally {
+      setIsCustomSubmitting(false);
+    }
   };
 
   const getCustomWhatsAppLink = () => {
@@ -969,10 +999,11 @@ export default function GiftsByAdeolaPage() {
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-sm"
+                      disabled={isCustomSubmitting}
+                      className="inline-flex items-center gap-2 px-7 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-hover disabled:opacity-50 text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-sm cursor-pointer"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      <span>Submit Request</span>
+                      <span>{isCustomSubmitting ? "Submitting..." : "Submit Request"}</span>
                     </button>
                   </div>
                 </form>

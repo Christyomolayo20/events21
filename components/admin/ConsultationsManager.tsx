@@ -43,11 +43,13 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
       const res = await fetch("/api/admin/test-email", { method: "POST" });
       const data = await res.json();
       if (data.success) {
-        setEmailStatusNote(`✓ Success: Test email sent via ${data.provider} to Royaltyeventservice@gmail.com!`);
-        onNotify?.(`Test email delivered to Royaltyeventservice@gmail.com!`);
+        setEmailStatusNote(
+          `✓ Success: Test email sent via ${data.provider} to ${data.target || "royaltyeventservices@gmail.com"}!`
+        );
+        onNotify?.(`Test email delivered to ${data.target || "royaltyeventservices@gmail.com"}!`);
       } else {
         setEmailStatusNote(
-          `⚠️ Live email credentials needed in Vercel: Set GMAIL_APP_PASSWORD (for Royaltyeventservice@gmail.com) or RESEND_API_KEY in Vercel Project Settings > Environment Variables.`
+          `⚠️ ${data.error || "Live Resend credentials needed: Set RESEND_API_KEY, EMAIL_FROM, and ADMIN_EMAIL in Vercel Environment Variables."}`
         );
       }
     } catch (err: any) {
@@ -159,7 +161,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-brand-purple" />
             <span className="font-serif font-bold text-sm text-brand-plum">
-              Automated Email System (Royaltyeventservice@gmail.com)
+              Automated Email System (royaltyeventservices@gmail.com)
             </span>
           </div>
           <p className="text-xs text-brand-plum/60 font-sans mt-0.5">
@@ -252,7 +254,7 @@ export default function ConsultationsManager({ onNotify }: ConsultationsManagerP
                   const emailClientUrl = `mailto:${booking.email}?subject=${encodeURIComponent(
                     `EVENTS21 Consultation (${booking.eventType}) - #${booking.id}`
                   )}&body=${encodeURIComponent(
-                    `Dear ${booking.fullName},\n\nWe are following up regarding your consultation appointment with EVENTS21 for ${booking.eventType} on ${booking.date} at ${booking.timeSlot}.\n\nStatus: ${booking.status}\n\nWarm regards,\nAdeola Oyeyode\nEVENTS21 (Royalty Twenty One Events)\nRoyaltyeventservice@gmail.com\n+234 806 054 9596`
+                    `Dear ${booking.fullName},\n\nWe are following up regarding your consultation appointment with EVENTS21 for ${booking.eventType} on ${booking.date} at ${booking.timeSlot}.\n\nStatus: ${booking.status}\n\nWarm regards,\nAdeola Oyeyode\nEVENTS21 (Royalty Twenty One Events)\nroyaltyeventservices@gmail.com\n+234 806 054 9596`
                   )}`;
 
                   return (

@@ -4,10 +4,10 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
 
-  // Canonical domain redirect: ensure www.events21.ng redirects to https://events21.ng
-  if (host.startsWith("www.events21.ng")) {
+  // Canonical domain redirect: ensure www.events21.com redirects to https://events21.com
+  if (host.startsWith("www.events21.com") || host.startsWith("www.events21.ng")) {
     const url = request.nextUrl.clone();
-    url.host = "events21.ng";
+    url.host = "events21.com";
     url.protocol = "https:";
     url.port = "";
     return NextResponse.redirect(url, { status: 301 });

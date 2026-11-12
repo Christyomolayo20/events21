@@ -111,10 +111,10 @@ function ContactContent() {
                       Official Email
                     </span>
                     <a
-                      href="mailto:Royaltyeventservice@gmail.com"
+                      href="mailto:royaltyeventservices@gmail.com"
                       className="font-medium hover:text-brand-purple transition-colors break-all text-xs block"
                     >
-                      Royaltyeventservice@gmail.com
+                      royaltyeventservices@gmail.com
                     </a>
                   </div>
                 </div>

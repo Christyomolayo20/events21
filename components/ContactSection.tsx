@@ -50,7 +50,7 @@ export default function ContactSection() {
           </a>
 
           <a
-            href="mailto:Royaltyeventservice@gmail.com"
+            href="mailto:royaltyeventservices@gmail.com"
             className="p-6 rounded-2xl bg-white border border-brand-warm-border hover:border-brand-purple/40 shadow-sm hover:shadow-subtle transition-all group"
           >
             <div className="w-10 h-10 rounded-full bg-brand-soft-lavender text-brand-purple flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
@@ -58,9 +58,9 @@ export default function ContactSection() {
             </div>
             <h4 className="text-sm font-serif font-bold text-brand-plum mb-1">Official Email</h4>
             <p className="text-xs text-brand-purple font-sans font-medium break-all">
-              Royaltyeventservice@gmail.com
+              royaltyeventservices@gmail.com
             </p>
-            <span className="text-[11px] text-brand-plum/50 block mt-1">Written proposals & decks</span>
+            <span className="text-[11px] text-brand-plum/50 block mt-1">Written proposals &amp; decks</span>
           </a>
 
           <div className="p-6 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
